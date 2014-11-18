@@ -246,7 +246,7 @@ def test_instance_custom_template(random_qcow2, pool_dir, agent, responses):
 
     def post(_, resp):
         assert resp['data']['instance']['+data']['+libvirt']['xml'] is not None
-        assert 'spice' in resp['data']['instance']['+data']['+libvirt']['xml']
+        assert 'cirrus' in resp['data']['instance']['+data']['+libvirt']['xml']
         resp['data']['instance']['+data']['+libvirt']['xml'] = '<xml/>'
 
     event_test(agent, 'libvirt/instance_activate_template', pre_func=pre,

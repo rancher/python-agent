@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+apt-get update
+apt-get install -y libvirt-bin libvirt-dev qemu-kvm python-numpy arptables genisoimage python-pip pkg-config python-dev
+pip install --upgrade pip tox

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd $(dirname $0)/..
+
+mkdir -p dist/artifacts
+
+tar cvzf dist/artifacts/python-agent.tar.gz --exclude dist/artifacts --exclude '*.pyc' apply.sh cattle dist main.py

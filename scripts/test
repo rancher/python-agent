@@ -1,0 +1,33 @@
+#!/bin/bash
+set -x -e
+
+cd $(dirname $0)/..
+
+if [ -x "$(which wrapdocker)" ]; then
+    wrapdocker
+    for ((i=0;i<20;i++)); do
+        if docker ps 2>/dev/null; then
+            break
+        else
+            sleep .5
+        fi
+    done
+
+    LANG=C.UTF-8 LANGUAGE=C /etc/init.d/libvirt-bin start
+    docker ps
+fi
+
+find -depth -name '*.pyc' -o -name '__pycache__' -exec rm -rf {} \;
+mkdir -p /var/lib/cattle
+
+TMP=$(mktemp -d --tmpdir=/tmp/python-agent-build)
+
+trap "rm -rf $TMP" exit
+
+rsync -a ./ $TMP
+pushd $TMP
+
+sudo env LIBVIRT_TEST=true DOCKER_TEST=true tox
+
+popd
+rsync -a --delete $TMP/.tox/ .tox
