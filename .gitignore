@@ -1,0 +1,8 @@
+/build
+/dist
+/CattleAgent.egg-info
+/.idea
+/.tox
+
+*.pyc
+__pycache__
