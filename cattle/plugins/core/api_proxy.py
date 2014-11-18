@@ -1,6 +1,5 @@
 import urlparse
 import logging
-import os
 import socket
 
 from cattle import Config
@@ -33,8 +32,4 @@ class ApiProxy(object):
                                                                   from_host)
         to = 'TCP:{0}:{1}'.format(to_host_ip, to_port)
 
-        background([socat_bin(), listen, to])
-
-
-def socat_bin():
-    return os.path.join(os.path.dirname(__file__), 'socat')
+        background(['socat', listen, to])
