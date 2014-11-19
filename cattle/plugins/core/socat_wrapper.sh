@@ -1,11 +1,7 @@
 #!/bin/bash
 set -e
 
-if [ -e $(dirname $0)/socat ]; then
-    $(dirname $0)/socat "$@" &
-else
-    socat "$@" &
-fi
+socat "$@" &
 PID=$!
 
 cleanup()

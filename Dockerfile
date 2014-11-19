@@ -4,3 +4,4 @@ COPY ./scripts/bootstrap /scripts/bootstrap
 RUN /scripts/bootstrap
 VOLUME /tmp/python-agent-build
 WORKDIR /source
+COPY ./vendor/nsenter /usr/local/bin/

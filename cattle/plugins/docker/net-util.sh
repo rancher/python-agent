@@ -50,12 +50,6 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ "$_ENTERED" != "true" ]; then
-    NSENTER=nsenter
-    NS_ARGS="-n -t $PID"
-    if [ ! -x "$(which nsenter)" ]; then
-        NSENTER=$(dirname $0)/nsenter
-    fi
-
     if [[ "$PID" = "" ]]; then
         echo "Invalid PID $PID"
         exit 42
@@ -70,7 +64,7 @@ if [ "$_ENTERED" != "true" ]; then
         NS_ARGS="--net=/host/proc/$PID/ns/net"
     fi
 
-    _ENTERED=true exec $NSENTER $NS_ARGS -F -- $0 $ARGS
+    _ENTERED=true exec nsenter $NS_ARGS -F -- $0 $ARGS
 
     # Not possible
     exit 0
