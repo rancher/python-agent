@@ -29,7 +29,7 @@
                         "imageUuid": "docker:ibuildthecloud/helloworld",
                         "command": "sleep 5",
                         "publishAllPorts": "true",
-                        "dockerVolumes": ["/proc:/host/proc", "/sys:/host/sys", "/random"],
+                        "dataVolumes": ["/proc:/host/proc", "/sys:/host/sys:ro", "/random"],
                         "startOnCreate": "true"
                     }
                 },
@@ -116,6 +116,11 @@
                         "type": "volume",
                         "uuid": "9bd4d257-e288-4cbd-b496-21310d64772f",
                         "virtualSizeBytes": null
+                    }
+                ],
+                "dataVolumesFromContainers" : [
+                    {
+                        "uuid" : "target_volumes_from"
                     }
                 ],
                 "zoneId": 1

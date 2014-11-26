@@ -74,25 +74,24 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         }
 
     def _is_volume_active(self, volume, storage_pool):
-        if volume.deviceNumber != 0:
-            raise Exception("Non-root volumes are not supported")
         return True
 
     def _is_volume_inactive(self, volume, storage_pool):
-        if volume.deviceNumber != 0:
-            raise Exception("Non-root volumes are not supported")
         return True
 
     def _is_volume_removed(self, volume, storage_pool):
-        if volume.deviceNumber != 0:
-            raise Exception("Non-root volumes are not supported")
-
-        container = get_compute().get_container_by_name(volume.instance.uuid)
-        return container is None
+        if volume.deviceNumber == 0:
+            container = get_compute().get_container_by_name(
+                volume.instance.uuid)
+            return container is None
+        else:
+            # TODO Implement remove logic
+            return True
 
     def _do_volume_remove(self, volume, storage_pool, progress):
         if volume.deviceNumber != 0:
-            raise Exception("Non-root volumes are not supported")
+            # TODO Implement remove logic
+            return
 
         container = get_compute().get_container_by_name(volume.instance.uuid)
         if container is None:
