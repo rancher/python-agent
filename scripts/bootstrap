@@ -7,4 +7,13 @@ apt-get update
 apt-get install -y libvirt-bin libvirt-dev qemu-kvm python-numpy arptables genisoimage python-pip pkg-config python-dev rsync
 pip install --upgrade pip tox
 
-cp ./vendor/nsenter /usr/local/bin/
+if [ ! -x "$(which nsenter)" ]; then
+    TMP=$(mktemp -d)
+    trap "rm -rf $TMP" exit
+
+    cd $TMP
+    wget https://github.com/rancherio/agent-binaries/releases/download/v0.1.2/agent-binaries.tar.gz
+    tar xzf agent-binaries.tar.gz
+    find -type f -name nsenter -exec cp -v {} /usr/local/bin/nsenter \;
+    chmod +x /usr/local/bin/nsenter
+fi
