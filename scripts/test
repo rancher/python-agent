@@ -1,10 +1,10 @@
 #!/bin/bash
-set -x -e
+set -e
 
 cd $(dirname $0)/..
 
 if [ -x "$(which wrapdocker)" ]; then
-    wrapdocker
+    wrapdocker > /tmp/docker.log 2>&1
     LANG=C.UTF-8 LANGUAGE=C /etc/init.d/libvirt-bin start
     docker ps
 fi

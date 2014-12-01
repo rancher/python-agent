@@ -17,4 +17,4 @@ find ${CONTENT} -name '*.pyc' -exec rm {} \;
 sha1sum -b $(find ${CONTENT} -type f) > ${CONTENT}/SHA1SUMS
 sha1sum ${CONTENT}/SHA1SUMS > ${CONTENT}/SHA1SUMSSUM
 
-tar cvzf ../dist/artifacts/python-agent.tar.gz ${CONTENT}
+tar czf ../dist/artifacts/python-agent.tar.gz ${CONTENT}
