@@ -211,19 +211,29 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
-            volumes = instance.data.fields['dockerVolumes']
+            volumes = instance.data.fields['dataVolumes']
             volumes_map = {}
             binds_map = {}
             if volumes is not None and len(volumes) > 0:
                 for i in volumes:
-                    parts = i.split(':', 2)
+                    parts = i.split(':', 3)
                     if len(parts) == 1:
                         volumes_map[parts[0]] = {}
                     else:
-                        binds_map[parts[0]] = parts[1]
+                        read_only = len(parts) == 3 and parts[2] == 'ro'
+                        bind = {'bind': parts[1], 'ro': read_only}
+                        binds_map[parts[0]] = bind
                 config['volumes'] = volumes_map
                 start_config['binds'] = binds_map
         except (KeyError, AttributeError):
+            pass
+
+        try:
+            vfcs = instance['dataVolumesFromContainers']
+            container_names = [vfc['uuid'] for vfc in vfcs]
+            if container_names:
+                start_config['volumes_from'] = container_names
+        except KeyError:
             pass
 
         self._setup_command(config, instance)

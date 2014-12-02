@@ -328,23 +328,34 @@ def _sort_ports(docker_container):
 def test_instance_activate_volumes(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
 
+    _delete_container('/target_volumes_from')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                volumes=['/volumes_from_path'],
+                                name='target_volumes_from')
+    client.start(c)
+
     def post(req, resp):
         inspect = resp['data']['instance']['+data']['dockerInspect']
 
         assert inspect['Volumes']['/host/proc'] == '/proc'
         assert inspect['Volumes']['/host/sys'] == '/sys'
         assert inspect['Volumes']['/random'] is not None
+        assert inspect['Volumes']['/volumes_from_path'] is not None
 
-        assert len(inspect['Volumes']) == 3
+        assert len(inspect['Volumes']) == 4
 
         assert inspect['VolumesRW'] == {
             '/host/proc': True,
-            '/host/sys': True,
-            '/random': True
+            '/host/sys': False,
+            '/random': True,
+            '/volumes_from_path': True,
+
         }
 
-        assert set(['/sys:/host/sys:rw', '/proc:/host/proc:rw']) == \
-            set(inspect['HostConfig']['Binds'])
+        assert set(['/sys:/host/sys:ro', '/proc:/host/proc:rw']) == set(
+            inspect['HostConfig']['Binds'])
 
         del resp['data']['instance']['+data']['dockerInspect']
         docker_container = resp['data']['instance']['+data']['dockerContainer']
