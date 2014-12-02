@@ -12,16 +12,12 @@ class HostApi(object):
 
         url = 'http://{0}:{1}'.format(Config.cadvisor_ip(),
                                       Config.cadvisor_port())
-        background([host_api_bin(),
+        background(['host-api',
                     '-cadvisor-url',  url,
                     '-logtostderr=true',
                     '-ip', Config.host_api_ip(),
                     '-port', str(Config.host_api_port())],
                    env=env)
-
-
-def host_api_bin():
-    return os.path.join(os.path.dirname(__file__), 'host-api')
 
 
 def host_api_config():
