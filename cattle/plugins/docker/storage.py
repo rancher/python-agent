@@ -1,4 +1,7 @@
 import logging
+import os.path
+import re
+import shutil
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
@@ -85,16 +88,31 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                 volume.instance.uuid)
             return container is None
         else:
-            # TODO Implement remove logic
-            return True
+            if volume.data.fields['isHostPath']:
+                # If this is a host path volume, we'll never really remove it
+                # from disk, so just report is as removed for the purpose of
+                # handling the event.
+                return True
+
+            path = self._path_to_volume(volume)
+            return not os.path.exists(path)
 
     def _do_volume_remove(self, volume, storage_pool, progress):
-        if volume.deviceNumber != 0:
-            # TODO Implement remove logic
-            return
+        if volume.deviceNumber == 0:
+            container = get_compute().get_container_by_name(
+                volume.instance.uuid)
+            if container is None:
+                return
+            docker_client().remove_container(container)
+        else:
+            if not volume.data.fields['isHostPath']:
+                path = self._path_to_volume(volume)
+                if os.path.exists(path):
+                    log.info("Deleting volume: %s" % volume.uri)
+                    shutil.rmtree(path)
 
-        container = get_compute().get_container_by_name(volume.instance.uuid)
-        if container is None:
-            return
-
-        docker_client().remove_container(container)
+    def _path_to_volume(self, volume):
+        host_path = volume.uri.replace('file://', '')
+        mounted_path = re.sub('^.*?/var/lib/docker', '/host/var/lib/docker',
+                              host_path)
+        return mounted_path

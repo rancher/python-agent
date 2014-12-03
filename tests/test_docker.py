@@ -470,3 +470,20 @@ def test_ping(agent, responses):
         resp['data']['resources'][1]['name'] = 'localhost Storage Pool'
 
     event_test(agent, 'docker/ping', post_func=post)
+
+@if_docker
+def test_volume_purge(agent, responses):
+    _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    _delete_container('/target_volumes_from')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                volumes=['/volumes_from_path'],
+                                name='target_volumes_from')
+    client.start(c)
+    # TODO Figure out a better way to test this. Because purging a volume
+    # means removing it from disk, we run into trouble testing when
+    # boot2docker is in the picture because the locally running agent cannot
+    # see inside the b2d vm. We do currently test this functionality fully
+    # in the integration test suite.
+    event_test(agent, 'docker/volume_purge')
