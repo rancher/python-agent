@@ -471,6 +471,7 @@ def test_ping(agent, responses):
 
     event_test(agent, 'docker/ping', post_func=post)
 
+
 @if_docker
 def test_volume_purge(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
