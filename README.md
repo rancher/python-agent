@@ -1,4 +1,7 @@
 #pyagent
+
+[![Build Status](http://drone.rancher.io/api/badge/github.com/rancherio/python-agent/status.svg?branch=master)](http://drone.rancher.io/github.com/rancherio/python-agent)
+
 This agent runs on compute nodes in a Rancher cluster. It receives events from the Rancher server, acts upon them, and returns response events.
 
 ### Deployment notes
