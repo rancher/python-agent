@@ -216,6 +216,16 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
+            start_config['dns_search'] = instance.data.fields['dnsSearch']
+        except KeyError:
+            pass
+
+        try:
+            start_config['dns'] = instance.data.fields['dns']
+        except KeyError:
+            pass
+
+        try:
             volumes = instance.data.fields['dataVolumes']
             volumes_map = {}
             binds_map = {}
