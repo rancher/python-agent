@@ -222,19 +222,41 @@ def test_instance_activate_links_no_service(agent, responses):
 
 @if_docker
 def test_instance_activate_cpu_set(agent, responses):
-    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def pre(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['cpuSet'] = '0,4,6'
+
+    def preNull(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['cpuSet'] = None
+
+    def preEmpty(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['cpuSet'] = ''
 
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == '0,4,6'
         container_field_test_boiler_plate(resp)
 
+    def postNull(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['Config']['Cpuset'] == ''
+        container_field_test_boiler_plate(resp)
+
+    def postEmpty(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['Config']['Cpuset'] == ''
+        container_field_test_boiler_plate(resp)
+
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
+    event_test(agent, schema, pre_func=preNull, post_func=postNull)
+    event_test(agent, schema, pre_func=preEmpty, post_func=postEmpty)
 
 
 @if_docker
@@ -336,19 +358,30 @@ def test_instance_activate_caps(agent, responses):
 
 @if_docker
 def test_instance_activate_privileged(agent, responses):
-    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
-    def pre(req):
+    def preTrue(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['privileged'] = True
 
-    def post(req, resp):
+    def preFalse(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['privileged'] = False
+
+    def postTrue(req, resp):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         assert docker_inspect['HostConfig']['Privileged']
         container_field_test_boiler_plate(resp)
 
+    def postFalse(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert not docker_inspect['HostConfig']['Privileged']
+        container_field_test_boiler_plate(resp)
+
     schema = 'docker/instance_activate_fields'
-    event_test(agent, schema, pre_func=pre, post_func=post)
+    event_test(agent, schema, pre_func=preTrue, post_func=postTrue)
+    event_test(agent, schema, pre_func=preFalse, post_func=postFalse)
 
 
 @if_docker
