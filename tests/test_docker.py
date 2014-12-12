@@ -221,6 +221,23 @@ def test_instance_activate_links_no_service(agent, responses):
 
 
 @if_docker
+def test_instance_activate_cpu_set(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['cpuSet'] = '0,4,6'
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['Config']['Cpuset'] == '0,4,6'
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_instance_activate_memory_swap(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 

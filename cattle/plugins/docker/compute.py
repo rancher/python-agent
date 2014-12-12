@@ -246,6 +246,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
+            config['cpuset'] = instance.data.fields['cpuSet']
+        except KeyError:
+            pass
+
+        try:
             volumes = instance.data.fields['dataVolumes']
             volumes_map = {}
             binds_map = {}
