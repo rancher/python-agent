@@ -216,6 +216,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
+            start_config['cap_drop'] = instance.data.fields['capDrop']
+        except KeyError:
+            pass
+
+        try:
             start_config['dns_search'] = instance.data.fields['dnsSearch']
         except KeyError:
             pass
