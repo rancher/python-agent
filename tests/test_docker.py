@@ -9,8 +9,6 @@ from .common_fixtures import *  # NOQA
 import pytest
 from cattle import CONFIG_OVERRIDE, Config
 
-from sets import Set
-
 if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") != "true"',
                                reason='DOCKER_TEST is not set')
 
@@ -233,15 +231,8 @@ def test_instance_activate_dns(agent, responses):
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         actual_dns = docker_inspect['HostConfig']['Dns']
-        assert Set(actual_dns) == Set(["8.8.8.8", "1.2.3.4"])
-        del resp['data']['instance']['+data']['dockerInspect']
-        docker_container = resp['data']['instance']['+data']['dockerContainer']
-        fields = resp['data']['instance']['+data']['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        del fields['dockerIp']
-        docker_container = _sort_ports(docker_container)
+        assert set(actual_dns) == set(["8.8.8.8", "1.2.3.4"])
+        conatiner_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
@@ -514,3 +505,14 @@ def test_volume_purge(agent, responses):
     # see inside the b2d vm. We do currently test this functionality fully
     # in the integration test suite.
     event_test(agent, 'docker/volume_purge')
+
+
+def conatiner_field_test_boiler_plate(resp):
+    del resp['data']['instance']['+data']['dockerInspect']
+    docker_container = resp['data']['instance']['+data']['dockerContainer']
+    fields = resp['data']['instance']['+data']['+fields']
+    del docker_container['Created']
+    del docker_container['Id']
+    del docker_container['Status']
+    del fields['dockerIp']
+    docker_container = _sort_ports(docker_container)
