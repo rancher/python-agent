@@ -229,6 +229,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             start_config['dns'] = instance.data.fields['dns']
         except KeyError:
             pass
+        
+        try:
+            config['domainname'] = instance.data.fields['domainName']
+        except KeyError:
+            pass
 
         try:
             volumes = instance.data.fields['dataVolumes']
