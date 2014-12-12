@@ -227,12 +227,55 @@ def test_instance_activate_dns(agent, responses):
     def pre(req):
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['dns'] = ["1.2.3.4", "8.8.8.8"]
+        instance['data']['fields']['dnsSearch'] = ["5.6.7.8", "7.7.7.7"]
 
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         actual_dns = docker_inspect['HostConfig']['Dns']
+        actual_dns_search = docker_inspect['HostConfig']['DnsSearch']
         assert set(actual_dns) == set(["8.8.8.8", "1.2.3.4"])
-        conatiner_field_test_boiler_plate(resp)
+        assert set(actual_dns_search) == set(["7.7.7.7", "5.6.7.8"])
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_caps(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['capAdd'] = ["MKNOD", "SYS_ADMIN"]
+        instance['data']['fields']['capDrop'] = ["MKNOD", "SYS_ADMIN"]
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        set_actual_cap_add = set(docker_inspect['HostConfig']['CapAdd'])
+        set_expected_cap_add = set(["MKNOD", "SYS_ADMIN"])
+        assert set_actual_cap_add == set_expected_cap_add
+        set_actual_cap_drop = set(docker_inspect['HostConfig']['CapDrop'])
+        set_expected_cap_drop = set(["MKNOD", "SYS_ADMIN"])
+        assert set_actual_cap_drop == set_expected_cap_drop
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_privileged(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['privileged'] = True
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['HostConfig']['Privileged']
+        container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
@@ -507,7 +550,7 @@ def test_volume_purge(agent, responses):
     event_test(agent, 'docker/volume_purge')
 
 
-def conatiner_field_test_boiler_plate(resp):
+def container_field_test_boiler_plate(resp):
     del resp['data']['instance']['+data']['dockerInspect']
     docker_container = resp['data']['instance']['+data']['dockerContainer']
     fields = resp['data']['instance']['+data']['+fields']
