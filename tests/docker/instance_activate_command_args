@@ -27,8 +27,8 @@
                 "data": {
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
-                        "startOnCreate": "true",
-                        "publishAllPorts": "true",
+                        "startOnCreate": true,
+                        "publishAllPorts": true,
                         "command" : "sleep",
                         "commandArgs" : [ "1", "2", "3" ]
                     }

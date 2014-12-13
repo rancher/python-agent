@@ -28,9 +28,9 @@
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
                         "command": "sleep 5",
-                        "publishAllPorts": "true",
+                        "publishAllPorts": true,
                         "dataVolumes": ["/proc:/host/proc", "/sys:/host/sys:ro", "/random"],
-                        "startOnCreate": "true"
+                        "startOnCreate": true
                     }
                 },
                 "ports" : [

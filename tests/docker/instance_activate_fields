@@ -1,3 +1,4 @@
+
 {
     "data": {
         "instanceHostMap": {
@@ -22,31 +23,15 @@
             "id": 50,
             "instance": {
                 "accountId": 1,
-                "agentId": 5,
                 "allocationState": "active",
                 "created": 1389396144000,
                 "data": {
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
-                        "startOnCreate": true,
-                        "publishAllPorts": true,
-                        "environment": {
-                            "ENV1": "value1"
-                        }
+                        "startOnCreate": true
                     }
                 },
-                "ports" : [
-                    {
-                        "protocol": "tcp",
-                        "privatePort": 8080,
-                        "publicPort": null
-                    },
-                    {
-                        "protocol": "udp",
-                        "privatePort": 12201,
-                        "publicPort": null
-                    }
-                ],
+                "ports" : [],
                 "description": null,
                 "hostname": null,
                 "id": 211,
@@ -94,32 +79,8 @@
                 "state": "starting",
                 "type": "instance",
                 "uuid": "c861f990-4472-4fa1-960f-65171b544c28",
-                "volumes": [
-                    {
-                        "accountId": 1,
-                        "allocationState": "active",
-                        "attachedState": "active",
-                        "created": 1389396144000,
-                        "data": {},
-                        "description": null,
-                        "deviceNumber": 0,
-                        "format": null,
-                        "id": 178,
-                        "imageId": 14,
-                        "instanceId": 211,
-                        "name": null,
-                        "offering": null,
-                        "offeringId": null,
-                        "physicalSizeBytes": null,
-                        "recreatable": false,
-                        "removeTime": null,
-                        "removed": null,
-                        "state": "active",
-                        "type": "volume",
-                        "uuid": "9bd4d257-e288-4cbd-b496-21310d64772f",
-                        "virtualSizeBytes": null
-                    }
-                ],
+                "volumes": [],
+                "nics": [],
                 "zoneId": 1
             },
             "instanceId": 211,

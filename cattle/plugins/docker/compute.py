@@ -216,6 +216,41 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
+            start_config['cap_drop'] = instance.data.fields['capDrop']
+        except KeyError:
+            pass
+
+        try:
+            start_config['dns_search'] = instance.data.fields['dnsSearch']
+        except KeyError:
+            pass
+
+        try:
+            start_config['dns'] = instance.data.fields['dns']
+        except KeyError:
+            pass
+
+        try:
+            config['domainname'] = instance.data.fields['domainName']
+        except KeyError:
+            pass
+
+        try:
+            config['mem_limit'] = instance.data.fields['memory']
+        except KeyError:
+            pass
+
+        try:
+            config['memswap_limit'] = instance.data.fields['memorySwap']
+        except KeyError:
+            pass
+
+        try:
+            config['cpuset'] = instance.data.fields['cpuSet']
+        except KeyError:
+            pass
+
+        try:
             volumes = instance.data.fields['dataVolumes']
             volumes_map = {}
             binds_map = {}

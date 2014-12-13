@@ -27,8 +27,8 @@
                 "data": {
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
-                        "publishAllPorts": "true",
-                        "startOnCreate": "true"
+                        "publishAllPorts": true,
+                        "startOnCreate": true
                     }
                 },
                 "instanceLinks" : [
