@@ -256,6 +256,16 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         try:
+            config['stdin_open'] = instance.data.fields['stdinOpen']
+        except KeyError:
+            pass
+
+        try:
+            config['detach'] = instance.data.fields['detach']
+        except KeyError:
+            pass
+
+        try:
             volumes = instance.data.fields['dataVolumes']
             volumes_map = {}
             binds_map = {}

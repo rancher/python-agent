@@ -297,28 +297,67 @@ def test_instance_activate_memory(agent, responses):
 
 @if_docker
 def test_instance_activate_tty(agent, responses):
-    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def preFalse(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['tty'] = False
 
     def pre(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['tty'] = True
 
+    def postFalse(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert not docker_inspect['Config']['Tty']
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
-        assert docker_inspect['Config']['Tty'] == True
+        assert docker_inspect['Config']['Tty']
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
+    event_test(agent, schema, pre_func=preFalse, post_func=postFalse)
 
 
 @if_docker
 def test_instance_activate_stdinOpen(agent, responses):
-    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
-    def pre(req):
+    def preTrueWithDetach(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['stdinOpen'] = True
+        instance['data']['fields']['detach'] = True
+
+    def preFalse(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['stdinOpen'] = False
+        instance['data']['fields']['detach'] = False
+
+    def pre(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['stdinOpen'] = True
+        instance['data']['fields']['detach'] = False
+
+    def postTrueWithDetach(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert not docker_inspect['Config']['StdinOnce']
+        assert docker_inspect['Config']['OpenStdin']
+        assert not docker_inspect['Config']['AttachStdin']
+        container_field_test_boiler_plate(resp)
+
+    def postFalse(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert not docker_inspect['Config']['StdinOnce']
+        assert not docker_inspect['Config']['OpenStdin']
+        assert not docker_inspect['Config']['AttachStdin']
+        container_field_test_boiler_plate(resp)
 
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
@@ -329,6 +368,8 @@ def test_instance_activate_stdinOpen(agent, responses):
 
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
+    event_test(agent, schema, pre_func=preFalse, post_func=postFalse)
+    event_test(agent, schema, pre_func=preTrueWithDetach, post_func=postTrueWithDetach)
 
 
 @if_docker
