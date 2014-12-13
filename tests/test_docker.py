@@ -279,6 +279,25 @@ def test_instance_activate_memory_swap(agent, responses):
 
 
 @if_docker
+def test_instance_activate_entrypoint(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['entryPoint'] = ["./sleep.sh"]
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['Config']['Entrypoint'] == ["./sleep.sh"]
+        docker_container = resp['data']['instance']['+data']['dockerContainer']
+        docker_container['Command'] = "/sleep.sh"
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_instance_activate_memory(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
@@ -313,7 +332,6 @@ def test_instance_activate_tty(agent, responses):
         assert not docker_inspect['Config']['Tty']
         container_field_test_boiler_plate(resp)
 
-    schema = 'docker/instance_activate_fields'
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         assert docker_inspect['Config']['Tty']
@@ -327,7 +345,7 @@ def test_instance_activate_tty(agent, responses):
 @if_docker
 def test_instance_activate_stdinOpen(agent, responses):
 
-    def preTrueWithDetach(req):
+    def preTrueDetach(req):
         _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
         instance['data']['fields']['stdinOpen'] = True
@@ -345,7 +363,7 @@ def test_instance_activate_stdinOpen(agent, responses):
         instance['data']['fields']['stdinOpen'] = True
         instance['data']['fields']['detach'] = False
 
-    def postTrueWithDetach(req, resp):
+    def postTrueDetach(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
         assert not docker_inspect['Config']['StdinOnce']
         assert docker_inspect['Config']['OpenStdin']
@@ -369,7 +387,7 @@ def test_instance_activate_stdinOpen(agent, responses):
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
     event_test(agent, schema, pre_func=preFalse, post_func=postFalse)
-    event_test(agent, schema, pre_func=preTrueWithDetach, post_func=postTrueWithDetach)
+    event_test(agent, schema, pre_func=preTrueDetach, post_func=postTrueDetach)
 
 
 @if_docker
