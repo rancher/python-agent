@@ -186,7 +186,15 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         copy_fields = [
             ('environment', 'environment'),
             ('directory', 'working_dir'),
-            ('user', 'user')]
+            ('user', 'user'),
+            ('domainName', 'domainname'),
+            ('memory', 'mem_limit'),
+            ('memorySwap', 'memswap_limit'),
+            ('cpuSet', 'cpuset'),
+            ('tty', 'tty'),
+            ('stdinOpen', 'stdin_open'),
+            ('detach', 'detach'),
+            ('entryPoint', 'entrypoint')]
 
         for src, dest in copy_fields:
             try:
@@ -204,71 +212,18 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'privileged': self._is_privileged(instance)
         }
 
-        try:
-            if instance.data.fields.publishAllPorts:
-                start_config['publish_all_ports'] = True
-        except (KeyError, AttributeError):
-            pass
+        start_fields = [
+            ('capAdd', 'cap_add'),
+            ('capDrop', 'cap_drop'),
+            ('dnsSearch', 'dns_search'),
+            ('dns', 'dns'),
+            ('publishAllPorts', 'publish_all_ports')]
 
-        try:
-            start_config['cap_add'] = instance.data.fields['capAdd']
-        except KeyError:
-            pass
-
-        try:
-            start_config['cap_drop'] = instance.data.fields['capDrop']
-        except KeyError:
-            pass
-
-        try:
-            start_config['dns_search'] = instance.data.fields['dnsSearch']
-        except KeyError:
-            pass
-
-        try:
-            start_config['dns'] = instance.data.fields['dns']
-        except KeyError:
-            pass
-
-        try:
-            config['domainname'] = instance.data.fields['domainName']
-        except KeyError:
-            pass
-
-        try:
-            config['mem_limit'] = instance.data.fields['memory']
-        except KeyError:
-            pass
-
-        try:
-            config['memswap_limit'] = instance.data.fields['memorySwap']
-        except KeyError:
-            pass
-
-        try:
-            config['cpuset'] = instance.data.fields['cpuSet']
-        except KeyError:
-            pass
-
-        try:
-            config['tty'] = instance.data.fields['tty']
-        except KeyError:
-            pass
-
-        try:
-            config['stdin_open'] = instance.data.fields['stdinOpen']
-        except KeyError:
-            pass
-
-        try:
-            config['detach'] = instance.data.fields['detach']
-        except KeyError:
-            pass
-
-        try:
-            config['entrypoint'] = instance.data.fields['entryPoint']
-        except KeyError:
-            pass
+        for src, dest in start_fields:
+            try:
+                start_config[dest] = instance.data.fields[src]
+            except (KeyError, AttributeError):
+                pass
 
         try:
             volumes = instance.data.fields['dataVolumes']
