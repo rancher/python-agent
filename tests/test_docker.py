@@ -226,7 +226,7 @@ def test_instance_activate_cpu_set(agent, responses):
     def pre(req):
         _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         instance = req['data']['instanceHostMap']['instance']
-        instance['data']['fields']['cpuSet'] = '0,4,6'
+        instance['data']['fields']['cpuSet'] = '0,1'
 
     def preNull(req):
         _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
@@ -240,7 +240,7 @@ def test_instance_activate_cpu_set(agent, responses):
 
     def post(req, resp):
         docker_inspect = resp['data']['instance']['+data']['dockerInspect']
-        assert docker_inspect['Config']['Cpuset'] == '0,4,6'
+        assert docker_inspect['Config']['Cpuset'] == '0,1'
         container_field_test_boiler_plate(resp)
 
     def postNull(req, resp):
