@@ -217,7 +217,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             ('capDrop', 'cap_drop'),
             ('dnsSearch', 'dns_search'),
             ('dns', 'dns'),
-            ('publishAllPorts', 'publish_all_ports')]
+            ('publishAllPorts', 'publish_all_ports'),
+            ('lxcConf', 'lxc_conf')]
 
         for src, dest in start_fields:
             try:

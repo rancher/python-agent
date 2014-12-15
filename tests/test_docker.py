@@ -391,6 +391,25 @@ def test_instance_activate_stdinOpen(agent, responses):
 
 
 @if_docker
+def test_instance_activate_lxc_conf(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    expectedLxcConf = {"lxc.network.type": "veth"}
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['lxcConf'] = expectedLxcConf
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        for conf in docker_inspect['HostConfig']['LxcConf']:
+            assert expectedLxcConf[conf['Key']] == conf['Value']
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_instance_activate_domainname(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
