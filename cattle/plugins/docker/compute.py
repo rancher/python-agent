@@ -127,7 +127,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except (KeyError, AttributeError):
             return None
 
-        if len(command.strip()) == 0:
+        if command is None or len(command.strip()) == 0:
             return None
 
         command_args = []
@@ -136,7 +136,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except (KeyError, AttributeError):
             pass
 
-        if len(command_args) > 0:
+        if command_args is not None and len(command_args) > 0:
             command = [command]
             command.extend(command_args)
 
