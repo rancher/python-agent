@@ -9,7 +9,7 @@ from .common_fixtures import *  # NOQA
 import pytest
 from cattle import CONFIG_OVERRIDE, Config
 
-if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") != "true"',
+if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") == "false"',
                                reason='DOCKER_TEST is not set')
 
 
