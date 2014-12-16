@@ -99,7 +99,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'uuid': compute['uuid'] + '-pool'
         }
 
-        utils.ping_add_resources(pong, physical_host, compute, pool)
+        ip = {
+            'type': 'ipAddress',
+            'uuid': DockerConfig.docker_host_ip(),
+            'address': DockerConfig.docker_host_ip(),
+            'hostUuid': compute['uuid'],
+        }
+
+        utils.ping_add_resources(pong, physical_host, compute, pool, ip)
 
     def inspect(self, container):
         return docker_client().inspect_container(container)
