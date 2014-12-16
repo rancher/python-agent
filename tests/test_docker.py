@@ -539,6 +539,29 @@ def test_instance_activate_volumes(agent, responses):
 
 
 @if_docker
+def test_instance_activate_null_command(agent, responses):
+    _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        del resp['data']['instance']['+data']['dockerInspect']
+        docker_container = resp['data']['instance']['+data']['dockerContainer']
+        fields = resp['data']['instance']['+data']['+fields']
+        del docker_container['Created']
+        del docker_container['Id']
+        del docker_container['Status']
+        docker_container = _sort_ports(docker_container)
+        del docker_container['Ports'][0]['PublicPort']
+        del docker_container['Ports'][1]['PublicPort']
+        del fields['dockerIp']
+        assert fields['dockerPorts']['8080/tcp'] is not None
+        assert fields['dockerPorts']['12201/udp'] is not None
+        fields['dockerPorts']['8080/tcp'] = '1234'
+        fields['dockerPorts']['12201/udp'] = '5678'
+
+    event_test(agent, 'docker/instance_activate_command_null', post_func=post)
+
+
+@if_docker
 def test_instance_activate_command(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
 
