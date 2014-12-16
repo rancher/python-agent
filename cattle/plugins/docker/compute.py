@@ -127,7 +127,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         return _is_running(container)
 
     @staticmethod
-    def _setup_command(config, instance):
+    def _setup_command(create_config, instance):
         command = ""
         try:
             command = instance.data.fields.command
@@ -148,7 +148,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             command.extend(command_args)
 
         if command is not None:
-            config['command'] = command
+            create_config['command'] = command
 
     @staticmethod
     def _setup_links(start_config, instance):
@@ -164,7 +164,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         start_config['links'] = links
 
     @staticmethod
-    def _setup_ports(config, instance):
+    def _setup_ports(create_config, instance):
         ports = []
         try:
             for port in instance.ports:
@@ -173,7 +173,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         if len(ports) > 0:
-            config['ports'] = ports
+            create_config['ports'] = ports
 
     def _do_instance_activate(self, instance, host, progress):
         name = instance.uuid
@@ -184,13 +184,13 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         c = docker_client()
 
-        config = {
+        create_config = {
             'name': name,
             'detach': True
         }
 
         # Docker-py doesn't support working_dir, maybe in 0.2.4?
-        copy_fields = [
+        create_config_fields = [
             ('environment', 'environment'),
             ('directory', 'working_dir'),
             ('user', 'user'),
@@ -203,14 +203,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             ('detach', 'detach'),
             ('entryPoint', 'entrypoint')]
 
-        for src, dest in copy_fields:
+        for src, dest in create_config_fields:
             try:
-                config[dest] = instance.data.fields[src]
+                create_config[dest] = instance.data.fields[src]
             except (KeyError, AttributeError):
                 pass
 
         try:
-            config['hostname'] = instance.hostname
+            create_config['hostname'] = instance.hostname
         except (KeyError, AttributeError):
             pass
 
@@ -219,7 +219,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'privileged': self._is_privileged(instance)
         }
 
-        start_fields = [
+        start_config_fields = [
             ('capAdd', 'cap_add'),
             ('capDrop', 'cap_drop'),
             ('dnsSearch', 'dns_search'),
@@ -227,7 +227,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             ('publishAllPorts', 'publish_all_ports'),
             ('lxcConf', 'lxc_conf')]
 
-        for src, dest in start_fields:
+        for src, dest in start_config_fields:
             try:
                 start_config[dest] = instance.data.fields[src]
             except (KeyError, AttributeError):
@@ -246,7 +246,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                         read_only = len(parts) == 3 and parts[2] == 'ro'
                         bind = {'bind': parts[1], 'ro': read_only}
                         binds_map[parts[0]] = bind
-                config['volumes'] = volumes_map
+                create_config['volumes'] = volumes_map
                 start_config['binds'] = binds_map
         except (KeyError, AttributeError):
             pass
@@ -259,27 +259,28 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except KeyError:
             pass
 
-        self._setup_command(config, instance)
-        self._setup_ports(config, instance)
+        self._setup_command(create_config, instance)
+        self._setup_ports(create_config, instance)
 
         self._setup_links(start_config, instance)
 
-        self._call_listeners(True, instance, host, config, start_config)
+        self._call_listeners(True, instance, host, create_config, start_config)
 
         container = self.get_container_by_name(name)
         if container is None:
             log.info('Creating docker container [%s] from config %s', name,
-                     config)
+                     create_config)
 
             try:
-                container = c.create_container(image_tag, **config)
+                container = c.create_container(image_tag, **create_config)
             except APIError as e:
                 try:
                     if e.message.response.status_code == 404:
                         # Ensure image is pulled, somebody could have deleted
                         # it behind the scenes
                         pull_image(instance.image, progress)
-                        container = c.create_container(image_tag, **config)
+                        cc = create_config
+                        container = c.create_container(image_tag, **cc)
                     else:
                         raise(e)
                 except:
