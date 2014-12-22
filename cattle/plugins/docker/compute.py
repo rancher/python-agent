@@ -176,6 +176,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             create_config['ports'] = ports
 
     def _do_instance_activate(self, instance, host, progress):
+
+        def to_upper_case(key):
+            return key[0].upper() + key[1:]
+
         name = instance.uuid
         try:
             image_tag = instance.image.data.dockerImage.fullName
@@ -198,6 +202,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             ('memory', 'mem_limit'),
             ('memorySwap', 'memswap_limit'),
             ('cpuSet', 'cpuset'),
+            ('cpuShares', 'cpu_shares'),
             ('tty', 'tty'),
             ('stdinOpen', 'stdin_open'),
             ('detach', 'detach'),
@@ -259,6 +264,22 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except KeyError:
             pass
 
+        try:
+            devices = instance.data.fields['devices']
+            devices = [device.replace(":", ",") for device in devices]
+            start_config['devices'] = devices
+        except KeyError:
+            pass
+
+        try:
+            restart_policy = instance.data.fields['restartPolicy']
+            refactored_res_policy = {}
+            for res_pol_key in restart_policy.keys():
+                refactored_res_policy[to_upper_case(res_pol_key)] = \
+                    restart_policy[res_pol_key]
+            start_config['restart_policy'] = refactored_res_policy
+        except KeyError:
+            pass
         self._setup_command(create_config, instance)
         self._setup_ports(create_config, instance)
 
