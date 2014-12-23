@@ -3,7 +3,7 @@
 /CattleAgent.egg-info
 /.idea
 /.tox
-/venv
+/.venv
 
 *.pyc
 __pycache__
