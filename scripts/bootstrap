@@ -5,7 +5,7 @@ cd $(dirname $0)/..
 
 apt-get update
 apt-get install -y libvirt-bin libvirt-dev qemu-kvm python-numpy arptables genisoimage python-pip pkg-config python-dev rsync
-pip install --upgrade pip tox virtualenv==1.11.6
+pip install --upgrade pip tox virtualenv
 
 if [ ! -x "$(which nsenter)" ]; then
     TMP=$(mktemp -d)
