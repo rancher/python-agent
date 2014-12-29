@@ -427,6 +427,45 @@ def test_instance_activate_domainname(agent, responses):
 
 
 @if_docker
+def test_instance_activate_devices(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    input_devices = ['/dev/null:/dev/xnull', '/dev/random:/dev/xrandom:rw']
+    expected_devices = {}
+    for input_device in input_devices:
+        parts_of_device = input_device.split(':')
+        key = parts_of_device[0]
+        expected_devices[key] = {
+            "PathOnHost": parts_of_device[0],
+            "PathInContainer": parts_of_device[1]
+        }
+        if len(parts_of_device) == 3:
+            expected_devices[key]["CgroupPermissions"] = parts_of_device[2]
+        else:
+            expected_devices[key]["CgroupPermissions"] = "rwm"
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['devices'] = input_devices
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        actual_devices = docker_inspect['HostConfig']['Devices']
+
+        assert len(expected_devices) == len(actual_devices)
+
+        for act_dvc in actual_devices:
+            exp_dvc = expected_devices[act_dvc['PathOnHost']]
+            assert exp_dvc['PathOnHost'] == act_dvc['PathOnHost']
+            assert exp_dvc['PathInContainer'] == act_dvc['PathInContainer']
+            assert exp_dvc['CgroupPermissions'] == act_dvc['CgroupPermissions']
+
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_instance_activate_dns(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
@@ -496,6 +535,77 @@ def test_instance_activate_privileged(agent, responses):
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=preTrue, post_func=postTrue)
     event_test(agent, schema, pre_func=preFalse, post_func=postFalse)
+
+
+@if_docker
+def test_instance_restart_policy(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    expected_restart_pol_1 = {"maximumRetryCount": 0,
+                              "name": "always"}
+    expected_restart_pol_2 = {"name": "on-failure",
+                              "maximumRetryCount": 2,
+                              }
+    expected_restart_pol_3 = {"name": "always"}
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['restartPolicy'] = expected_restart_pol_1
+
+    def pre_failure_policy(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['restartPolicy'] = expected_restart_pol_2
+
+    def pre_name_policy(req):
+        _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['restartPolicy'] = expected_restart_pol_3
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
+        assert act_restart_pol['Name'] == expected_restart_pol_1['name']
+        assert act_restart_pol['MaximumRetryCount'] == expected_restart_pol_1[
+            'maximumRetryCount']
+        container_field_test_boiler_plate(resp)
+
+    def post_failure_policy(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
+        assert act_restart_pol['Name'] == expected_restart_pol_2['name']
+        assert act_restart_pol['MaximumRetryCount'] == expected_restart_pol_2[
+            'maximumRetryCount']
+        container_field_test_boiler_plate(resp)
+
+    def post_name_policy(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
+        assert act_restart_pol['Name'] == expected_restart_pol_3['name']
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+    event_test(agent, schema, pre_func=pre_failure_policy,
+               post_func=post_failure_policy)
+    event_test(agent, schema, pre_func=pre_name_policy,
+               post_func=post_name_policy)
+
+
+@if_docker
+def test_instance_activate_cpu_shares(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['cpuShares'] = 400
+
+    def post(req, resp):
+        docker_inspect = resp['data']['instance']['+data']['dockerInspect']
+        assert docker_inspect['Config']['CpuShares'] == 400
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
 
 
 @if_docker
