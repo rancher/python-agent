@@ -6,10 +6,14 @@ class BaseComputeDriver(BaseHandler):
     def _get_handler_category(self, req):
         return "compute"
 
-    def instance_activate(self, req=None, instanceHostMap=None, **kw):
+    def instance_activate(self, req=None, instanceHostMap=None,
+                          processData=None, **kw):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
         progress = Progress(req)
+
+        if instance is not None:
+            instance.processData = processData
 
         return self._do(
             req=req,
@@ -19,10 +23,14 @@ class BaseComputeDriver(BaseHandler):
             action=lambda: self._do_instance_activate(instance, host, progress)
         )
 
-    def instance_deactivate(self, req=None, instanceHostMap=None, **kw):
+    def instance_deactivate(self, req=None, instanceHostMap=None,
+                            processData=None, **kw):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
         progress = Progress(req)
+
+        if instance is not None:
+            instance.processData = processData
 
         return self._do(
             req=req,

@@ -1,6 +1,4 @@
 import logging
-import requests.exceptions
-import time
 
 from . import docker_client, pull_image
 from . import DockerConfig, DOCKER_COMPUTE_LISTENER
@@ -376,17 +374,16 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _do_instance_deactivate(self, instance, host, progress):
         name = instance.uuid
         c = docker_client()
+        timeout = 10
+
+        try:
+            timeout = int(instance.processData.timeout)
+        except (TypeError, KeyError, AttributeError):
+            pass
 
         container = self.get_container_by_name(name)
 
-        start = time.time()
-        while True:
-            try:
-                c.stop(container['Id'], timeout=1)
-                break
-            except requests.exceptions.Timeout:
-                if (time.time() - start) > Config.stop_timeout():
-                    break
+        c.stop(container['Id'], timeout=timeout)
 
         container = self.get_container_by_name(name)
         if not _is_stopped(container):
@@ -394,5 +391,5 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         container = self.get_container_by_name(name)
         if not _is_stopped(container):
-            raise Exception('Failed to stop container for VM [{0}]'
+            raise Exception('Failed to stop container {0}'
                             .format(name))
