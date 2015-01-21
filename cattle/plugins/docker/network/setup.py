@@ -13,7 +13,16 @@ class NetworkSetup(BaseHandler):
         pass
 
     def before_start(self, instance, host, config, start_config):
-        pass
+        mac_address = None
+        device_number = None
+        for nic in instance.nics:
+            if device_number is None:
+                mac_address = nic.macAddress
+                device_number = nic.deviceNumber
+            elif device_number > nic.deviceNumber:
+                mac_address = nic.macAddress
+                device_number = nic.deviceNumber
+        config["mac_address"] = mac_address
 
     def after_start(self, instance, host, id):
         try:
@@ -31,7 +40,7 @@ class NetworkSetup(BaseHandler):
                 inspect = self.compute.inspect(id)
                 pid = inspect['State']['Pid']
 
-                net_util(pid, ip=ip_address, mac=nic.macAddress,
+                net_util(pid, ip=ip_address,
                          device='eth{0}'.format(nic.deviceNumber))
         except (KeyError, AttributeError):
             pass

@@ -22,7 +22,6 @@ wait_for_dev()
 }
 
 IP=
-MAC=
 PID=
 DEV=eth0
 ARGS="$@"
@@ -32,10 +31,6 @@ while [ "$#" -gt 0 ]; do
     -p)
         shift 1
         PID=$1
-        ;;
-    -m)
-        shift 1
-        MAC=$1
         ;;
     -i)
         shift 1
@@ -89,12 +84,5 @@ if [ -n "$IP" ]; then
 
     if ! ip route show | grep -q 169.254.0.0; then
         ip route add 169.254.0.0/16 dev $DEV src $(echo $IP | cut -f1 -d'/')
-    fi
-fi
-
-if [ -n "$MAC" ]; then
-    if ! ip link show dev $DEV | grep -qi $MAC; then
-        echo "Setting $DEV to $MAC"
-        ip link set dev $DEV address $MAC
     fi
 fi
