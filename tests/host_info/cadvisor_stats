@@ -1,0 +1,3505 @@
+{
+    "name": "/",
+    "spec": {
+        "cpu": {
+            "limit": 1024,
+            "mask": "0-3",
+            "max_limit": 0
+        },
+        "has_cpu": true,
+        "has_filesystem": true,
+        "has_memory": true,
+        "has_network": true,
+        "memory": {
+            "limit": 18446744073709551615,
+            "swap_limit": 18446744073709551615
+        }
+    },
+    "stats": [
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        415250549485,
+                        351180935584,
+                        348249210468,
+                        354024287838
+                    ],
+                    "system": 476860000000,
+                    "total": 1468704983375,
+                    "user": 437030000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67080,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8791224,
+                    "usage": 7104299008,
+                    "weighted_io_time": 926550,
+                    "write_time": 900780,
+                    "writes_completed": 65213,
+                    "writes_merged": 222210
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 260964,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 260964,
+                    "pgmajfault": 2
+                },
+                "usage": 2342240256,
+                "working_set": 1353900032
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:16.967019892Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        415941345586,
+                        351996549757,
+                        349135596183,
+                        354828078994
+                    ],
+                    "system": 477780000000,
+                    "total": 1471901570520,
+                    "user": 438680000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67080,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8791224,
+                    "usage": 7104311296,
+                    "weighted_io_time": 926550,
+                    "write_time": 900780,
+                    "writes_completed": 65213,
+                    "writes_merged": 222210
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2344222720,
+                "working_set": 1355796480
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:17.96126751Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        416732127171,
+                        352760713033,
+                        350049104045,
+                        355602695289
+                    ],
+                    "system": 478570000000,
+                    "total": 1475144639538,
+                    "user": 440370000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67080,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8791224,
+                    "usage": 7104380928,
+                    "weighted_io_time": 926550,
+                    "write_time": 900780,
+                    "writes_completed": 65213,
+                    "writes_merged": 222210
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2346893312,
+                "working_set": 1358467072
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:18.971910882Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        417459307513,
+                        353603449602,
+                        350795457759,
+                        356413264898
+                    ],
+                    "system": 479490000000,
+                    "total": 1478271479772,
+                    "user": 441980000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67080,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8791264,
+                    "usage": 7104380928,
+                    "weighted_io_time": 926550,
+                    "write_time": 900780,
+                    "writes_completed": 65214,
+                    "writes_merged": 222210
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2349023232,
+                "working_set": 1360535552
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:19.961451438Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        417880003028,
+                        354299361702,
+                        351534774480,
+                        357119524333
+                    ],
+                    "system": 480310000000,
+                    "total": 1480833663543,
+                    "user": 443020000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67080,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8791264,
+                    "usage": 7109259264,
+                    "weighted_io_time": 926550,
+                    "write_time": 900780,
+                    "writes_completed": 65214,
+                    "writes_merged": 222210
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2355363840,
+                "working_set": 1366691840
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:20.963056942Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        418664988764,
+                        354974910167,
+                        352087261504,
+                        357693544092
+                    ],
+                    "system": 481360000000,
+                    "total": 1483420704527,
+                    "user": 444030000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67090,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8792536,
+                    "usage": 7121035264,
+                    "weighted_io_time": 926560,
+                    "write_time": 900790,
+                    "writes_completed": 65217,
+                    "writes_merged": 222366
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2364608512,
+                "working_set": 1375870976
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:21.969094996Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        419293913850,
+                        355888210484,
+                        352625054365,
+                        358372812330
+                    ],
+                    "system": 482230000000,
+                    "total": 1486179991029,
+                    "user": 445370000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67090,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8792536,
+                    "usage": 7124283392,
+                    "weighted_io_time": 926560,
+                    "write_time": 900790,
+                    "writes_completed": 65217,
+                    "writes_merged": 222366
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261136,
+                    "pgmajfault": 2
+                },
+                "usage": 2367401984,
+                "working_set": 1378664448
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:22.975006307Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        419971623299,
+                        356716538144,
+                        353430643642,
+                        359117513392
+                    ],
+                    "system": 483080000000,
+                    "total": 1489236318477,
+                    "user": 447050000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67090,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8792536,
+                    "usage": 7127097344,
+                    "weighted_io_time": 926560,
+                    "write_time": 900790,
+                    "writes_completed": 65217,
+                    "writes_merged": 222366
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261191,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261191,
+                    "pgmajfault": 2
+                },
+                "usage": 2383618048,
+                "working_set": 1394831360
+            },
+            "network": {
+                "rx_bytes": 588049764,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521792,
+                "tx_bytes": 10416641,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180018
+            },
+            "timestamp": "2015-01-28T20:08:23.962328172Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        420818566422,
+                        357650750135,
+                        354200294937,
+                        359998132164
+                    ],
+                    "system": 483860000000,
+                    "total": 1492667743658,
+                    "user": 449420000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67140,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8793688,
+                    "usage": 7131172864,
+                    "weighted_io_time": 926610,
+                    "write_time": 900840,
+                    "writes_completed": 65228,
+                    "writes_merged": 222484
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2417614848,
+                "working_set": 1425756160
+            },
+            "network": {
+                "rx_bytes": 588049818,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521793,
+                "tx_bytes": 10416695,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180019
+            },
+            "timestamp": "2015-01-28T20:08:24.963325766Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        420970244902,
+                        358650390597,
+                        354356342677,
+                        360934990208
+                    ],
+                    "system": 484250000000,
+                    "total": 1494911968384,
+                    "user": 451130000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67140,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8793688,
+                    "usage": 7139332096,
+                    "weighted_io_time": 926610,
+                    "write_time": 900840,
+                    "writes_completed": 65228,
+                    "writes_merged": 222484
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2427138048,
+                "working_set": 1433063424
+            },
+            "network": {
+                "rx_bytes": 588049818,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521793,
+                "tx_bytes": 10416695,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180019
+            },
+            "timestamp": "2015-01-28T20:08:25.964394478Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        421039286235,
+                        359650422826,
+                        354481101190,
+                        361804391802
+                    ],
+                    "system": 484570000000,
+                    "total": 1496975202053,
+                    "user": 452570000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67140,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8793688,
+                    "usage": 7150489600,
+                    "weighted_io_time": 926610,
+                    "write_time": 900840,
+                    "writes_completed": 65228,
+                    "writes_merged": 222484
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2438098944,
+                "working_set": 1438261248
+            },
+            "network": {
+                "rx_bytes": 588049818,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521793,
+                "tx_bytes": 10416695,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180019
+            },
+            "timestamp": "2015-01-28T20:08:26.969568428Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        421408090252,
+                        360453875241,
+                        354948630461,
+                        362343373596
+                    ],
+                    "system": 485100000000,
+                    "total": 1499153969550,
+                    "user": 453780000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67140,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8793776,
+                    "usage": 7143464960,
+                    "weighted_io_time": 926610,
+                    "write_time": 900840,
+                    "writes_completed": 65230,
+                    "writes_merged": 222484
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2411106304,
+                "working_set": 1417764864
+            },
+            "network": {
+                "rx_bytes": 588049818,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521793,
+                "tx_bytes": 10416695,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180019
+            },
+            "timestamp": "2015-01-28T20:08:27.963040595Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        421924896303,
+                        360905442639,
+                        355866158815,
+                        363309678981
+                    ],
+                    "system": 485720000000,
+                    "total": 1502006176738,
+                    "user": 455560000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67140,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8793776,
+                    "usage": 7143464960,
+                    "weighted_io_time": 926610,
+                    "write_time": 900840,
+                    "writes_completed": 65230,
+                    "writes_merged": 222484
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2417668096,
+                "working_set": 1422807040
+            },
+            "network": {
+                "rx_bytes": 588049818,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521793,
+                "tx_bytes": 10416695,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180019
+            },
+            "timestamp": "2015-01-28T20:08:28.962931971Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        422192299227,
+                        361429309408,
+                        356448232151,
+                        363913249296
+                    ],
+                    "system": 485980000000,
+                    "total": 1503983090082,
+                    "user": 457180000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67170,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8798432,
+                    "usage": 7143612416,
+                    "weighted_io_time": 926860,
+                    "write_time": 901090,
+                    "writes_completed": 65279,
+                    "writes_merged": 222899
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2423799808,
+                "working_set": 1428918272
+            },
+            "network": {
+                "rx_bytes": 588053191,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521802,
+                "tx_bytes": 10417684,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180029
+            },
+            "timestamp": "2015-01-28T20:08:29.962650316Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        422481166134,
+                        362082615166,
+                        356554020998,
+                        364100643101
+                    ],
+                    "system": 486230000000,
+                    "total": 1505218445399,
+                    "user": 457960000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67170,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8798440,
+                    "usage": 7143657472,
+                    "weighted_io_time": 926860,
+                    "write_time": 901090,
+                    "writes_completed": 65280,
+                    "writes_merged": 222899
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2431672320,
+                "working_set": 1436794880
+            },
+            "network": {
+                "rx_bytes": 588107006,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 521875,
+                "tx_bytes": 10422344,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180074
+            },
+            "timestamp": "2015-01-28T20:08:30.967725551Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        422859674256,
+                        362249565358,
+                        356731957520,
+                        364553353447
+                    ],
+                    "system": 486580000000,
+                    "total": 1506394550581,
+                    "user": 458320000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67170,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8798440,
+                    "usage": 7143854080,
+                    "weighted_io_time": 926860,
+                    "write_time": 901090,
+                    "writes_completed": 65280,
+                    "writes_merged": 222899
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2432176128,
+                "working_set": 1437167616
+            },
+            "network": {
+                "rx_bytes": 588324320,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 522102,
+                "tx_bytes": 10430228,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180220
+            },
+            "timestamp": "2015-01-28T20:08:31.962331938Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        423580571129,
+                        362568385084,
+                        356987573459,
+                        364728919676
+                    ],
+                    "system": 486960000000,
+                    "total": 1507865449348,
+                    "user": 459120000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67170,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8798440,
+                    "usage": 7144157184,
+                    "weighted_io_time": 926860,
+                    "write_time": 901090,
+                    "writes_completed": 65280,
+                    "writes_merged": 222899
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2432516096,
+                "working_set": 1437241344
+            },
+            "network": {
+                "rx_bytes": 588667082,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 522437,
+                "tx_bytes": 10434710,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180303
+            },
+            "timestamp": "2015-01-28T20:08:32.965296483Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        423743068069,
+                        363562300443,
+                        357092933066,
+                        364822153392
+                    ],
+                    "system": 487140000000,
+                    "total": 1509220454970,
+                    "user": 460250000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67170,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8798440,
+                    "usage": 7144566784,
+                    "weighted_io_time": 926860,
+                    "write_time": 901090,
+                    "writes_completed": 65280,
+                    "writes_merged": 222899
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261192,
+                    "pgmajfault": 2
+                },
+                "usage": 2433040384,
+                "working_set": 1437401088
+            },
+            "network": {
+                "rx_bytes": 589112704,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 522910,
+                "tx_bytes": 10442432,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180446
+            },
+            "timestamp": "2015-01-28T20:08:33.96221814Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        424278773963,
+                        364562580554,
+                        357669191440,
+                        365346405745
+                    ],
+                    "system": 487700000000,
+                    "total": 1511856951702,
+                    "user": 461920000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67200,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8800856,
+                    "usage": 7148838912,
+                    "weighted_io_time": 926890,
+                    "write_time": 901120,
+                    "writes_completed": 65294,
+                    "writes_merged": 222916
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2427850752,
+                "working_set": 1430773760
+            },
+            "network": {
+                "rx_bytes": 589195500,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 523024,
+                "tx_bytes": 10447799,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180484
+            },
+            "timestamp": "2015-01-28T20:08:34.963484962Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        424562851528,
+                        365324371935,
+                        358168406743,
+                        365942187731
+                    ],
+                    "system": 487930000000,
+                    "total": 1513997817937,
+                    "user": 463770000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67220,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8800888,
+                    "usage": 7151706112,
+                    "weighted_io_time": 926910,
+                    "write_time": 901140,
+                    "writes_completed": 65298,
+                    "writes_merged": 222916
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2432770048,
+                "working_set": 1434959872
+            },
+            "network": {
+                "rx_bytes": 589195808,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 523026,
+                "tx_bytes": 10448003,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180487
+            },
+            "timestamp": "2015-01-28T20:08:35.961486276Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        424918235668,
+                        365610997739,
+                        358282567706,
+                        366941852521
+                    ],
+                    "system": 488240000000,
+                    "total": 1515753653634,
+                    "user": 465130000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67220,
+                    "read_time": 28040,
+                    "reads_completed": 23300,
+                    "reads_merged": 618,
+                    "sectors_read": 858456,
+                    "sectors_written": 8800888,
+                    "usage": 7155961856,
+                    "weighted_io_time": 926910,
+                    "write_time": 901140,
+                    "writes_completed": 65298,
+                    "writes_merged": 222916
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2445168640,
+                "working_set": 1447190528
+            },
+            "network": {
+                "rx_bytes": 589777924,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 523630,
+                "tx_bytes": 10467703,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180807
+            },
+            "timestamp": "2015-01-28T20:08:36.961716087Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        425374644625,
+                        365900084431,
+                        358540302462,
+                        367942011321
+                    ],
+                    "system": 488520000000,
+                    "total": 1517757042839,
+                    "user": 466760000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67250,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8800920,
+                    "usage": 7157559296,
+                    "weighted_io_time": 926940,
+                    "write_time": 901160,
+                    "writes_completed": 65301,
+                    "writes_merged": 222916
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2439258112,
+                "working_set": 1441091584
+            },
+            "network": {
+                "rx_bytes": 589964359,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 523814,
+                "tx_bytes": 10472404,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180857
+            },
+            "timestamp": "2015-01-28T20:08:37.963641636Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        425780499971,
+                        366305905798,
+                        358641822470,
+                        368839444181
+                    ],
+                    "system": 488860000000,
+                    "total": 1519567672420,
+                    "user": 468010000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67260,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8800936,
+                    "usage": 7160881152,
+                    "weighted_io_time": 926950,
+                    "write_time": 901170,
+                    "writes_completed": 65303,
+                    "writes_merged": 222916
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2444017664,
+                "working_set": 1445040128
+            },
+            "network": {
+                "rx_bytes": 590584101,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 524426,
+                "tx_bytes": 10480190,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 180983
+            },
+            "timestamp": "2015-01-28T20:08:38.964360469Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        426295033086,
+                        366979427540,
+                        358867229488,
+                        369000947266
+                    ],
+                    "system": 489450000000,
+                    "total": 1521142637380,
+                    "user": 468520000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67280,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8803384,
+                    "usage": 7168315392,
+                    "weighted_io_time": 927000,
+                    "write_time": 901220,
+                    "writes_completed": 65307,
+                    "writes_merged": 223218
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2453934080,
+                "working_set": 1453723648
+            },
+            "network": {
+                "rx_bytes": 594179733,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527596,
+                "tx_bytes": 10513886,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181607
+            },
+            "timestamp": "2015-01-28T20:08:39.962716439Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        426499683504,
+                        367910498724,
+                        359053121864,
+                        369758680739
+                    ],
+                    "system": 489970000000,
+                    "total": 1523221984831,
+                    "user": 469860000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67280,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8804768,
+                    "usage": 7191212032,
+                    "weighted_io_time": 927000,
+                    "write_time": 901220,
+                    "writes_completed": 65316,
+                    "writes_merged": 223218
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2484256768,
+                "working_set": 1485299712
+            },
+            "network": {
+                "rx_bytes": 594179733,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527596,
+                "tx_bytes": 10513886,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181607
+            },
+            "timestamp": "2015-01-28T20:08:40.961486466Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        426896485987,
+                        368059432659,
+                        359997955748,
+                        370178486129
+                    ],
+                    "system": 490230000000,
+                    "total": 1525132360523,
+                    "user": 471280000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67280,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8804856,
+                    "usage": 7193907200,
+                    "weighted_io_time": 927000,
+                    "write_time": 901220,
+                    "writes_completed": 65318,
+                    "writes_merged": 223218
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2475925504,
+                "working_set": 1476870144
+            },
+            "network": {
+                "rx_bytes": 594475068,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527839,
+                "tx_bytes": 10520161,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181659
+            },
+            "timestamp": "2015-01-28T20:08:41.961339466Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        427822401066,
+                        368548490033,
+                        360531985768,
+                        370710752538
+                    ],
+                    "system": 490850000000,
+                    "total": 1527613629405,
+                    "user": 472810000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67310,
+                    "read_time": 28060,
+                    "reads_completed": 23302,
+                    "reads_merged": 618,
+                    "sectors_read": 858720,
+                    "sectors_written": 8804896,
+                    "usage": 7194202112,
+                    "weighted_io_time": 927050,
+                    "write_time": 901270,
+                    "writes_completed": 65323,
+                    "writes_merged": 223218
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2485178368,
+                "working_set": 1485824000
+            },
+            "network": {
+                "rx_bytes": 594475068,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527839,
+                "tx_bytes": 10520161,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181659
+            },
+            "timestamp": "2015-01-28T20:08:42.961411577Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        428545101129,
+                        369072085499,
+                        360979182674,
+                        371125808928
+                    ],
+                    "system": 491360000000,
+                    "total": 1529722178230,
+                    "user": 474070000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67360,
+                    "read_time": 28080,
+                    "reads_completed": 23324,
+                    "reads_merged": 618,
+                    "sectors_read": 860264,
+                    "sectors_written": 8804960,
+                    "usage": 7198191616,
+                    "weighted_io_time": 927100,
+                    "write_time": 901300,
+                    "writes_completed": 65331,
+                    "writes_merged": 223218
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2496401408,
+                "working_set": 1493938176
+            },
+            "network": {
+                "rx_bytes": 594475068,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527839,
+                "tx_bytes": 10520161,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181659
+            },
+            "timestamp": "2015-01-28T20:08:43.961465509Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        429266695510,
+                        369911807668,
+                        361335936658,
+                        371493060287
+                    ],
+                    "system": 492120000000,
+                    "total": 1532007500123,
+                    "user": 475300000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67370,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8808408,
+                    "usage": 7199252480,
+                    "weighted_io_time": 927140,
+                    "write_time": 901350,
+                    "writes_completed": 65358,
+                    "writes_merged": 223618
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 261823,
+                    "pgmajfault": 2
+                },
+                "usage": 2500980736,
+                "working_set": 1498185728
+            },
+            "network": {
+                "rx_bytes": 594475068,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527839,
+                "tx_bytes": 10520161,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181659
+            },
+            "timestamp": "2015-01-28T20:08:44.966649899Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        430033153588,
+                        370290366023,
+                        361795928640,
+                        372085852163
+                    ],
+                    "system": 492840000000,
+                    "total": 1534205300414,
+                    "user": 476290000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67480,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8809048,
+                    "usage": 7199236096,
+                    "weighted_io_time": 927500,
+                    "write_time": 901710,
+                    "writes_completed": 65417,
+                    "writes_merged": 223618
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262452,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262452,
+                    "pgmajfault": 2
+                },
+                "usage": 2509197312,
+                "working_set": 1506336768
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:45.961482282Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        430928631728,
+                        370911152760,
+                        362286851352,
+                        372540160052
+                    ],
+                    "system": 493580000000,
+                    "total": 1536666795892,
+                    "user": 477390000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67570,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8809552,
+                    "usage": 7199236096,
+                    "weighted_io_time": 927630,
+                    "write_time": 901840,
+                    "writes_completed": 65478,
+                    "writes_merged": 223618
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262452,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262452,
+                    "pgmajfault": 2
+                },
+                "usage": 2500038656,
+                "working_set": 1497182208
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:46.961857956Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        431814996512,
+                        371460652935,
+                        362724974879,
+                        373108321612
+                    ],
+                    "system": 494470000000,
+                    "total": 1539108945938,
+                    "user": 478400000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 2,
+                    "io_time": 67650,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8810288,
+                    "usage": 7199256576,
+                    "weighted_io_time": 927720,
+                    "write_time": 901930,
+                    "writes_completed": 65566,
+                    "writes_merged": 223618
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "usage": 2499739648,
+                "working_set": 1496866816
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:48.01899332Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        432369429482,
+                        372350751602,
+                        363262646763,
+                        374010087700
+                    ],
+                    "system": 495280000000,
+                    "total": 1541992915547,
+                    "user": 479750000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67700,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8810456,
+                    "usage": 7199236096,
+                    "weighted_io_time": 927790,
+                    "write_time": 902000,
+                    "writes_completed": 65581,
+                    "writes_merged": 223618
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "usage": 2503356416,
+                "working_set": 1500495872
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:48.964415345Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        433008229134,
+                        373357333987,
+                        363972166985,
+                        374453491370
+                    ],
+                    "system": 495960000000,
+                    "total": 1544791221476,
+                    "user": 481320000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67840,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8811056,
+                    "usage": 7199236096,
+                    "weighted_io_time": 927940,
+                    "write_time": 902150,
+                    "writes_completed": 65608,
+                    "writes_merged": 223660
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262453,
+                    "pgmajfault": 2
+                },
+                "usage": 2499702784,
+                "working_set": 1496842240
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:49.965755139Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        433577805163,
+                        374347890291,
+                        364332313215,
+                        374922619779
+                    ],
+                    "system": 496460000000,
+                    "total": 1547180628448,
+                    "user": 482990000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67920,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8839888,
+                    "usage": 7199166464,
+                    "weighted_io_time": 928710,
+                    "write_time": 902920,
+                    "writes_completed": 65659,
+                    "writes_merged": 223660
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2505203712,
+                "working_set": 1502339072
+            },
+            "network": {
+                "rx_bytes": 594479939,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527868,
+                "tx_bytes": 10524042,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181675
+            },
+            "timestamp": "2015-01-28T20:08:50.961478988Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        433929386691,
+                        375113947233,
+                        364705565561,
+                        375619444053
+                    ],
+                    "system": 497000000000,
+                    "total": 1549368343538,
+                    "user": 484450000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 67960,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8840144,
+                    "usage": 7199174656,
+                    "weighted_io_time": 928760,
+                    "write_time": 902980,
+                    "writes_completed": 65680,
+                    "writes_merged": 223660
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2499624960,
+                "working_set": 1496633344
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:51.964307269Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        434525288479,
+                        375864533060,
+                        365295055559,
+                        376197565122
+                    ],
+                    "system": 497760000000,
+                    "total": 1551882442220,
+                    "user": 485490000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68070,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8840392,
+                    "usage": 7199178752,
+                    "weighted_io_time": 928890,
+                    "write_time": 903110,
+                    "writes_completed": 65710,
+                    "writes_merged": 223660
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2504093696,
+                "working_set": 1501102080
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:52.961929368Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        434929374822,
+                        376676054348,
+                        365774141356,
+                        376912053953
+                    ],
+                    "system": 498520000000,
+                    "total": 1554291624479,
+                    "user": 486630000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68090,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8840720,
+                    "usage": 7199191040,
+                    "weighted_io_time": 928910,
+                    "write_time": 903130,
+                    "writes_completed": 65742,
+                    "writes_merged": 223660
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2500091904,
+                "working_set": 1497100288
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:53.963039052Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        435378538629,
+                        377348904077,
+                        366245479110,
+                        377518817463
+                    ],
+                    "system": 499110000000,
+                    "total": 1556491739279,
+                    "user": 487630000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68140,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8841056,
+                    "usage": 7199170560,
+                    "weighted_io_time": 928960,
+                    "write_time": 903180,
+                    "writes_completed": 65758,
+                    "writes_merged": 223680
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2506108928,
+                "working_set": 1503117312
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:54.962598194Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        435865610471,
+                        377961552270,
+                        366895911567,
+                        378178644280
+                    ],
+                    "system": 500050000000,
+                    "total": 1558901718588,
+                    "user": 488750000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68280,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8888192,
+                    "usage": 7196741632,
+                    "weighted_io_time": 932190,
+                    "write_time": 906410,
+                    "writes_completed": 65930,
+                    "writes_merged": 224117
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2511007744,
+                "working_set": 1508089856
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:55.964610234Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        436187108336,
+                        378943483293,
+                        367246654432,
+                        379017415662
+                    ],
+                    "system": 500490000000,
+                    "total": 1561394661723,
+                    "user": 490620000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68300,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8888376,
+                    "usage": 7197646848,
+                    "weighted_io_time": 932210,
+                    "write_time": 906430,
+                    "writes_completed": 65951,
+                    "writes_merged": 224117
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2551689216,
+                "working_set": 1546395648
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:56.961685275Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        436279244576,
+                        379942430094,
+                        367332498076,
+                        380016472971
+                    ],
+                    "system": 501040000000,
+                    "total": 1563570645717,
+                    "user": 492190000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68300,
+                    "read_time": 28080,
+                    "reads_completed": 23326,
+                    "reads_merged": 618,
+                    "sectors_read": 860328,
+                    "sectors_written": 8888376,
+                    "usage": 7201767424,
+                    "weighted_io_time": 932210,
+                    "write_time": 906430,
+                    "writes_completed": 65951,
+                    "writes_merged": 224117
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2523078656,
+                "working_set": 1517731840
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:57.960962378Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        436412104024,
+                        380952582965,
+                        367467607097,
+                        381026584241
+                    ],
+                    "system": 501270000000,
+                    "total": 1565858878327,
+                    "user": 494150000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68310,
+                    "read_time": 28090,
+                    "reads_completed": 23329,
+                    "reads_merged": 618,
+                    "sectors_read": 860352,
+                    "sectors_written": 8888376,
+                    "usage": 7201767424,
+                    "weighted_io_time": 932220,
+                    "write_time": 906430,
+                    "writes_completed": 65951,
+                    "writes_merged": 224117
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2558767104,
+                "working_set": 1553481728
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:58.972291887Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        437217173661,
+                        381844225864,
+                        368231778091,
+                        382017029667
+                    ],
+                    "system": 502920000000,
+                    "total": 1569310207283,
+                    "user": 495780000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68380,
+                    "read_time": 28150,
+                    "reads_completed": 23367,
+                    "reads_merged": 618,
+                    "sectors_read": 860656,
+                    "sectors_written": 8889048,
+                    "usage": 7208955904,
+                    "weighted_io_time": 932290,
+                    "write_time": 906450,
+                    "writes_completed": 65953,
+                    "writes_merged": 224199
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2542841856,
+                "working_set": 1537421312
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:08:59.963081288Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        437818263604,
+                        382224177051,
+                        369230280726,
+                        382404507716
+                    ],
+                    "system": 503350000000,
+                    "total": 1571677229097,
+                    "user": 497500000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68460,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8913648,
+                    "usage": 7212290048,
+                    "weighted_io_time": 935170,
+                    "write_time": 909320,
+                    "writes_completed": 66147,
+                    "writes_merged": 225359
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2568667136,
+                "working_set": 1559547904
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:09:00.962078934Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438137015674,
+                        383073784519,
+                        370231899783,
+                        382566424778
+                    ],
+                    "system": 503680000000,
+                    "total": 1574009124754,
+                    "user": 499330000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68480,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8913944,
+                    "usage": 7212380160,
+                    "weighted_io_time": 935190,
+                    "write_time": 909340,
+                    "writes_completed": 66151,
+                    "writes_merged": 225359
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2571431936,
+                "working_set": 1562218496
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:09:01.961057641Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438334696691,
+                        384058025465,
+                        371230894533,
+                        382637445059
+                    ],
+                    "system": 503880000000,
+                    "total": 1576261061748,
+                    "user": 501110000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68510,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8914488,
+                    "usage": 7212568576,
+                    "weighted_io_time": 935220,
+                    "write_time": 909370,
+                    "writes_completed": 66155,
+                    "writes_merged": 225359
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2582089728,
+                "working_set": 1572278272
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:09:02.962087401Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438512293904,
+                        385058508384,
+                        372230725203,
+                        382886820464
+                    ],
+                    "system": 504080000000,
+                    "total": 1578688347955,
+                    "user": 502930000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68510,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8914488,
+                    "usage": 7212593152,
+                    "weighted_io_time": 935220,
+                    "write_time": 909370,
+                    "writes_completed": 66155,
+                    "writes_merged": 225359
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2593443840,
+                "working_set": 1583632384
+            },
+            "network": {
+                "rx_bytes": 594479993,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527869,
+                "tx_bytes": 10524096,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181676
+            },
+            "timestamp": "2015-01-28T20:09:03.96146452Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438611606822,
+                        386058278687,
+                        373230671792,
+                        383071038250
+                    ],
+                    "system": 504290000000,
+                    "total": 1580971595551,
+                    "user": 504750000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68520,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8915768,
+                    "usage": 7212699648,
+                    "weighted_io_time": 935240,
+                    "write_time": 909390,
+                    "writes_completed": 66158,
+                    "writes_merged": 225516
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2603945984,
+                "working_set": 1594138624
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:04.961352929Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438758473991,
+                        387058070825,
+                        374230463286,
+                        383209852092
+                    ],
+                    "system": 504460000000,
+                    "total": 1583256860194,
+                    "user": 506750000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68540,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8921568,
+                    "usage": 7211732992,
+                    "weighted_io_time": 935730,
+                    "write_time": 909880,
+                    "writes_completed": 66224,
+                    "writes_merged": 225694
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2613313536,
+                "working_set": 1603506176
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:05.962359852Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438818920634,
+                        388057313120,
+                        375230487564,
+                        383296573234
+                    ],
+                    "system": 504530000000,
+                    "total": 1585403294552,
+                    "user": 508740000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68540,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8921568,
+                    "usage": 7211810816,
+                    "weighted_io_time": 935730,
+                    "write_time": 909880,
+                    "writes_completed": 66224,
+                    "writes_merged": 225694
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2622922752,
+                "working_set": 1613115392
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:06.962313377Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438892131842,
+                        389058387295,
+                        376231104912,
+                        383438855226
+                    ],
+                    "system": 504720000000,
+                    "total": 1587620479275,
+                    "user": 510720000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68540,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8921568,
+                    "usage": 7211958272,
+                    "weighted_io_time": 935730,
+                    "write_time": 909880,
+                    "writes_completed": 66224,
+                    "writes_merged": 225694
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2636836864,
+                "working_set": 1627029504
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:07.961425294Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        438929777862,
+                        390057310098,
+                        377230468196,
+                        383556505056
+                    ],
+                    "system": 504840000000,
+                    "total": 1589774061212,
+                    "user": 512690000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68540,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8921568,
+                    "usage": 7212044288,
+                    "weighted_io_time": 935730,
+                    "write_time": 909880,
+                    "writes_completed": 66224,
+                    "writes_merged": 225694
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2646335488,
+                "working_set": 1636528128
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:08.961562835Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        439448551287,
+                        391058683246,
+                        377386080184,
+                        383638494369
+                    ],
+                    "system": 505160000000,
+                    "total": 1591531809086,
+                    "user": 513830000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68550,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8921792,
+                    "usage": 7212118016,
+                    "weighted_io_time": 935740,
+                    "write_time": 909890,
+                    "writes_completed": 66226,
+                    "writes_merged": 225720
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2654191616,
+                "working_set": 1644384256
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:09.962567787Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        439695119202,
+                        391813282410,
+                        377727494944,
+                        384336958825
+                    ],
+                    "system": 505620000000,
+                    "total": 1593572855381,
+                    "user": 514990000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68650,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8950952,
+                    "usage": 7209762816,
+                    "weighted_io_time": 937970,
+                    "write_time": 912120,
+                    "writes_completed": 66313,
+                    "writes_merged": 226219
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2577281024,
+                "working_set": 1567375360
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:10.961763563Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        439872997088,
+                        392225245818,
+                        378572593035,
+                        385337554984
+                    ],
+                    "system": 505820000000,
+                    "total": 1596008390925,
+                    "user": 516860000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68650,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8950952,
+                    "usage": 7209844736,
+                    "weighted_io_time": 937970,
+                    "write_time": 912120,
+                    "writes_completed": 66313,
+                    "writes_merged": 226219
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2584002560,
+                "working_set": 1574096896
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:11.964999104Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        440145171300,
+                        393199512387,
+                        378906384967,
+                        386337062473
+                    ],
+                    "system": 506150000000,
+                    "total": 1598588131127,
+                    "user": 518930000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68650,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8950952,
+                    "usage": 7209963520,
+                    "weighted_io_time": 937970,
+                    "write_time": 912120,
+                    "writes_completed": 66313,
+                    "writes_merged": 226219
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2597535744,
+                "working_set": 1587630080
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:12.962291456Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        440840840472,
+                        394199508858,
+                        379025512478,
+                        386715039454
+                    ],
+                    "system": 506360000000,
+                    "total": 1600780901262,
+                    "user": 520860000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68660,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8952704,
+                    "usage": 7210082304,
+                    "weighted_io_time": 937990,
+                    "write_time": 912140,
+                    "writes_completed": 66316,
+                    "writes_merged": 226219
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2588749824,
+                "working_set": 1578799104
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:13.962334751Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        441841306851,
+                        395200180536,
+                        379099884100,
+                        386813346887
+                    ],
+                    "system": 506470000000,
+                    "total": 1602954718374,
+                    "user": 522890000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68660,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 8952704,
+                    "usage": 7210262528,
+                    "weighted_io_time": 937990,
+                    "write_time": 912140,
+                    "writes_completed": 66316,
+                    "writes_merged": 226219
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2605416448,
+                "working_set": 1595465728
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:14.961442233Z"
+        },
+        {
+            "cpu": {
+                "load": 0,
+                "usage": {
+                    "per_cpu_usage": [
+                        442645975018,
+                        396209520757,
+                        379454722411,
+                        387095800953
+                    ],
+                    "system": 506840000000,
+                    "total": 1605406019139,
+                    "user": 524760000000
+                }
+            },
+            "diskio": {},
+            "filesystem": [
+                {
+                    "capacity": 29829492736,
+                    "device": "/dev/sda1",
+                    "io_in_progress": 0,
+                    "io_time": 68880,
+                    "read_time": 28160,
+                    "reads_completed": 23369,
+                    "reads_merged": 618,
+                    "sectors_read": 860672,
+                    "sectors_written": 9008400,
+                    "usage": 7203504128,
+                    "weighted_io_time": 944840,
+                    "write_time": 918990,
+                    "writes_completed": 66419,
+                    "writes_merged": 227753
+                }
+            ],
+            "memory": {
+                "container_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "hierarchical_data": {
+                    "pgfault": 262677,
+                    "pgmajfault": 2
+                },
+                "usage": 2582024192,
+                "working_set": 1571868672
+            },
+            "network": {
+                "rx_bytes": 594480083,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 527870,
+                "tx_bytes": 10524150,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 181677
+            },
+            "timestamp": "2015-01-28T20:09:15.965581587Z"
+        }
+    ],
+    "subcontainers": [
+        {
+            "name": "/docker"
+        }
+    ]
+}

@@ -1,6 +1,8 @@
 from tempfile import NamedTemporaryFile
 from os import path
 from urlparse import urlparse
+from datetime import datetime
+from contextlib import closing
 
 import binascii
 import calendar
@@ -10,6 +12,9 @@ import re
 import subprocess
 import time
 import uuid
+import json
+import urllib2
+
 
 try:
     from eventlet.green.subprocess import check_output as e_check_output
@@ -71,6 +76,42 @@ class JsonObject:
             return ret
 
         return json_object
+
+
+class CadvisorAPIClient(object):
+    def __init__(self, host, port, version='v1.2', proto='http://'):
+        self.url = '{0}{1}:{2}/api/{3}'.format(proto, host, str(port), version)
+
+    def get_containers(self):
+        return self._get(self.url + '/containers')
+
+    def get_latest_stat(self):
+        return self.get_containers()['stats'][-1]
+
+    def get_stats(self):
+        return self.get_containers()['stats']
+
+    def timestamp_diff(self, time_current, time_prev):
+        time_current_conv = self._timestamp_convert(time_current)
+        time_prev_conv = self._timestamp_convert(time_prev)
+
+        diff = (time_current_conv - time_prev_conv).total_seconds()
+        return round((diff * 10**9))
+
+    def _timestamp_convert(self, stime):
+        # This is a bit hacky
+        t_strip = stime[:-4]
+        return datetime.strptime(t_strip, "%Y-%m-%dT%H:%M:%S.%f")
+
+    def _marshall_to_python(self, data):
+        if isinstance(data, str):
+            return json.loads(data)
+
+    def _get(self, url):
+        with closing(urllib2.urlopen(url, timeout=5)) as resp:
+            if resp.code == 200:
+                data = resp.read()
+                return self._marshall_to_python(data)
 
 
 def ping_include_resources(ping):

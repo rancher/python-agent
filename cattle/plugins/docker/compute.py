@@ -8,6 +8,7 @@ from cattle.agent.handler import KindBasedMixin
 from cattle.type_manager import get_type_list
 from cattle import utils
 from docker.errors import APIError
+from cattle.plugins.host_info.main import HostInfo
 
 log = logging.getLogger('docker')
 
@@ -33,6 +34,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def __init__(self):
         KindBasedMixin.__init__(self, kind='docker')
         BaseComputeDriver.__init__(self)
+        self.host_info = HostInfo()
 
     @staticmethod
     def get_container_by(func):
@@ -86,7 +88,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'kind': 'docker',
             'name': Config.hostname(),
             'physicalHostUuid': physical_host['uuid'],
-            'uuid': DockerConfig.docker_uuid()
+            'uuid': DockerConfig.docker_uuid(),
+            'physicalHostStats': self.host_info.collect_data()
         }
 
         pool = {

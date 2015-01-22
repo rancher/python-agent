@@ -6,6 +6,7 @@ from cattle.plugins.docker import docker_client
 import cattle.plugins.docker  # NOQA
 
 from cattle.plugins.docker.network.setup import NetworkSetup
+from cattle.plugins.host_info.main import HostInfo
 from .common_fixtures import *  # NOQA
 import pytest
 import time
@@ -980,7 +981,10 @@ def test_instance_deactivate(agent, responses):
 
 
 @if_docker
-def test_ping(agent, responses):
+def test_ping(agent, responses, mocker):
+    mocker.patch.object(HostInfo, 'collect_data',
+                        return_value=json_data('docker/host_info_resp'))
+
     test_instance_only_activate(agent, responses)
 
     CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
