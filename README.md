@@ -29,11 +29,9 @@ Steps to get the tests running and passing:
 
   ```
   mkdir $HOME/cattle-home
-  $ CATTLE_DOCKER_USE_BOOT2DOCKER=true DOCKER_TEST=true CATTLE_HOME=$HOME/cattle-home \
-  py.test tests
+  $ CATTLE_DOCKER_USE_BOOT2DOCKER=true CATTLE_HOME=$HOME/cattle-home py.test tests
   ```
   Or you can do the equivalent in PyCharm. An explanation of those environment variables:
   * ```CATTLE_DOCKER_USE_BOOT2DOCKER=true``` tells the docker client to use the connection settings derived from ```boot2docker shellinit```. You need this because boot2docker has TLS enabled by default.
-  * ```DOCKER_TEST=true``` tells the test framework to run the docker tests. They're disabled by default. We'll probably turn them on by default in the future.
   * ```CATTLE_HOME``` is needed for some temporary files that are written (locks, specifically)
 
