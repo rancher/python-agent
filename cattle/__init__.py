@@ -18,7 +18,10 @@ except:
 def default_value(name, default):
     if name in CONFIG_OVERRIDE:
         return CONFIG_OVERRIDE[name]
-    return os.environ.get('CATTLE_%s' % name, default)
+    result = os.environ.get('CATTLE_%s' % name, default)
+    if result == '':
+        return default
+    return result
 
 
 _SCHEMAS = '/schemas'
