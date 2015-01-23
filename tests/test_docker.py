@@ -7,6 +7,7 @@ import cattle.plugins.docker  # NOQA
 
 from .common_fixtures import *  # NOQA
 import pytest
+import time
 from cattle import CONFIG_OVERRIDE, Config
 
 if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") == "false"',
@@ -833,23 +834,27 @@ def test_instance_activate_command_args(agent, responses):
 
 @if_docker
 def test_instance_deactivate(agent, responses):
-    CONFIG_OVERRIDE['STOP_TIMEOUT'] = 1
-
     test_instance_only_activate(agent, responses)
 
     def post(req, resp):
-        del resp['data']['instance']['+data']['dockerInspect']
-        del resp['data']['instance']['+data']['dockerContainer']['Created']
-        del resp['data']['instance']['+data']['dockerContainer']['Id']
-        del resp['data']['instance']['+data']['dockerContainer']['Status']
-        del resp['data']['instance']['+data']['+fields']['dockerIp']
+        container_field_test_boiler_plate(resp)
 
-        # TODO: this shouldn't be needed but sometimes dockerPorts is set
-        # on really slow machines (m1.small on ec2)
-        resp['data']['instance']['+data']['+fields']['dockerPorts'] = {}
-        resp['data']['instance']['+data']['dockerContainer']['Ports'] = []
-
+    start = time.time()
     event_test(agent, 'docker/instance_deactivate', post_func=post)
+    end = time.time()
+
+    assert end - start < 1
+
+    def pre(req):
+        req['data']['processData']['timeout'] = 1
+
+    test_instance_only_activate(agent, responses)
+    start = time.time()
+    event_test(agent, 'docker/instance_deactivate', pre_func=pre,
+               post_func=post)
+    end = time.time()
+
+    assert end - start > 1
 
 
 @if_docker

@@ -178,7 +178,7 @@ class EventClient:
             ping_drop = 0
             r = requests.post(self._url, **args)
             if r.status_code != 201:
-                raise Exception(r.text)
+                raise Exception("{} : {}".format(r.status_code, r.text))
 
             self._start_children()
 
