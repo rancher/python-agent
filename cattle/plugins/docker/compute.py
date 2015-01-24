@@ -264,7 +264,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         try:
             devices = instance.data.fields['devices']
-            devices = [device.replace(":", ",") for device in devices]
             start_config['devices'] = devices
         except KeyError:
             pass
