@@ -17,7 +17,7 @@ def pipe_error(ctx, stderr, buffer):
             log.error('[%s] %s', ctx, line[:-1])
 
 
-def net_util(pid, ip=None, mac=None, device=None):
+def net_util(pid, ip=None, device=None):
     if not sys.platform.startswith('linux'):
         log.warn('Skipping net_util call because it is not supported on this '
                  'platform.')
@@ -28,10 +28,6 @@ def net_util(pid, ip=None, mac=None, device=None):
     if ip is not None:
         args.append('-i')
         args.append(ip)
-
-    if mac is not None:
-        args.append('-m')
-        args.append(mac)
 
     if device is not None:
         args.append('-d')
