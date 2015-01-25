@@ -1,13 +1,6 @@
-
 flake8
 setuptools
 pytest
 datadiff==1.1.5
 pytest-mock
-arrow
-
-mako
-docker-py==1.0.0
-portalocker
-
 libvirt-python
