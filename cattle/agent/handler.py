@@ -77,7 +77,8 @@ class BaseHandler(object):
 
             return self._reply(req, data)
 
-    def _get_response_data(self, obj):
+    def _get_response_data(self, req, obj):
+        resource_type = req.get("resourceType")
         type = obj.get("type")
         if type is not None:
             inner_name = re.sub("([A-Z])", r'_\1', type)
@@ -89,7 +90,7 @@ class BaseHandler(object):
                 pass
 
             if method is not None:
-                return method(obj)
+                return {resource_type: method(obj)}
 
         return {}
 

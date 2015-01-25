@@ -18,7 +18,7 @@ class BaseStoragePool(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_image_active(image, storage_pool),
-            result=lambda: self._get_response_data(imageStoragePoolMap),
+            result=lambda: self._get_response_data(req, imageStoragePoolMap),
             lock_obj=image,
             action=lambda: self._do_image_activate(image, storage_pool,
                                                    progress)
@@ -32,7 +32,7 @@ class BaseStoragePool(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_volume_active(volume, storage_pool),
-            result=lambda: self._get_response_data(volumeStoragePoolMap),
+            result=lambda: self._get_response_data(req, volumeStoragePoolMap),
             lock_obj=volume,
             action=lambda: self._do_volume_activate(volume, storage_pool,
                                                     progress)
@@ -46,7 +46,7 @@ class BaseStoragePool(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_volume_inactive(volume, storage_pool),
-            result=lambda: self._get_response_data(volumeStoragePoolMap),
+            result=lambda: self._get_response_data(req, volumeStoragePoolMap),
             lock_obj=volume,
             action=lambda: self._do_volume_deactivate(volume, storage_pool,
                                                       progress)
@@ -60,7 +60,7 @@ class BaseStoragePool(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_volume_removed(volume, storage_pool),
-            result=lambda: self._get_response_data(volumeStoragePoolMap),
+            result=lambda: self._get_response_data(req, volumeStoragePoolMap),
             lock_obj=volume,
             action=lambda: self._do_volume_remove(volume, storage_pool,
                                                   progress)

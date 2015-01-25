@@ -18,7 +18,7 @@ class BaseComputeDriver(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_instance_active(instance, host),
-            result=lambda: self._get_response_data(instanceHostMap),
+            result=lambda: self._get_response_data(req, instanceHostMap),
             lock_obj=instance,
             action=lambda: self._do_instance_activate(instance, host, progress)
         )
@@ -35,7 +35,7 @@ class BaseComputeDriver(BaseHandler):
         return self._do(
             req=req,
             check=lambda: self._is_instance_inactive(instance, host),
-            result=lambda: self._get_response_data(instanceHostMap),
+            result=lambda: self._get_response_data(req, instanceHostMap),
             lock_obj=instance,
             action=lambda: self._do_instance_deactivate(instance, host,
                                                         progress)
