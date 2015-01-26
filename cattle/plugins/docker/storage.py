@@ -1,6 +1,5 @@
 import logging
 import os.path
-import re
 import shutil
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
@@ -112,7 +111,4 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                     shutil.rmtree(path)
 
     def _path_to_volume(self, volume):
-        host_path = volume.uri.replace('file://', '')
-        mounted_path = re.sub('^.*?/var/lib/docker', '/host/var/lib/docker',
-                              host_path)
-        return mounted_path
+        return volume.uri.replace('file://', '')

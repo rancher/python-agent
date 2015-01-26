@@ -28,7 +28,7 @@ class DockerConfig:
 
     @staticmethod
     def docker_uuid_file():
-        def_value = '{0}/.docker_uuid'.format(Config.home())
+        def_value = '{0}/.docker_uuid'.format(Config.state_dir())
         return default_value('DOCKER_UUID_FILE', def_value)
 
     @staticmethod
