@@ -5,6 +5,7 @@ from cattle.plugins.docker import docker_client
 # unavailable, importing it first
 import cattle.plugins.docker  # NOQA
 
+from cattle.plugins.docker.network.setup import NetworkSetup
 from .common_fixtures import *  # NOQA
 import pytest
 import time
@@ -171,6 +172,25 @@ def test_instance_activate_mac_address(agent, responses):
         fields['dockerPorts']['12201/udp'] = '5678'
 
     event_test(agent, 'docker/instance_activate', post_func=post)
+
+
+def test_multiple_nics_pick_mac():
+    instance = {
+        'nics': [
+            {
+                'macAddress': '02:03:04:05:06:07',
+                'deviceNumber': 0
+            },
+            {
+                'macAddress': '02:03:04:05:06:09',
+                'deviceNumber': 1
+            }
+        ]
+    }
+    instance = JsonObject(instance)
+    config = {'test': 'Nothing'}
+    NetworkSetup().before_start(instance, None, config, None)
+    assert config['mac_address'] == '02:03:04:05:06:07'
 
 
 @if_docker
