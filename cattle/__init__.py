@@ -60,8 +60,12 @@ class Config:
         return uuid
 
     @staticmethod
+    def state_dir():
+        return default_value('STATE_DIR', Config.home())
+
+    @staticmethod
     def physical_host_uuid_file():
-        def_value = '{0}/.physical_host_uuid'.format(Config.home())
+        def_value = '{0}/.physical_host_uuid'.format(Config.state_dir())
         return default_value('PHYSICAL_HOST_UUID_FILE', def_value)
 
     @staticmethod
