@@ -7,7 +7,7 @@ This agent runs on compute nodes in a Rancher cluster. It receives events from t
 ### Deployment notes
 This agent is typically deployed inside a container on Rancher compute nodes. See [the Rancher project](http://github.com/rancherio/rancher) for details.
 
-### Setup and Develiopment notes
+### Setup and Development notes
 #### On Mac OS X
 Steps to get the tests running and passing:
 
