@@ -329,8 +329,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         docker_ports = {}
         docker_ip = None
 
-        print existing
-
         if existing is not None:
             inspect = docker_client().inspect_container(existing['Id'])
             docker_ip = inspect['NetworkSettings']['IPAddress']

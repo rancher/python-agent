@@ -242,8 +242,6 @@ class LibvirtCompute(KindBasedMixin, BaseComputeDriver):
             if isinstance(default_network, dict):
                 interfaces = [default_network]
 
-        print interfaces
-
         return interfaces
 
     def _call_listeners(self, start, *args):
