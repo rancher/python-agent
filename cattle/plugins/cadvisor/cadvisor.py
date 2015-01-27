@@ -12,7 +12,12 @@ class Cadvisor(object):
                '-listen_ip', Config.cadvisor_ip(),
                '-port', str(Config.cadvisor_port())]
 
-        if os.path.exists('/host/proc/1/ns/mnt'):
-            cmd = ['nsenter', '--mount=/host/proc/1/ns/mnt', '--'] + cmd
+        wrapper = Config.cadvisor_wrapper()
+
+        if len(wrapper):
+            cmd.insert(0, wrapper)
+        else:
+            if os.path.exists('/host/proc/1/ns/mnt'):
+                cmd = ['nsenter', '--mount=/host/proc/1/ns/mnt', '--'] + cmd
 
         background(cmd)
