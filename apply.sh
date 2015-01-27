@@ -68,6 +68,9 @@ start()
 
     info Executing $MAIN
     cleanup
+
+    $CATTLE_HOME/config.sh host-config
+
     exec $MAIN
 }
 
