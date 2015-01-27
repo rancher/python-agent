@@ -280,3 +280,7 @@ class Config:
             return int(val)
         else:
             return None
+
+    @staticmethod
+    def cadvisor_wrapper():
+        return default_value('CADVISOR_WRAPPER', '')
