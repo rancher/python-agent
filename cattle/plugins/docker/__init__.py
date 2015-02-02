@@ -57,6 +57,10 @@ class DockerConfig:
         use_b2d = default_value('DOCKER_USE_BOOT2DOCKER', 'false')
         return use_b2d.lower() == 'true'
 
+    @staticmethod
+    def is_host_pidns():
+        return default_value('AGENT_PIDNS', 'container') == 'host'
+
 
 def docker_client(version=None):
     if DockerConfig.use_boot2docker_connection_env_vars():

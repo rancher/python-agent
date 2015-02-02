@@ -3,7 +3,7 @@ import logging
 from urlparse import urlparse
 
 from cattle import Config
-from cattle.utils import reply
+from cattle.utils import reply, popen
 from .util import add_to_env
 from .compute import DockerCompute
 from cattle.agent.handler import BaseHandler
@@ -12,6 +12,8 @@ from cattle.type_manager import get_type, MARSHALLER
 from . import DockerConfig
 
 import requests
+import subprocess
+import os
 
 log = logging.getLogger('docker')
 
@@ -25,6 +27,54 @@ def _make_session():
 
 
 _SESSION = _make_session()
+
+
+def ns_exec(pid, event):
+    script = os.path.join(Config.home(), 'events', event.name.split(';')[0])
+    cmd = ['nsenter',
+           '-F',
+           '-m',
+           '-u',
+           '-i',
+           '-n',
+           '-p',
+           '-t', str(pid),
+           '--', script]
+
+    marshaller = get_type(MARSHALLER)
+    input = marshaller.to_string(event)
+    data = None
+
+    env = {}
+    with open('/proc/{}/environ'.format(pid)) as f:
+        for line in f.read().split('\0'):
+            if not len(line):
+                continue
+            kv = line.split('=', 1)
+            if kv[0].startswith('CATTLE'):
+                env[kv[0]] = kv[1]
+
+    env['PATH'] = os.environ['PATH']
+
+    p = popen(cmd,
+              env=env,
+              stdin=subprocess.PIPE,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.STDOUT)
+    output, error = p.communicate(input=input)
+    retcode = p.poll()
+
+    if retcode:
+        return retcode, output, None
+
+    text = []
+    for line in output.splitlines():
+        if line.startswith('{'):
+            data = marshaller.from_string(line)
+            break
+        text.append(line)
+
+    return retcode, ''.join(text), data
 
 
 def container_exec(ip, token, event):
@@ -88,7 +138,11 @@ class DockerDelegate(BaseHandler):
             pass
 
         progress = Progress(event, parent=req)
-        exit_code, output, data = container_exec(ip, instanceData.token, event)
+        if DockerConfig.is_host_pidns():
+            exit_code, output, data = ns_exec(inspect['State']['Pid'], event)
+        else:
+            exit_code, output, data = container_exec(ip, instanceData.token,
+                                                     event)
 
         if exit_code == 0:
             return reply(event, data, parent=req)
