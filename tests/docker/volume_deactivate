@@ -54,6 +54,6 @@
     "publisher": null,
     "replyTo": "reply.1304443302859863169",
     "resourceId": "178",
-    "resourceType": "volume",
+    "resourceType": "volumeStoragePoolMap",
     "time": 1389637915959
 }
