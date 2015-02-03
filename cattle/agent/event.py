@@ -16,11 +16,6 @@ from cattle.plugins.core.publisher import Publisher
 from cattle.concurrency import Queue, Full, Empty, run, spawn
 
 
-PS_UTIL = False
-if not sys.platform.startswith("linux"):
-    import psutil
-    PS_UTIL = True
-
 log = logging.getLogger("agent")
 _STAMP_TS = None
 
@@ -65,10 +60,7 @@ def _should_run(pid):
     if pid is None:
         return True
     else:
-        if PS_UTIL:
-            return psutil.pid_exists(pid)
-        else:
-            return os.path.exists("/proc/%s" % pid)
+        return os.path.exists('/proc/%s' % pid)
 
 
 def _worker(worker_name, queue, ppid):
