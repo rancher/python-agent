@@ -31,7 +31,7 @@
                         "mountPoints": {
                             "/dev/sda1": {
                                 "free": 17185324.0,
-                                "percent": 41.005,
+                                "percentUsed": 41.005,
                                 "total": 29130364.0,
                                 "used": 11945040.0
                             }
