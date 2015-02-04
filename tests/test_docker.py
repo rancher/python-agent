@@ -97,21 +97,7 @@ def test_instance_only_activate(agent, responses):
             nic['macAddress'] = ''
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post)
 
@@ -132,20 +118,7 @@ def test_instance_activate_no_mac_address(agent, responses):
         mac_nic_received = docker_inspect['NetworkSettings']['MacAddress']
         assert mac_received == ''
         assert mac_nic_received is not None
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post)
 
@@ -161,20 +134,7 @@ def test_instance_activate_mac_address(agent, responses):
         mac_nic_received = docker_inspect['NetworkSettings']['MacAddress']
         assert mac_nic_received == '02:03:04:05:06:07'
         assert mac_received == '02:03:04:05:06:07'
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate', post_func=post)
 
@@ -224,24 +184,10 @@ def test_instance_activate_links(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        id = docker_container['Id']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
-
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
         inspect = docker_client().inspect_container(id)
+        instance_activate_common_validation(resp)
 
         env = inspect['Config']['Env']
 
@@ -287,24 +233,10 @@ def test_instance_activate_links_no_service(agent, responses):
     client.start(c)
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        id = docker_container['Id']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
-
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
         inspect = docker_client().inspect_container(id)
+        instance_activate_common_validation(resp)
 
         assert set(
             ['/target_mysql:/c861f990-4472-4fa1-960f-65171b544c28/mysql',
@@ -730,21 +662,7 @@ def test_instance_activate_ipsec(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate_ipsec', post_func=post)
 
@@ -755,25 +673,10 @@ def test_instance_activate_agent_instance_localhost(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        id = docker_container['Id']
-
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
-
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
         inspect = docker_client().inspect_container(id)
+        instance_activate_common_validation(resp)
 
         port = Config.api_proxy_listen_port()
         assert 'CATTLE_CONFIG_URL_SCHEME=https' in inspect['Config']['Env']
@@ -791,26 +694,11 @@ def test_instance_activate_agent_instance(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        id = docker_container['Id']
-
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
 
         inspect = docker_client().inspect_container(id)
+        instance_activate_common_validation(resp)
 
         port = Config.api_proxy_listen_port()
         assert 'CATTLE_CONFIG_URL={0}'.format(Config.config_url()) in \
@@ -865,20 +753,7 @@ def test_instance_activate_volumes(agent, responses):
         assert set(['/sys:/host/sys:ro', '/proc:/host/proc:rw']) == set(
             inspect['HostConfig']['Binds'])
 
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate_volumes', post_func=post)
 
@@ -888,21 +763,7 @@ def test_instance_activate_null_command(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate_command_null', post_func=post)
 
@@ -912,21 +773,7 @@ def test_instance_activate_command(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate_command', post_func=post)
 
@@ -936,21 +783,7 @@ def test_instance_activate_command_args(agent, responses):
     _delete_container('/ca-c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
-        instance_data = resp['data']['instanceHostMap']['instance']['+data']
-        del instance_data['dockerInspect']
-        docker_container = instance_data['dockerContainer']
-        fields = instance_data['+fields']
-        del docker_container['Created']
-        del docker_container['Id']
-        del docker_container['Status']
-        docker_container = _sort_ports(docker_container)
-        del docker_container['Ports'][0]['PublicPort']
-        del docker_container['Ports'][1]['PublicPort']
-        del fields['dockerIp']
-        assert fields['dockerPorts']['8080/tcp'] is not None
-        assert fields['dockerPorts']['12201/udp'] is not None
-        fields['dockerPorts']['8080/tcp'] = '1234'
-        fields['dockerPorts']['12201/udp'] = '5678'
+        instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate_command_args', post_func=post)
 
@@ -1041,3 +874,16 @@ def container_field_test_boiler_plate(resp):
     del docker_container['Status']
     del fields['dockerIp']
     docker_container = _sort_ports(docker_container)
+
+
+def instance_activate_common_validation(resp):
+    container_field_test_boiler_plate(resp)
+    docker_container = resp['data']['instanceHostMap']['instance']
+    docker_container = docker_container['+data']['dockerContainer']
+    fields = resp['data']['instanceHostMap']['instance']['+data']['+fields']
+    del docker_container['Ports'][0]['PublicPort']
+    del docker_container['Ports'][1]['PublicPort']
+    assert fields['dockerPorts']['8080/tcp'] is not None
+    assert fields['dockerPorts']['12201/udp'] is not None
+    fields['dockerPorts']['8080/tcp'] = '1234'
+    fields['dockerPorts']['12201/udp'] = '5678'
