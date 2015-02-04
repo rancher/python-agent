@@ -1,4 +1,4 @@
 mako
-git+https://github.com/rancherio/docker-py.git@0.7.1-macaddr
+docker-py==0.7.2
 portalocker
 # WebSockify is installed manually from package.sh
