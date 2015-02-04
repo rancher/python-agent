@@ -1,6 +1,7 @@
 import os
-
+from cattle.plugins.docker import DockerConfig
 from cattle import Config
+
 from cattle.process_manager import background
 
 
@@ -16,7 +17,10 @@ class HostApi(object):
                     '-cadvisor-url',  url,
                     '-logtostderr=true',
                     '-ip', Config.host_api_ip(),
-                    '-port', str(Config.host_api_port())],
+                    '-port', str(Config.host_api_port()),
+                    '-auth=true',
+                    '-host-uuid', DockerConfig.docker_uuid(),
+                    '-public-key', Config.jwt_public_key_file()],
                    env=env)
 
 
