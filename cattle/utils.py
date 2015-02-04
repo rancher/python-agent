@@ -18,6 +18,7 @@ import urllib2
 
 try:
     from eventlet.green.subprocess import check_output as e_check_output
+    from eventlet.green.subprocess import Popen as e_popen
 except:
     pass
 
@@ -312,6 +313,13 @@ def check_output(*popenargs, **kwargs):
             # This is in case CallProcessError doesn't have returncode, cmd,
             # or output
             raise e
+
+
+def popen(*args, **kw):
+    try:
+        return e_popen(*args, **kw)
+    except NameError:
+        return Popen(*args, **kw)
 
 
 def random_string(length=64):
