@@ -3,6 +3,7 @@ flake8
 setuptools
 pytest
 datadiff==1.1.5
+pytest-mock
 
 mako
 git+https://github.com/rancherio/docker-py.git@0.7.1-macaddr

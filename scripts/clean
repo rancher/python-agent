@@ -3,3 +3,4 @@
 cd $(dirname $0)/..
 
 rm -rf CattleAgent.egg-info dist .tox
+find . -name *.pyc -o -name *.pyo -exec rm -rf {} \;
