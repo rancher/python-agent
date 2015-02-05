@@ -81,6 +81,13 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if not utils.ping_include_resources(ping):
             return
 
+        stats = None
+        if utils.ping_include_stats(ping):
+            try:
+                stats = self.host_info.collect_data()
+            except:
+                log.exception("Error geting host info stats")
+
         physical_host = Config.physical_host()
 
         compute = {
@@ -89,7 +96,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'name': Config.hostname(),
             'physicalHostUuid': physical_host['uuid'],
             'uuid': DockerConfig.docker_uuid(),
-            'physicalHostStats': self.host_info.collect_data()
+            'physicalHostStats': stats
         }
 
         pool = {

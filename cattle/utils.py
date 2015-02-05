@@ -1,7 +1,6 @@
 from tempfile import NamedTemporaryFile
 from os import path
 from urlparse import urlparse
-from datetime import datetime
 from contextlib import closing
 
 import binascii
@@ -14,6 +13,7 @@ import time
 import uuid
 import json
 import urllib2
+import arrow
 
 
 try:
@@ -100,9 +100,10 @@ class CadvisorAPIClient(object):
         return round((diff * 10**9))
 
     def _timestamp_convert(self, stime):
-        # This is a bit hacky
-        t_strip = stime[:-4]
-        return datetime.strptime(t_strip, "%Y-%m-%dT%H:%M:%S.%f")
+        # Cadvisor handles everything in nanoseconds.
+        # Python does not.
+        t_conv = arrow.get(stime[0:26])
+        return t_conv
 
     def _marshall_to_python(self, data):
         if isinstance(data, str):
@@ -118,6 +119,13 @@ class CadvisorAPIClient(object):
 def ping_include_resources(ping):
     try:
         return ping.data.options['resources']
+    except (KeyError, AttributeError):
+        return False
+
+
+def ping_include_stats(ping):
+    try:
+        return ping.data.options['stats']
     except (KeyError, AttributeError):
         return False
 

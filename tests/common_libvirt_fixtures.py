@@ -8,12 +8,12 @@ from uuid import uuid4
 from cattle.plugins.core.marshaller import JsonObject
 from cattle.progress import LogProgress
 from cattle import download
+from cattle.plugins.libvirt import enabled
 
 
 if_libvirt = pytest.mark.skipif('os.environ.get("LIBVIRT_TEST") != "true"',
                                 reason='LIBVIRT_TEST is not set')
 
-from cattle.plugins.libvirt import enabled
 if enabled():
     from cattle.plugins.libvirt_directory_pool import DirectoryPoolDriver
 

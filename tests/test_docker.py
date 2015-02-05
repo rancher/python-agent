@@ -813,17 +813,7 @@ def test_instance_deactivate(agent, responses):
     assert end - start > 1
 
 
-@if_docker
-def test_ping(agent, responses, mocker):
-    mocker.patch.object(HostInfo, 'collect_data',
-                        return_value=json_data('docker/host_info_resp'))
-
-    test_instance_only_activate(agent, responses)
-
-    CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
-    CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
-
-    def post(req, resp):
+def ping_post_process(req, resp):
         hostname = Config.hostname()
         pool_name = hostname + ' Storage Pool'
         resources = resp['data']['resources']
@@ -843,7 +833,32 @@ def test_ping(agent, responses, mocker):
         resp['data']['resources'][0]['name'] = 'localhost'
         resp['data']['resources'][1]['name'] = 'localhost Storage Pool'
 
-    event_test(agent, 'docker/ping', post_func=post)
+
+@if_docker
+def test_ping(agent, responses, mocker):
+    mocker.patch.object(HostInfo, 'collect_data',
+                        return_value=json_data('docker/host_info_resp'))
+
+    test_instance_only_activate(agent, responses)
+
+    CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
+    CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
+
+    event_test(agent, 'docker/ping', post_func=ping_post_process)
+
+
+@if_docker
+def test_ping_stat_exception(agent, responses, mocker):
+    mocker.patch.object(HostInfo, 'collect_data',
+                        side_effect=ValueError('Bad Value Found'))
+
+    test_instance_only_activate(agent, responses)
+
+    CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
+    CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
+
+    event_test(agent, 'docker/ping_stat_exception',
+               post_func=ping_post_process)
 
 
 @if_docker
