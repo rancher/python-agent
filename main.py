@@ -1,20 +1,22 @@
 #!/usr/bin/env python
 
-from cattle import concurrency  # NOQA
-
 import sys
 import os
+
+# Cattle imports should go after this.
+if __name__ == '__main__':
+    dist = os.path.join(os.path.dirname(__file__), "dist")
+    if os.path.exists(dist):
+        sys.path.insert(0, dist)
+
+from cattle import concurrency  # NOQA
+
 import logging
 from logging.handlers import RotatingFileHandler
 import argparse
 
 _LOG_SIZE = 20971520
 _LOG_COUNT = 2
-
-if __name__ == '__main__':
-    dist = os.path.join(os.path.dirname(__file__), "dist")
-    if os.path.exists(dist):
-        sys.path.insert(0, dist)
 
 from cattle import plugins, Config, process_manager
 from cattle.agent.event import EventClient

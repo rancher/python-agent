@@ -1,17 +1,17 @@
-from cattle import CONFIG_OVERRIDE
-CONFIG_OVERRIDE['DOCKER_REQUIRED'] = 'false'
-
-import pytest
-from os.path import dirname
-from datadiff.tools import assert_equals
 import os
 import sys
-
-_file = os.path.abspath(__file__)
-sys.path.insert(0, dirname(dirname(_file)))
-
 import tests
 import shutil
+import pytest
+from cattle import CONFIG_OVERRIDE
+CONFIG_OVERRIDE['DOCKER_REQUIRED'] = 'false'  # NOQA
+
+from os.path import dirname
+from datadiff.tools import assert_equals
+
+_file = os.path.abspath(__file__)  # NOQA
+sys.path.insert(0, dirname(dirname(_file)))  # NOQA
+
 from .response_holder import ResponseHolder
 from cattle import type_manager, plugins
 from cattle.agent import Agent
