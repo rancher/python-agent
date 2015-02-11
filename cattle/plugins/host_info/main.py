@@ -21,7 +21,7 @@ class HostInfo(object):
             try:
                 data[collector.key_name()] = collector.get_data()
             except:
-                log.exeception(
+                log.exception(
                     "Error collecting {0} stats".format(collector.key_name()))
                 data[collector.key_name()] = {}
 
