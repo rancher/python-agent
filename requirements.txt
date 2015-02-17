@@ -1,6 +1,6 @@
 argparse
 mako
-docker-py==0.7.2
+docker-py==1.0.0
 portalocker
 libvirt-python
 websockify
