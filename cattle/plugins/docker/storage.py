@@ -26,8 +26,10 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
     @staticmethod
     def _get_image_by_label(tag):
-        templates = docker_client().images(all=True, name=tag.split(':', 1)[0])
-        templates = filter(lambda x: tag in x['RepoTags'], templates)
+        parsed_tag = DockerPool.parse_repo_tag(tag)
+        templates = docker_client().images(all=True, name=parsed_tag['repo'])
+        templates = filter(lambda x: parsed_tag['uuid'] in x['RepoTags'],
+                           templates)
 
         if len(templates) > 0:
             return templates[0]
@@ -42,23 +44,44 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         return image_obj is not None
 
     def _do_image_activate(self, image, storage_pool, progress):
+        try:
+            auth_config = {
+                'username': image.registryCredential['publicValue'],
+                'email': image.registryCredential['data']['fields']['email'],
+                'password': image.registryCredential['secretValue'],
+                'serveraddress': image.registryCredential['storagePool']
+                ['data']['fields']['serverAddress']
+            }
+
+            log.debug('Auth_Config: [%s]', auth_config)
+        except (AttributeError, KeyError, TypeError):
+            auth_config = None
+            log.debug("No Auth Config, or malformed Auth Config.")
+            pass
         client = docker_client()
         data = image.data.dockerImage
         marshaller = get_type(MARSHALLER)
-
         if progress is None:
-            client.pull(repository=data.qualifiedName, tag=data.tag)
+            result = client.pull(repository=data.qualifiedName,
+                                 tag=data.tag, auth_config=auth_config)
+            if 'error' in result:
+                raise ImageValidationError('Image [%s] failed to pull' %
+                                           data.fullName)
         else:
             for status in client.pull(repository=data.qualifiedName,
                                       tag=data.tag,
+                                      auth_config=auth_config,
                                       stream=True):
+                log.info('Pulling [%s] status : %s', data.fullName, status)
+                status = marshaller.from_string(status)
                 try:
-                    log.info('Pulling [%s] status : %s', data.fullName, status)
-                    status = marshaller.from_string(status)
                     message = status['status']
-                    progress.update(message)
-                except:
-                    pass
+                except KeyError:
+                    message = status['error']
+                    raise ImageValidationError('Image [%s] failed to pull '
+                                               ': %s' % (data.fullName,
+                                                         message))
+                progress.update(message)
 
     def _get_image_storage_pool_map_data(self, obj):
         image = self._get_image_by_label(obj.image.data.dockerImage.fullName)
@@ -112,3 +135,23 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
     def _path_to_volume(self, volume):
         return volume.uri.replace('file://', '')
+
+    @staticmethod
+    def parse_repo_tag(image_uuid):
+        if image_uuid.startswith('docker:'):
+                    image_uuid = image_uuid[7:]
+        n = image_uuid.rfind(":")
+        if n < 0:
+            return {'repo': image_uuid,
+                    'tag': 'latest',
+                    'uuid': image_uuid + ':latest'}
+        tag = image_uuid[n+1:]
+        if tag.find("/") < 0:
+            return {'repo': image_uuid[:n], 'tag': tag, 'uuid': image_uuid}
+        return {'repo': image_uuid,
+                'tag': 'latest',
+                'uuid': image_uuid + ':latest'}
+
+
+class ImageValidationError(Exception):
+    pass

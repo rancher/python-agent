@@ -66,7 +66,7 @@ def _diff_dict(left, right):
             pass
 
 
-def event_test(agent, name, pre_func=None, post_func=None):
+def event_test(agent, name, pre_func=None, post_func=None, no_diff=False):
     req = json_data(name)
     resp_valid = json_data(name + '_resp')
 
@@ -77,10 +77,11 @@ def event_test(agent, name, pre_func=None, post_func=None):
     if post_func is not None:
         post_func(req, resp)
 
-    del resp["id"]
-    del resp["time"]
+    if not no_diff:
+        del resp["id"]
+        del resp["time"]
 
-    _diff_dict(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
-    assert_equals(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
+        _diff_dict(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
+        assert_equals(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
 
     return req, resp

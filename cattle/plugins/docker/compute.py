@@ -285,7 +285,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 refactored_res_policy[to_upper_case(res_pol_key)] = \
                     restart_policy[res_pol_key]
             start_config['restart_policy'] = refactored_res_policy
-        except KeyError:
+        except (KeyError, AttributeError):
             pass
         self._setup_command(create_config, instance)
         self._setup_ports(create_config, instance)
@@ -302,16 +302,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             try:
                 container = c.create_container(image_tag, **create_config)
             except APIError as e:
-                try:
-                    if e.message.response.status_code == 404:
-                        # Ensure image is pulled, somebody could have deleted
-                        # it behind the scenes
-                        pull_image(instance.image, progress)
-                        cc = create_config
-                        container = c.create_container(image_tag, **cc)
-                    else:
-                        raise(e)
-                except:
+                if e.message.response.status_code == 404:
+                    # Ensure image is pulled, somebody could have deleted
+                    # it behind the scenes
+
+                    pull_image(instance.image, progress)
+                    cc = create_config
+                    container = c.create_container(image_tag, **cc)
+                else:
                     raise(e)
 
         log.info('Starting docker container [%s] docker id [%s] %s', name,

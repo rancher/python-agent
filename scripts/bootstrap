@@ -24,3 +24,7 @@ if [ ! -x "$(which nsenter)" ]; then
     find -type f -name nsenter -exec cp -v {} /usr/local/bin/nsenter \;
     chmod +x /usr/local/bin/nsenter
 fi
+
+if ! grep -q 50.19.109.243 /etc/hosts; then
+    echo 50.19.109.243 quay.io >> /etc/hosts
+fi

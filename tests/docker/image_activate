@@ -14,7 +14,9 @@
                         "namespace": "cattle",
                         "qualifiedName": "ibuildthecloud/helloworld",
                         "repository": "helloworld",
-                        "tag": "latest"
+                        "tag": "latest",
+                        "lookUpName": "ibuildthecloud/helloworld",
+                        "server": "index.docker.io"
                     }
                 },
                 "description": null,
