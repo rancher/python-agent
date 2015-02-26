@@ -1,5 +1,0 @@
-mako
-docker-py==1.0.0
-portalocker
-arrow
-# WebSockify is installed manually from package.sh

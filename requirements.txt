@@ -1,7 +1,7 @@
-argparse
 mako
 docker-py==1.0.0
 portalocker
-libvirt-python
-websockify
 subprocess32
+psutil
+websockify
+arrow
