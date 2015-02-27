@@ -902,3 +902,25 @@ def instance_activate_common_validation(resp):
     assert fields['dockerPorts']['12201/udp'] is not None
     fields['dockerPorts']['8080/tcp'] = '1234'
     fields['dockerPorts']['12201/udp'] = '5678'
+
+
+@if_docker
+def test_instance_activate_ipsec_network_agent(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/instance_activate_ipsec_network_agent',
+               post_func=post)
+
+
+@if_docker
+def test_instance_activate_ipsec_lb_agent(agent, responses):
+    _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/instance_activate_ipsec_lb_agent',
+               post_func=post)

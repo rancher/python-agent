@@ -12,7 +12,15 @@ class IpsecTunnelSetup(BaseHandler):
         pass
 
     def before_start(self, instance, host, config, start_config):
-        if instance.get('agentId') is None or \
+        if instance.get('agentId') is None:
+            network_agent = False
+        elif instance.get('systemContainer') is None or \
+                instance.get('systemContainer') == 'NetworkAgent':
+            network_agent = True
+        else:
+            network_agent = False
+
+        if not network_agent or \
                 not has_service(instance, 'ipsecTunnelService'):
             return
 
