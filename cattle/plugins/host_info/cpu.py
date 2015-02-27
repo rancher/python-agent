@@ -40,24 +40,26 @@ class CpuCollector(object):
         data['cpuCoresPercentages'] = []
 
         stats = self.cadvisor.get_stats()
-        stat_latest = stats[-1]
-        stat_prev = stats[-2]
 
-        time_diff = self.cadvisor.timestamp_diff(stat_latest['timestamp'],
-                                                 stat_prev['timestamp'])
+        if len(stats) >= 2:
+            stat_latest = stats[-1]
+            stat_prev = stats[-2]
 
-        latest_usage = stat_latest['cpu']['usage']['per_cpu_usage']
-        prev_usage = stat_prev['cpu']['usage']['per_cpu_usage']
+            time_diff = self.cadvisor.timestamp_diff(stat_latest['timestamp'],
+                                                     stat_prev['timestamp'])
 
-        for idx, core_usage in enumerate(latest_usage):
-            cpu_usage = float(core_usage) - float(prev_usage[idx])
-            percentage = (cpu_usage/time_diff) * 100
-            percentage = round(percentage, 3)
+            latest_usage = stat_latest['cpu']['usage']['per_cpu_usage']
+            prev_usage = stat_prev['cpu']['usage']['per_cpu_usage']
 
-            if percentage > 100:
-                percentage = math.floor(percentage)
+            for idx, core_usage in enumerate(latest_usage):
+                cpu_usage = float(core_usage) - float(prev_usage[idx])
+                percentage = (cpu_usage/time_diff) * 100
+                percentage = round(percentage, 3)
 
-            data['cpuCoresPercentages'].append(percentage)
+                if percentage > 100:
+                    percentage = math.floor(percentage)
+
+                data['cpuCoresPercentages'].append(percentage)
 
         return data
 
