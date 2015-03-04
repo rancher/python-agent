@@ -10,7 +10,7 @@
                 "name" : "localhost",
                 "physicalHostUuid" : "hostuuid",
                 "kind" : "docker",
-                "physicalHostStats" : null
+                "info" : null
             },
             {
                 "type" : "storagePool",

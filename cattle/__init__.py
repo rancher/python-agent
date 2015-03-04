@@ -261,13 +261,17 @@ class Config:
     @staticmethod
     def jwt_public_key_file():
         value = os.path.join(Config.home(), 'etc', 'cattle', 'api.crt')
-        return default_value('CONSOLE_AGENT_PORT', value)
+        return default_value('CONSOLE_HOST_API_PUBLIC_KEY', value)
 
     @staticmethod
     def host_api_config_file():
         default_path = os.path.join(Config.home(), 'etc', 'cattle',
                                     'host-api.conf')
         return default_value('HOST_API_CONFIG_FILE', default_path)
+
+    @staticmethod
+    def host_proxy():
+        return default_value('HOST_API_PROXY', None)
 
     @staticmethod
     def event_read_timeout():
