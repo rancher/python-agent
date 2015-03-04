@@ -96,7 +96,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'name': Config.hostname(),
             'physicalHostUuid': physical_host['uuid'],
             'uuid': DockerConfig.docker_uuid(),
-            'physicalHostStats': stats
+            'info': stats
         }
 
         pool = {
@@ -113,6 +113,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'address': DockerConfig.docker_host_ip(),
             'hostUuid': compute['uuid'],
         }
+
+        proxy = Config.host_proxy()
+        if proxy is not None:
+            compute['apiProxy'] = proxy
 
         utils.ping_add_resources(pong, physical_host, compute, pool, ip)
 
