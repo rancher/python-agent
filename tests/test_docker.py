@@ -136,7 +136,7 @@ def remap_dockerImage(dockerImage, image_name):
 
 
 @if_docker
-def test_image_pull_variants(agent, responses):
+def _test_image_pull_variants(agent, responses):
     image_names = [
         'ibuildthecloud/helloworld:latest',
         'ibuildthecloud/helloworld',
@@ -159,7 +159,7 @@ def _image_exists_inregistry(agent, responses, i):
 
 
 @if_docker
-def test_image_pull_credential(agent, responses):
+def _test_image_pull_credential(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     image_name = 'quay.io/wizardofmath/whisperdocker'
 
@@ -213,7 +213,7 @@ def test_image_pull_credential(agent, responses):
 
 
 @if_docker
-def test_instance_pull_credential(agent, responses):
+def _test_instance_pull_credential(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     image_name = 'quay.io/wizardofmath/whisperdocker'
 
