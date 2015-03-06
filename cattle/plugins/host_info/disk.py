@@ -6,11 +6,12 @@ from cattle import Config
 
 class DiskCollector(object):
     def __init__(self):
-        self.unit = 1024.0
+        self.unit = 1048576
         self.cadvisor = CadvisorAPIClient(Config.cadvisor_ip(),
                                           Config.cadvisor_port())
 
     def _convert_units(self, number):
+        # Return in MB
         return round(float(number)/self.unit, 3)
 
     def _get_mountpoints_cadvisor(self):
