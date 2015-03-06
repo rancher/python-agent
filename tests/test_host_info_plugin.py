@@ -114,9 +114,9 @@ def test_collect_data_diskinf(host_data):
     mount_point = host_data['diskInfo']['mountPoints']
 
     assert mount_point['/dev/sda1']['percentUsed'] == 24.15
-    assert mount_point['/dev/sda1']['total'] == 29130364.0
-    assert mount_point['/dev/sda1']['used'] == 7034672.0
-    assert mount_point['/dev/sda1']['free'] == 22095692.0
+    assert mount_point['/dev/sda1']['total'] == 28447.621
+    assert mount_point['/dev/sda1']['used'] == 6869.797
+    assert mount_point['/dev/sda1']['free'] == 21577.824
 
 
 def test_collect_data_cpuinfo(host_data):
