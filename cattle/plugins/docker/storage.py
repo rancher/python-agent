@@ -45,18 +45,25 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
     def _do_image_activate(self, image, storage_pool, progress):
         try:
-            auth_config = {
-                'username': image.registryCredential['publicValue'],
-                'email': image.registryCredential['data']['fields']['email'],
-                'password': image.registryCredential['secretValue'],
-                'serveraddress': image.registryCredential['storagePool']
-                ['data']['fields']['serverAddress']
-            }
-
-            log.debug('Auth_Config: [%s]', auth_config)
-        except (AttributeError, KeyError, TypeError):
+            try:
+                if image.registryCredential is not None:
+                    auth_config = {
+                        'username': image.registryCredential['publicValue'],
+                        'email': image.registryCredential['data']['fields']
+                        ['email'],
+                        'password': image.registryCredential['secretValue'],
+                        'serveraddress': image.registryCredential['registry']
+                        ['data']['fields']['serverAddress']
+                    }
+                    log.debug('Auth_Config: [%s]', auth_config)
+            except (AttributeError, KeyError, TypeError) as e:
+                raise AuthConfigurationError("Malformed Auth Config. \n\n"
+                                             "error: [%s]\nregistryCredential:"
+                                             " %s"
+                                             % (e, image.registryCredential))
+        except AttributeError as e:
+            log.debug("No registry credential found. \n Error: %s" % e)
             auth_config = None
-            log.debug("No Auth Config, or malformed Auth Config.")
             pass
         client = docker_client()
         data = image.data.dockerImage
@@ -154,4 +161,8 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
 
 class ImageValidationError(Exception):
+    pass
+
+
+class AuthConfigurationError(Exception):
     pass
