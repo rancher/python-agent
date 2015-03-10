@@ -1,7 +1,7 @@
 import logging
 
-from ..util import net_util
 from ..compute import DockerCompute
+from ..util import add_to_env
 from cattle.agent.handler import BaseHandler
 
 log = logging.getLogger('docker')
@@ -24,23 +24,21 @@ class NetworkSetup(BaseHandler):
                 device_number = nic.deviceNumber
         config["mac_address"] = mac_address
 
-    def after_start(self, instance, host, id):
         try:
-            for nic in instance.nics:
+            if instance.nics and instance.nics[0].ipAddresses:
+                # Assume one nic
+                nic = instance.nics[0]
                 ip_address = None
-
                 for ip in nic.ipAddresses:
                     if ip.role == 'primary':
                         ip_address = '{0}/{1}'.format(ip.address,
                                                       ip.subnet.cidrSize)
+                        break
 
-                if ip_address is None:
-                    continue
-
-                inspect = self.compute.inspect(id)
-                pid = inspect['State']['Pid']
-
-                net_util(pid, ip=ip_address,
-                         device='eth{0}'.format(nic.deviceNumber))
+                if ip_address:
+                    add_to_env(config, **{"RANCHER_IP": ip_address})
         except (KeyError, AttributeError):
             pass
+
+    def after_start(self, instance, host, id):
+        pass
