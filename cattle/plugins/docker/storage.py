@@ -113,6 +113,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
     def _is_volume_removed(self, volume, storage_pool):
         if volume.deviceNumber == 0:
             container = get_compute().get_container_by_name(
+                docker_client(),
                 volume.instance.uuid)
             return container is None
         else:
@@ -128,6 +129,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
     def _do_volume_remove(self, volume, storage_pool, progress):
         if volume.deviceNumber == 0:
             container = get_compute().get_container_by_name(
+                docker_client(),
                 volume.instance.uuid)
             if container is None:
                 return

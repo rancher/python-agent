@@ -13,11 +13,9 @@ from cattle.plugins.host_info.main import HostInfo
 log = logging.getLogger('docker')
 
 
-def _is_running(container):
+def _is_running(client, container):
     if container is None:
         return False
-
-    client = docker_client()
     inspect = client.inspect_container(container)
 
     try:
@@ -26,8 +24,8 @@ def _is_running(container):
         return False
 
 
-def _is_stopped(container):
-    return not _is_running(container)
+def _is_stopped(client, container):
+    return not _is_running(client, container)
 
 
 class DockerCompute(KindBasedMixin, BaseComputeDriver):
@@ -37,9 +35,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         self.host_info = HostInfo()
 
     @staticmethod
-    def get_container_by(func):
-        c = docker_client()
-        containers = c.containers(all=True, trunc=False)
+    def get_container_by(client, func):
+        containers = client.containers(all=True, trunc=False)
         containers = filter(func, containers)
 
         if len(containers) > 0:
@@ -128,15 +125,32 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         names = container.get('Names')
         if names is None:
             return False
-        return name in names
+        found = False
+        for n in names:
+            if n.endswith(name):
+                found = True
+                break
+        return found
 
-    def get_container_by_name(self, name):
+    def get_container_by_name(self, client, name):
         name = '/{0}'.format(name)
-        return self.get_container_by(lambda x: self._name_filter(name, x))
+        return self.get_container_by(
+            client, lambda x: self._name_filter(name, x))
 
     def _is_instance_active(self, instance, host):
-        container = self.get_container_by_name(instance.uuid)
-        return _is_running(container)
+        client = self._get_docker_client(host)
+        container = self.get_container_by_name(client, instance.uuid)
+        return _is_running(client, container)
+
+    @staticmethod
+    def _get_docker_client(host):
+        cluster_connection = ""
+        try:
+            cluster_connection = host['clusterConnection']
+        except (KeyError, AttributeError):
+            return docker_client()
+
+        return docker_client(base_url_override=cluster_connection)
 
     @staticmethod
     def _setup_command(create_config, instance):
@@ -188,7 +202,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             create_config['ports'] = ports
 
     def _do_instance_activate(self, instance, host, progress):
-
         def to_upper_case(key):
             return key[0].upper() + key[1:]
 
@@ -198,7 +211,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except KeyError:
             raise Exception('Can not start container with no image')
 
-        c = docker_client()
+        c = self._get_docker_client(host)
 
         create_config = {
             'name': name,
@@ -298,7 +311,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         self._call_listeners(True, instance, host, create_config, start_config)
 
-        container = self.get_container_by_name(name)
+        container = self.get_container_by_name(c, name)
         if container is None:
             log.info('Creating docker container [%s] from config %s', name,
                      create_config)
@@ -336,13 +349,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return False
 
     def _get_instance_host_map_data(self, obj):
+        client = self._get_docker_client(obj.host)
         inspect = None
-        existing = self.get_container_by_name(obj.instance.uuid)
+        existing = self.get_container_by_name(client, obj.instance.uuid)
         docker_ports = {}
         docker_ip = None
 
         if existing is not None:
-            inspect = docker_client().inspect_container(existing['Id'])
+            inspect = client.inspect_container(existing['Id'])
             docker_ip = inspect['NetworkSettings']['IPAddress']
             if existing.get('Ports') is not None:
                 for port in existing['Ports']:
@@ -376,13 +390,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _is_instance_inactive(self, instance, host):
         name = instance.uuid
-        container = self.get_container_by_name(name)
+        c = self._get_docker_client(host)
+        container = self.get_container_by_name(c, name)
 
-        return _is_stopped(container)
+        return _is_stopped(c, container)
 
     def _do_instance_deactivate(self, instance, host, progress):
         name = instance.uuid
-        c = docker_client()
+        c = self._get_docker_client(host)
         timeout = 10
 
         try:
@@ -390,15 +405,15 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except (TypeError, KeyError, AttributeError):
             pass
 
-        container = self.get_container_by_name(name)
+        container = self.get_container_by_name(c, name)
 
         c.stop(container['Id'], timeout=timeout)
 
-        container = self.get_container_by_name(name)
-        if not _is_stopped(container):
+        container = self.get_container_by_name(c, name)
+        if not _is_stopped(c, container):
             c.kill(container['Id'])
 
-        container = self.get_container_by_name(name)
-        if not _is_stopped(container):
+        container = self.get_container_by_name(c, name)
+        if not _is_stopped(c, container):
             raise Exception('Failed to stop container {0}'
                             .format(name))

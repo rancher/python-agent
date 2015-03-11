@@ -62,9 +62,11 @@ class DockerConfig:
         return default_value('AGENT_PIDNS', 'container') == 'host'
 
 
-def docker_client(version=None):
+def docker_client(version=None, base_url_override=None):
     if DockerConfig.use_boot2docker_connection_env_vars():
         kwargs = kwargs_from_env(assert_hostname=False)
+    elif base_url_override is not None:
+        kwargs = {'base_url': base_url_override}
     else:
         kwargs = {'base_url': DockerConfig.url_base()}
 
@@ -72,7 +74,7 @@ def docker_client(version=None):
         version = DockerConfig.api_version()
 
     kwargs['version'] = version
-
+    log.debug('docker_client=%s', kwargs)
     return Client(**kwargs)
 
 

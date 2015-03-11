@@ -10,6 +10,7 @@ from cattle.agent.handler import BaseHandler
 from cattle.progress import Progress
 from cattle.type_manager import get_type, MARSHALLER
 from . import DockerConfig
+from . import docker_client
 
 import requests
 import subprocess
@@ -111,7 +112,8 @@ class DockerDelegate(BaseHandler):
            instanceData.get('token') is None:
             return
 
-        container = self.compute.get_container_by_name(instanceData.uuid)
+        container = self.compute.get_container_by_name(
+            docker_client(), instanceData.uuid)
         if container is None:
             return
 

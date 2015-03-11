@@ -1,5 +1,9 @@
+import logging
+
 from cattle.agent.handler import BaseHandler
 from cattle.progress import Progress
+
+log = logging.getLogger("BaseComputeDriver")
 
 
 class BaseComputeDriver(BaseHandler):
@@ -10,6 +14,14 @@ class BaseComputeDriver(BaseHandler):
                           processData=None, **kw):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
+
+        try:
+            host.clusterConnection = \
+                instanceHostMap.data.fields['clusterConnection']
+            log.info('clusterConnection = %s', host.clusterConnection)
+        except (KeyError, AttributeError):
+            pass
+
         progress = Progress(req)
 
         if instance is not None:
@@ -29,6 +41,14 @@ class BaseComputeDriver(BaseHandler):
                             processData=None, **kw):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
+
+        try:
+            host.clusterConnection = \
+                instanceHostMap.data.fields['clusterConnection']
+            log.info('clusterConnection = %', host.clusterConnection)
+        except (KeyError, AttributeError):
+            pass
+
         progress = Progress(req)
 
         if instance is not None:
