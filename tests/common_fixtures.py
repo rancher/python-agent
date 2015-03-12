@@ -53,12 +53,12 @@ def json_data(name):
         return marshaller.from_string(f.read())
 
 
-def _diff_dict(left, right):
+def diff_dict(left, right):
     for k in left.keys():
         left_value = left.get(k)
         right_value = right.get(k)
         try:
-            _diff_dict(dict(left_value), dict(right_value))
+            diff_dict(dict(left_value), dict(right_value))
             assert_equals(dict(left_value), dict(right_value))
         except AssertionError, e:
             raise e
@@ -81,7 +81,7 @@ def event_test(agent, name, pre_func=None, post_func=None, no_diff=False):
         del resp["id"]
         del resp["time"]
 
-        _diff_dict(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
+        diff_dict(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
         assert_equals(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
 
     return req, resp

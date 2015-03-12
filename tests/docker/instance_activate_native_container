@@ -1,5 +1,8 @@
 {
     "data": {
+        "processData": {
+            "containerNoOpEvent": true
+        },
         "instanceHostMap": {
             "host": {
                 "agentId": 91,
@@ -27,24 +30,11 @@
                 "data": {
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
-                        "command": "sleep 5",
-                        "publishAllPorts": true,
-                        "dataVolumes": ["/proc:/host/proc", "/sys:/host/sys:ro", "/random"],
+                        "publishAllPorts": false,
                         "startOnCreate": true
                     }
                 },
-                "ports" : [
-                    {
-                        "protocol": "tcp",
-                        "privatePort": 8080,
-                        "publicPort": null
-                    },
-                    {
-                        "protocol": "udp",
-                        "privatePort": 12201,
-                        "publicPort": null
-                    }
-                ],
+                "nativeContainer": true,
                 "description": null,
                 "hostname": null,
                 "id": 211,
@@ -79,7 +69,7 @@
                 },
                 "imageId": 14,
                 "kind": "container",
-                "name": "test",
+                "name": "native_docker",
                 "nics": [],
                 "offering": null,
                 "offeringId": null,
@@ -91,7 +81,7 @@
                 "requestedState": null,
                 "state": "starting",
                 "type": "instance",
-                "uuid": "c-c861f990-4472-4fa1-960f-65171b544c28",
+                "uuid": "c861f990-4472-4fa1-960f-65171b544c28",
                 "volumes": [
                     {
                         "accountId": 1,
@@ -118,12 +108,19 @@
                         "virtualSizeBytes": null
                     }
                 ],
-                "dataVolumesFromContainers" : [
+                "nics": [
                     {
-                        "uuid" : "target_volumes_from_by_uuid"
-                    },
-                    {
-                        "externalId": "set in code"
+                        "macAddress": "02:03:04:05:06:07",
+                        "deviceNumber": 0,
+                        "ipAddresses": [
+                            {
+                                "address": "10.10.10.10",
+                                "role": "primary",
+                                "subnet" : {
+                                    "cidrSize": 24
+                                }
+                            }
+                        ]
                     }
                 ],
                 "zoneId": 1
