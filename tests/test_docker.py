@@ -136,15 +136,15 @@ def remap_dockerImage(dockerImage, image_name):
 
 
 @if_docker
-def _test_image_pull_variants(agent, responses):
+def test_image_pull_variants(agent, responses):
     image_names = [
         'ibuildthecloud/helloworld:latest',
         'ibuildthecloud/helloworld',
         'tianon/true',
         'tianon/true:latest',
-        # 'quay.io/rancher/scratch',
-        # 'quay.io/rancher/scratch:latest',
-        # 'quay.io/rancher/scratch:new_stuff',
+        # 'registry.rancher.io/rancher/scratch', Need to make our registry
+        # 'registry.rancher.io/rancher/scratch:latest', Support non-authed
+        # 'registry.rancher.io/rancher/scratch:new_stuff',  pulls.
         'cirros',
         'cirros:latest',
         'cirros:0.3.3'
@@ -161,7 +161,7 @@ def _image_exists_inregistry(agent, responses, i):
 @if_docker
 def _test_image_pull_credential(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
-    image_name = 'quay.io/wizardofmath/whisperdocker'
+    image_name = 'registry.rancher.io/rancher/loop'
 
     try:
         docker_client().remove_image(image_name)
@@ -172,18 +172,17 @@ def _test_image_pull_credential(agent, responses):
         image = req['data']['imageStoragePoolMap']['image']
         remap_dockerImage(image, image_name)
         image['registryCredential'] = {
-            'publicValue': 'wizardofmath+whisper',
-            'secretValue':
-            'W0IUYDBM2VORHM4DTTEHSMKLXGCG3KD3IT081QWWTZA11R9DZS2DDPP7248NUTT6',
+            'publicValue': 'rancher',
+            'secretValue': 'rancher',
             'data': {
                 'fields': {
-                    'email': 'wizardofmath+whisper@gmail.com',
+                    'email': 'test@rancher.com',
                 }
             },
-            'storagePool': {
+            'registry': {
                 'data': {
                     'fields': {
-                        'serverAddress': 'https://quay.io/v1/'
+                        'serverAddress': 'registry.rancher.io'
                     }
                 }
             }
@@ -215,7 +214,7 @@ def _test_image_pull_credential(agent, responses):
 @if_docker
 def _test_instance_pull_credential(agent, responses):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
-    image_name = 'quay.io/wizardofmath/whisperdocker'
+    image_name = 'registry.rancher.io/rancher/loop'
 
     try:
         docker_client().remove_image(image_name)
@@ -227,18 +226,17 @@ def _test_instance_pull_credential(agent, responses):
         image = instance['image']
         remap_dockerImage(image, image_name)
         image['registryCredential'] = {
-            'publicValue': 'wizardofmath+whisper',
-            'secretValue':
-            'W0IUYDBM2VORHM4DTTEHSMKLXGCG3KD3IT081QWWTZA11R9DZS2DDPP7248NUTT6',
+            'publicValue': 'rancher',
+            'secretValue': 'rancher',
             'data': {
                 'fields': {
-                    'email': 'wizardofmath+whisper@gmail.com',
+                    'email': 'test@rancher.com',
                 }
             },
-            'storagePool': {
+            'registry': {
                 'data': {
                     'fields': {
-                        'serverAddress': 'https://quay.io/v1/'
+                        'serverAddress': 'registry.rancher.io'
                     }
                 }
             }
