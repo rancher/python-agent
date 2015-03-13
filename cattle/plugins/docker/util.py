@@ -1,8 +1,5 @@
 import logging
 import os
-import sys
-
-from cattle.utils import get_command_output
 
 log = logging.getLogger('docker')
 
@@ -15,26 +12,6 @@ def pipe_error(ctx, stderr, buffer):
         if len(line) > 0:
             buffer.append(line)
             log.error('[%s] %s', ctx, line[:-1])
-
-
-def net_util(pid, ip=None, device=None):
-    if not sys.platform.startswith('linux'):
-        log.warn('Skipping net_util call because it is not supported on this '
-                 'platform.')
-        return
-
-    args = [_NET_UTIL, '-p', str(pid)]
-
-    if ip is not None:
-        args.append('-i')
-        args.append(ip)
-
-    if device is not None:
-        args.append('-d')
-        args.append(device)
-
-    output = get_command_output(sudo(args))
-    log.info(output)
 
 
 def sudo(args):
