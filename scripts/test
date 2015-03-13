@@ -19,7 +19,8 @@ trap "rm -rf $TMP" exit
 rsync -a ./ $TMP
 pushd $TMP
 
-sudo env LIBVIRT_TEST=false DOCKER_TEST=true tox
+sudo env LIBVIRT_TEST=false DOCKER_TEST=true tox -e flake8
+sudo env LIBVIRT_TEST=false DOCKER_TEST=true tox -e py27
 
 popd
 rsync -a --delete $TMP/.tox/ .tox
