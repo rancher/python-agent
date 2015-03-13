@@ -20,7 +20,9 @@ class BaseComputeDriver(BaseHandler):
             check=lambda: self._is_instance_active(instance, host),
             result=lambda: self._get_response_data(req, instanceHostMap),
             lock_obj=instance,
-            action=lambda: self._do_instance_activate(instance, host, progress)
+            action=lambda: self._do_instance_activate(instance, host,
+                                                      progress),
+            post_check=False
         )
 
     def instance_deactivate(self, req=None, instanceHostMap=None,

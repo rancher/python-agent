@@ -60,7 +60,7 @@ class BaseHandler(object):
         return resp
 
     def _do(self, req=None, check=None, result=None, lock_obj=None,
-            action=None):
+            action=None, post_check=True):
         if check():
             return self._reply(req, result())
 
@@ -72,7 +72,7 @@ class BaseHandler(object):
 
             data = result()
 
-            if not check():
+            if post_check and not check():
                 raise Exception("Operation failed")
 
             return self._reply(req, data)
