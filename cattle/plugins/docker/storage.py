@@ -44,8 +44,9 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         return image_obj is not None
 
     def _do_image_activate(self, image, storage_pool, progress):
+        auth_config = None
         try:
-            try:
+            if 'registryCredential' in image:
                 if image.registryCredential is not None:
                     auth_config = {
                         'username': image.registryCredential['publicValue'],
@@ -56,15 +57,13 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                         ['data']['fields']['serverAddress']
                     }
                     log.debug('Auth_Config: [%s]', auth_config)
-            except (AttributeError, KeyError, TypeError) as e:
-                raise AuthConfigurationError("Malformed Auth Config. \n\n"
-                                             "error: [%s]\nregistryCredential:"
-                                             " %s"
-                                             % (e, image.registryCredential))
-        except AttributeError as e:
-            log.debug("No registry credential found. \n Error: %s" % e)
-            auth_config = None
-            pass
+            else:
+                log.debug('No Registry credential found. Pulling non-authed')
+        except (AttributeError, KeyError, TypeError) as e:
+            raise AuthConfigurationError("Malformed Auth Config. \n\n"
+                                         "error: [%s]\nregistryCredential:"
+                                         " %s"
+                                         % (e, image.registryCredential))
         client = docker_client()
         data = image.data.dockerImage
         marshaller = get_type(MARSHALLER)

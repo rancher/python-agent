@@ -87,6 +87,24 @@ def test_instance_activate_need_pull_image(agent, responses):
     test_instance_only_activate(agent, responses)
 
 
+@if_docker
+def test_image_activate_no_reg_cred_pull_image(agent, responses):
+    try:
+        docker_client().remove_image('ibuildthecloud/helloworld:latest')
+    except APIError:
+        pass
+
+    def pre(req):
+        image = req['data']['imageStoragePoolMap']['image']
+        image['registryCredential'] = None
+
+    def post(req, resp):
+        image_data = resp['data']['imageStoragePoolMap']['+data']
+        del image_data['dockerImage']['VirtualSize']
+
+    event_test(agent, 'docker/image_activate', pre_func=pre, post_func=post)
+
+
 def _pull_image_by_name(agent, responses, image_name):
     _delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     try:
@@ -152,10 +170,6 @@ def test_image_pull_variants(agent, responses):
 
     for i in image_names:
         _pull_image_by_name(agent, responses, i)
-
-
-def _image_exists_inregistry(agent, responses, i):
-    pass
 
 
 @if_docker
