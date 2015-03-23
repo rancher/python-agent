@@ -13,8 +13,11 @@ def _load(module, plugin_path):
         return
 
     log.info("Loading Plugin: %s from %s", module, plugin_path)
-    m = imp.find_module(module, [plugin_path])
-    return imp.load_module(std_name, m[0], m[1], m[2])
+    try:
+        m = imp.find_module(module, [plugin_path])
+        return imp.load_module(std_name, m[0], m[1], m[2])
+    except Exception:
+        log.exception('Exception loading module')
 
 
 def _init(full_path):
