@@ -35,6 +35,13 @@ Steps to get the tests running and passing:
   * ```CATTLE_DOCKER_USE_BOOT2DOCKER=true``` tells the docker client to use the connection settings derived from ```boot2docker shellinit```. You need this because boot2docker has TLS enabled by default.
   * ```CATTLE_HOME``` is needed for some temporary files that are written (locks, specifically)
 
+## Contact
+For bugs, questions, comments, corrections, suggestions, etc., open an issue in
+ [rancherio/rancher](//github.com/rancherio/rancher/issues) with a title starting with `[Python-Agent] `.
+
+Or just [click here](//github.com/rancherio/rancher/issues/new?title=%5BPython-Agent%5D%20) to create a new issue.
+
+
 # License
 Copyright (c) 2014-2015 [Rancher Labs, Inc.](http://rancher.com)
 
