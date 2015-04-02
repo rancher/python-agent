@@ -5,7 +5,7 @@ class MemoryCollector(object):
     def __init__(self):
         self.key_map = {'memtotal': 'memTotal',
                         'memfree': 'memFree',
-                        'memvailable': 'memAvailable',
+                        'memavailable': 'memAvailable',
                         'buffers': 'buffers',
                         'cached': 'cached',
                         'swapcached': 'swapCached',
