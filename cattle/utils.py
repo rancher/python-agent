@@ -88,9 +88,8 @@ class CadvisorAPIClient(object):
 
     def get_latest_stat(self):
         containers = self.get_stats()
-        if containers:
-            if len(containers) > 1:
-                return containers[-1]
+        if len(containers) > 1:
+            return containers[-1]
         return {}
 
     def get_stats(self):
