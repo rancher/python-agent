@@ -5,18 +5,42 @@ from cattle.plugins.docker import docker_client
 # unavailable, importing it first
 import cattle.plugins.docker  # NOQA
 
-from cattle.plugins.docker.network.setup import NetworkSetup
+from cattle.plugins.docker.network import setup_mac_and_ip
+
 from cattle.plugins.host_info.main import HostInfo
 from .common_fixtures import *  # NOQA
 import pytest
 import time
 from cattle import CONFIG_OVERRIDE, Config
 
+from os import path
+import os
+
 if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") == "false"',
                                reason='DOCKER_TEST is not set')
 
 
 CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'
+
+
+def _state_file_exists(docker_id):
+    try:
+        cont_dir = Config.container_state_dir()
+        file_path = path.join(cont_dir, docker_id)
+        return os.path.exists(file_path)
+    except:
+        return False
+
+
+def _remove_state_file(container):
+    if container:
+        try:
+            cont_dir = Config.container_state_dir()
+            file_path = path.join(cont_dir, container['Id'])
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except:
+            pass
 
 
 def _delete_container(name):
@@ -29,6 +53,7 @@ def _delete_container(name):
                 except:
                     pass
                 client.remove_container(c)
+                _remove_state_file(c)
 
 
 def _get_container(name):
@@ -388,6 +413,130 @@ def test_instance_activate_mac_address(agent, responses):
     event_test(agent, 'docker/instance_activate', post_func=post)
 
 
+@if_docker
+def test_instance_activate_native_container_happy_path(agent, responses):
+    # Recieving an activate event for a running, pre-existing container should
+    # result in the container continuin to run and the appropriate data sent
+    # back in the response (like, ports, ip, inspect, etc)
+    _delete_container('/native_container')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='native_container')
+    client.start(c)
+    inspect = docker_client().inspect_container(c['Id'])
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['externalId'] = c['Id']
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        diff_dict(inspect, docker_inspect)
+        assert docker_inspect['State']['Running']
+        container_field_test_boiler_plate(resp)
+        assert _state_file_exists(docker_inspect['Id'])
+
+    event_test(agent, 'docker/instance_activate_native_container',
+               pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_native_container_not_running(agent, responses):
+    # Receiving an activate event for a pre-existing stopped container
+    # that Rancher never recorded as having started should result in the
+    # container staying stopped and appropriate data sent in the response.
+    _delete_container('/native_container')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='native_container')
+    inspect = docker_client().inspect_container(c['Id'])
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['externalId'] = c['Id']
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        diff_dict(inspect, docker_inspect)
+        assert not docker_inspect['State']['Running']
+        container_field_test_boiler_plate(resp)
+        assert _state_file_exists(docker_inspect['Id'])
+
+    event_test(agent, 'docker/instance_activate_native_container_not_running',
+               pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_native_container_removed(agent, responses):
+    # Receiving an activate event for a pre-existing, but removed container
+    # should result in the container continuing to not exist and a valid but
+    # minimally populated response.
+    _delete_container('/native_container')
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='native_container')
+    _delete_container('/native_container')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['externalId'] = c['Id']
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        assert not instance_data['dockerInspect']
+        assert not instance_data['dockerContainer']
+        fields = instance_data['+fields']
+        assert not fields['dockerIp']
+        assert not fields['dockerPorts']
+        assert fields['dockerHostIp']
+        c = _get_container('/native_container')
+        assert not c
+
+    event_test(agent, 'docker/instance_activate_native_container_not_running',
+               pre_func=pre, post_func=post, no_diff=True)
+
+
+@if_docker
+def test_instance_deactivate_native_container(agent, responses):
+    test_instance_activate_native_container_happy_path(agent, responses)
+
+    c = _get_container('/native_container')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['externalId'] = c['Id']
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert not docker_inspect['State']['Running']
+        container_field_test_boiler_plate(resp)
+        assert _state_file_exists(docker_inspect['Id'])
+
+    event_test(agent, 'docker/instance_deactivate_native_container',
+               pre_func=pre, post_func=post)
+
+    def pre_second_start(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['externalId'] = c['Id']
+        instance['firstRunning'] = 1389656010338
+        del req['data']['processData']['containerNoOpEvent']
+
+    def post_second_start(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['State']['Running']
+        container_field_test_boiler_plate(resp)
+        assert _state_file_exists(docker_inspect['Id'])
+
+    event_test(agent, 'docker/instance_activate_native_container',
+               pre_func=pre_second_start, post_func=post_second_start)
+
+
 def test_multiple_nics_pick_mac():
     instance = {
         'nics': [
@@ -403,7 +552,7 @@ def test_multiple_nics_pick_mac():
     }
     instance = JsonObject(instance)
     config = {'test': 'Nothing'}
-    NetworkSetup().before_start(instance, None, config, None)
+    setup_mac_and_ip(instance, config)
     assert config['mac_address'] == '02:03:04:05:06:07'
 
 
@@ -420,6 +569,7 @@ def test_instance_activate_ports(agent, responses):
         del docker_container['Id']
         del docker_container['Status']
         del fields['dockerIp']
+        del resp['data']['instanceHostMap']['instance']['externalId']
 
         assert len(docker_container['Ports']) == 1
         assert docker_container['Ports'][0]['PrivatePort'] == 8080
@@ -971,14 +1121,23 @@ def _sort_ports(docker_container):
 @if_docker
 def test_instance_activate_volumes(agent, responses):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
-
-    _delete_container('/target_volumes_from')
+    _delete_container('/target_volumes_from_by_uuid')
+    _delete_container('/target_volumes_from_by_id')
 
     client = docker_client()
     c = client.create_container('ibuildthecloud/helloworld',
-                                volumes=['/volumes_from_path'],
-                                name='target_volumes_from')
+                                volumes=['/volumes_from_path_by_uuid'],
+                                name='target_volumes_from_by_uuid')
     client.start(c)
+
+    c2 = client.create_container('ibuildthecloud/helloworld',
+                                 volumes=['/volumes_from_path_by_id'],
+                                 name='target_volumes_from_by_id')
+    client.start(c2)
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['dataVolumesFromContainers'][1]['externalId'] = c2['Id']
 
     def post(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
@@ -987,15 +1146,17 @@ def test_instance_activate_volumes(agent, responses):
         assert inspect['Volumes']['/host/proc'] == '/proc'
         assert inspect['Volumes']['/host/sys'] == '/sys'
         assert inspect['Volumes']['/random'] is not None
-        assert inspect['Volumes']['/volumes_from_path'] is not None
+        assert inspect['Volumes']['/volumes_from_path_by_uuid'] is not None
+        assert inspect['Volumes']['/volumes_from_path_by_id'] is not None
 
-        assert len(inspect['Volumes']) == 4
+        assert len(inspect['Volumes']) == 5
 
         assert inspect['VolumesRW'] == {
             '/host/proc': True,
             '/host/sys': False,
             '/random': True,
-            '/volumes_from_path': True,
+            '/volumes_from_path_by_uuid': True,
+            '/volumes_from_path_by_id': True,
 
         }
 
@@ -1004,7 +1165,8 @@ def test_instance_activate_volumes(agent, responses):
 
         instance_activate_common_validation(resp)
 
-    event_test(agent, 'docker/instance_activate_volumes', post_func=post)
+    event_test(agent, 'docker/instance_activate_volumes', pre_func=pre,
+               post_func=post)
 
 
 @if_docker
@@ -1071,9 +1233,12 @@ def ping_post_process(req, resp):
         instances = filter(lambda x: x['type'] == 'instance' and
                            x['uuid'] == uuid, resources)
         assert len(instances) == 1
+        instance = instances[0]
+        assert instance['dockerId'] is not None
+        del instance['dockerId']
 
         resources = filter(lambda x: x.get('kind') == 'docker', resources)
-        resources.append(instances[0])
+        resources.append(instance)
 
         resp['data']['resources'] = resources
 
@@ -1130,20 +1295,24 @@ def test_volume_purge(agent, responses):
 
 def container_field_test_boiler_plate(resp):
     instance_data = resp['data']['instanceHostMap']['instance']['+data']
-    del instance_data['dockerInspect']
     docker_container = instance_data['dockerContainer']
+    assert resp['data']['instanceHostMap']['instance']['externalId'] == \
+        instance_data['dockerInspect']['Id']
+    del resp['data']['instanceHostMap']['instance']['externalId']
+    del instance_data['dockerInspect']
     fields = instance_data['+fields']
     del docker_container['Created']
     del docker_container['Id']
     del docker_container['Status']
     del fields['dockerIp']
-    docker_container = _sort_ports(docker_container)
+    _sort_ports(docker_container)
 
 
 def instance_activate_common_validation(resp):
-    container_field_test_boiler_plate(resp)
     docker_container = resp['data']['instanceHostMap']['instance']
     docker_container = docker_container['+data']['dockerContainer']
+    docker_id = docker_container['Id']
+    container_field_test_boiler_plate(resp)
     fields = resp['data']['instanceHostMap']['instance']['+data']['+fields']
     del docker_container['Ports'][0]['PublicPort']
     del docker_container['Ports'][1]['PublicPort']
@@ -1151,6 +1320,7 @@ def instance_activate_common_validation(resp):
     assert fields['dockerPorts']['12201/udp'] is not None
     fields['dockerPorts']['8080/tcp'] = '1234'
     fields['dockerPorts']['12201/udp'] = '5678'
+    assert _state_file_exists(docker_id)
 
 
 @if_docker
