@@ -278,6 +278,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         instance = instanceHostMap.instance
         host = instanceHostMap.host
+
+        try:
+            host.clusterConnection = \
+                instanceHostMap.data.fields['clusterConnection']
+            log.trace('clusterConnection = %', host.clusterConnection)
+        except (KeyError, AttributeError):
+            pass
+
         progress = Progress(req)
         client = self._get_docker_client(host)
         if instance is not None:
