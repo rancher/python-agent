@@ -12,15 +12,7 @@ class BaseComputeDriver(BaseHandler):
 
     def instance_activate(self, req=None, instanceHostMap=None,
                           processData=None, **kw):
-        instance = instanceHostMap.instance
-        host = instanceHostMap.host
-
-        try:
-            host.clusterConnection = \
-                instanceHostMap.data.fields['clusterConnection']
-            log.info('clusterConnection = %s', host.clusterConnection)
-        except (KeyError, AttributeError):
-            pass
+        instance, host = self.get_instance_host_from_map(instanceHostMap)
 
         progress = Progress(req)
 
@@ -39,15 +31,7 @@ class BaseComputeDriver(BaseHandler):
 
     def instance_deactivate(self, req=None, instanceHostMap=None,
                             processData=None, **kw):
-        instance = instanceHostMap.instance
-        host = instanceHostMap.host
-
-        try:
-            host.clusterConnection = \
-                instanceHostMap.data.fields['clusterConnection']
-            log.info('clusterConnection = %', host.clusterConnection)
-        except (KeyError, AttributeError):
-            pass
+        instance, host = self.get_instance_host_from_map(instanceHostMap)
 
         progress = Progress(req)
 
@@ -62,6 +46,31 @@ class BaseComputeDriver(BaseHandler):
             action=lambda: self._do_instance_deactivate(instance, host,
                                                         progress)
         )
+
+    def get_instance_host_from_map(self, instanceHostMap):
+        instance = instanceHostMap.instance
+        host = instanceHostMap.host
+
+        try:
+            host.clusterConnection = \
+                instanceHostMap.data.fields['clusterConnection']
+            log.debug('clusterConnection = %s', host.clusterConnection)
+            if host.clusterConnection.startswith('https'):
+                try:
+                    host.caCrt = \
+                        instanceHostMap.data.fields['caCrt']
+                    host.clientCrt = \
+                        instanceHostMap.data.fields['clientCrt']
+                    host.clientKey = \
+                        instanceHostMap.data.fields['clientKey']
+                except (KeyError, AttributeError) as e:
+                    raise Exception(
+                        'Missing certs/key for clusterConnection',
+                        host.clusterConnection, e)
+        except (KeyError, AttributeError):
+            pass
+
+        return instance, host
 
     def _is_instance_active(self, instance, host):
         raise Exception("Not implemented")

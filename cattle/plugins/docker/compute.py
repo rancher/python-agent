@@ -1,6 +1,5 @@
 import logging
-from os import path
-import os
+from os import path, remove, makedirs
 
 from . import docker_client, pull_image
 from . import DockerConfig
@@ -10,6 +9,7 @@ from cattle.agent.handler import KindBasedMixin
 from cattle.type_manager import get_type, MARSHALLER
 from cattle import utils
 from docker.errors import APIError
+from docker import tls
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.docker.util import add_label
 from cattle.progress import Progress
@@ -192,13 +192,61 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     @staticmethod
     def _get_docker_client(host):
-        cluster_connection = ""
+        cluster_connection = None
+        tls_config = None
         try:
             cluster_connection = host['clusterConnection']
-        except (KeyError, AttributeError):
-            return docker_client()
+            if cluster_connection.startswith('https'):
+                try:
+                    account_id = host['accountId']
+                    ca_crt = host['caCrt']
+                    client_crt = host['clientCrt']
+                    client_key = host['clientKey']
 
-        return docker_client(base_url_override=cluster_connection)
+                    client_certs_dir = Config.client_certs_dir()
+                    acct_client_cert_dir = \
+                        path.join(client_certs_dir, str(account_id))
+                    if not path.exists(acct_client_cert_dir):
+                        log.debug('Creating client cert directory: %s',
+                                  acct_client_cert_dir)
+                        makedirs(acct_client_cert_dir)
+                    if ca_crt:
+                        log.debug('Writing cert auth')
+                        with open(path.join(acct_client_cert_dir, 'ca.crt'),
+                                  'w') as f:
+                            f.write(ca_crt)
+                    if client_crt:
+                        log.debug('Writing client cert')
+                        with open(path.join(acct_client_cert_dir,
+                                            'client.crt'),
+                                  'w') as f:
+                                f.write(client_crt)
+                    if client_key:
+                        log.debug('Writing client key')
+                        with open(path.join(acct_client_cert_dir,
+                                            'client.key'),
+                                  'w') as f:
+                            f.write(client_key)
+                    if ca_crt and client_crt and client_key:
+                        tls_config = tls.TLSConfig(
+                            client_cert=(
+                                path.join(acct_client_cert_dir, 'client.crt'),
+                                path.join(acct_client_cert_dir, 'client.key')
+                            ),
+                            verify=path.join(acct_client_cert_dir, 'ca.crt'),
+                            assert_hostname=False
+                        )
+                except (KeyError, AttributeError) as e:
+                    raise Exception(
+                        'Unable to process cert/keys for cluster',
+                        cluster_connection,
+                        e)
+        except (KeyError, AttributeError):
+            pass
+
+        return docker_client(
+            base_url_override=cluster_connection,
+            tls_config=tls_config)
 
     @staticmethod
     def _setup_command(create_config, instance):
@@ -262,11 +310,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         cont_dir = Config.container_state_dir()
 
         file_path = path.join(cont_dir, docker_id)
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if path.exists(file_path):
+            remove(file_path)
 
-        if not os.path.exists(cont_dir):
-            os.makedirs(cont_dir)
+        if not path.exists(cont_dir):
+            makedirs(cont_dir)
 
         with open(file_path, 'w') as outfile:
             marshaller = get_type(MARSHALLER)
@@ -275,16 +323,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def instance_activate(self, req=None, instanceHostMap=None,
                           processData=None, **kw):
-
-        instance = instanceHostMap.instance
-        host = instanceHostMap.host
-
-        try:
-            host.clusterConnection = \
-                instanceHostMap.data.fields['clusterConnection']
-            log.trace('clusterConnection = %', host.clusterConnection)
-        except (KeyError, AttributeError):
-            pass
+        instance, host = \
+            BaseComputeDriver.get_instance_host_from_map(self, instanceHostMap)
 
         progress = Progress(req)
         client = self._get_docker_client(host)

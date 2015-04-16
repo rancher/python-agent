@@ -220,6 +220,12 @@ class Config:
         return default_value('LOCK_DIR', os.path.join(Config.home(), 'locks'))
 
     @staticmethod
+    def client_certs_dir():
+        client_dir = default_value('CLIENT_CERTS_DIR',
+                                   os.path.join(Config.home(), 'client_certs'))
+        return client_dir
+
+    @staticmethod
     def stamp():
         return default_value('STAMP_FILE', os.path.join(Config.home(),
                                                         '.pyagent-stamp'))
