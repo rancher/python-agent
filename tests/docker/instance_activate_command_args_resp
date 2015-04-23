@@ -12,6 +12,7 @@
                     },
                     "dockerContainer": {
                         "Command": "sleep 1 2 3",
+                        "Labels": {},
                         "Image": "ibuildthecloud/helloworld:latest",
                         "Names": [
                             "/ca-c861f990-4472-4fa1-960f-65171b544c28"

@@ -9,6 +9,7 @@
                     },
                     "dockerContainer": {
                         "Command": "/sleep.sh",
+                        "Labels": {},
                         "Image": "ibuildthecloud/helloworld:latest",
                         "Names": [
                             "/native_container"
