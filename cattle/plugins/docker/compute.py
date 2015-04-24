@@ -249,13 +249,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             tls_config=tls_config)
 
     @staticmethod
-    def _setup_command(create_config, instance):
-        command = ""
-        try:
-            command = instance.data.fields.command
-        except (KeyError, AttributeError):
-            return None
-
+    def _setup_legacy_command(create_config, instance, command):
+        # This can be removed shortly once cattle removes
+        # commandArgs
         if command is None or len(command.strip()) == 0:
             return None
 
@@ -271,6 +267,21 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         if command is not None:
             create_config['command'] = command
+
+    @staticmethod
+    def _setup_command(create_config, instance):
+        command = ""
+        try:
+            command = instance.data.fields.command
+        except (KeyError, AttributeError):
+            return None
+
+        if isinstance(command, basestring):
+            DockerCompute._setup_legacy_command(create_config, instance,
+                                                command)
+        else:
+            if command is not None:
+                create_config['command'] = command
 
     @staticmethod
     def _setup_links(start_config, instance):

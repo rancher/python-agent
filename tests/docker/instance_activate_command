@@ -28,7 +28,7 @@
                     "fields": {
                         "imageUuid": "docker:ibuildthecloud/helloworld",
                         "publishAllPorts": true,
-                        "command": "sleep 5",
+                        "command": ["sleep", "5"],
                         "startOnCreate": true
                     }
                 },
