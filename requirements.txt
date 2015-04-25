@@ -3,5 +3,4 @@ git+https://github.com/hibooboo2/docker-py.git@pull_auth
 portalocker
 subprocess32
 psutil
-websockify
 arrow

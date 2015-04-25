@@ -4,12 +4,11 @@ set -e
 cd $(dirname $0)/..
 
 apt-get update
-apt-get install -y libvirt-bin libvirt-dev qemu-kvm python-numpy arptables genisoimage python-pip pkg-config python-dev rsync
+apt-get install -y arptables python-pip python-dev rsync
 
 pip install --upgrade pip tox virtualenv
 
 # Switch to pip installed pip...
-/usr/local/bin/pip install --no-deps websockify
 /usr/local/bin/pip install psutil
 /usr/local/bin/pip install subprocess32
 
