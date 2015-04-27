@@ -120,10 +120,11 @@
                 ],
                 "dataVolumesFromContainers" : [
                     {
-                        "uuid" : "target_volumes_from_by_uuid"
+                        "uuid": "target_volumes_from_by_uuid"
                     },
                     {
-                        "externalId": "set in code"
+                        "uuid": "wont be found",
+                        "externalId": "set in test code"
                     }
                 ],
                 "zoneId": 1
