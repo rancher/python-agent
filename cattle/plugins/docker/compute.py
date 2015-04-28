@@ -1,5 +1,5 @@
 import logging
-from os import path, remove, makedirs
+from os import path, remove, makedirs, rename
 
 from . import docker_client, pull_image
 from . import DockerConfig
@@ -320,6 +320,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         cont_dir = Config.container_state_dir()
 
+        tmp_file_path = path.join(cont_dir, 'tmp-%s' % docker_id)
+        if path.exists(tmp_file_path):
+            remove(tmp_file_path)
+
         file_path = path.join(cont_dir, docker_id)
         if path.exists(file_path):
             remove(file_path)
@@ -327,10 +331,12 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if not path.exists(cont_dir):
             makedirs(cont_dir)
 
-        with open(file_path, 'w') as outfile:
+        with open(tmp_file_path, 'w') as outfile:
             marshaller = get_type(MARSHALLER)
             data = marshaller.to_string(instance)
             outfile.write(data)
+
+        rename(tmp_file_path, file_path)
 
     def instance_activate(self, req=None, instanceHostMap=None,
                           processData=None, **kw):
@@ -341,11 +347,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         client = self._get_docker_client(host)
         if instance is not None:
             instance.processData = processData
-
-        if self._is_instance_active(instance, host):
-            self._record_rancher_container_state(client, instance)
-            return self._reply(req,
-                               self._get_response_data(req, instanceHostMap))
 
         with lock(instance):
             if self._is_instance_active(instance, host):
