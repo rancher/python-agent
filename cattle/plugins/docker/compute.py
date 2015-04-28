@@ -61,7 +61,7 @@ def _is_stopped(client, container):
 
 
 def _to_upper_case(key):
-            return key[0].upper() + key[1:]
+    return key[0].upper() + key[1:]
 
 
 class DockerCompute(KindBasedMixin, BaseComputeDriver):
@@ -174,16 +174,15 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         return id == container_id
 
     def get_container(self, client, instance):
-        try:
-            if instance.externalId is not None:
-                return self.get_container_by(client, lambda x: self._id_filter(
-                    instance.externalId, x))
-        except AttributeError:
-            pass
-
         name = '/{0}'.format(instance.uuid)
-        return self.get_container_by(client,
-                                     lambda x: self._name_filter(name, x))
+        container = self.get_container_by(client,
+                                          lambda x: self._name_filter(name, x))
+        if container:
+            return container
+
+        if hasattr(instance, 'externalId') and instance.externalId:
+            return self.get_container_by(client, lambda x: self._id_filter(
+                instance.externalId, x))
 
     def _is_instance_active(self, instance, host):
         client = self._get_docker_client(host)
@@ -220,7 +219,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                         with open(path.join(acct_client_cert_dir,
                                             'client.crt'),
                                   'w') as f:
-                                f.write(client_crt)
+                            f.write(client_crt)
                     if client_key:
                         log.debug('Writing client key')
                         with open(path.join(acct_client_cert_dir,
