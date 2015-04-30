@@ -109,7 +109,8 @@ def restore_snapshot(vol_name, old_vol_name, vol_size,
         f.write(instance_name)
     finally:
         f.close()
-    v.mount_volume(volume_uuid, mount_dir, False)
+    v.mount_volume(volume_uuid, mount_dir, False,
+                   Config.volmgr_mount_namespace_fd())
     return mount_dir
 
 
