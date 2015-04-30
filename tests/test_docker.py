@@ -1,3 +1,4 @@
+import json
 from docker.errors import APIError
 from cattle.plugins.docker import docker_client
 
@@ -9,6 +10,7 @@ from cattle.plugins.docker.network import setup_mac_and_ip
 
 from cattle.plugins.host_info.main import HostInfo
 from .common_fixtures import *  # NOQA
+import mock
 import pytest
 import time
 from cattle import CONFIG_OVERRIDE, Config
@@ -1458,12 +1460,10 @@ def test_volmgr_instance_activate_volumes(agent, responses, mocker):
     _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
 
     volmgr_mount = CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"]
-    volume1_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
-    volume2_uuid = "f3e79a9f-e35d-4b1b-b778-de6e860af5d8"
+    volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
 
     create_volume = mocker.patch.object(service.VolmgrService, "create_volume",
-                                        side_effect=[volume1_uuid,
-                                                     volume2_uuid])
+                                        return_value=volume_uuid)
     add_volume = mocker.patch.object(service.VolmgrService,
                                      "add_volume_to_blockstore")
     mount_volume = mocker.patch.object(service.VolmgrService, "mount_volume")
@@ -1476,31 +1476,18 @@ def test_volmgr_instance_activate_volumes(agent, responses, mocker):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         inspect = instance_data['dockerInspect']
 
-        assert len(inspect['Volumes']) == 2
-        path1 = inspect['Volumes']['/opt']
-        path2 = inspect['Volumes']['/random']
+        assert len(inspect['Volumes']) == 1
+        mpath = inspect['Volumes']['/opt']
 
-        assert path1 is not None
-        assert path2 is not None
+        assert mpath is not None
 
         # Cannot use startswith because boot2docker link /tmp to /mnt/sda1/tmp
         # which result in docker volume mount shows in different path.
-        # The path and volume ID match seems random, we didn't know which
-        # one would be called and assigned first
-        if path.join(volmgr_mount, "default/test_v1",
-                     volume1_uuid) in path1:
-            assert path.join(volmgr_mount, "default/test_v2",
-                             volume2_uuid) in path2
-        elif path.join(volmgr_mount, "default/test_v1",
-                       volume2_uuid) in path1:
-            assert path.join(volmgr_mount, "default/test_v2",
-                             volume1_uuid) in path2
-        else:
-            assert 0
+        assert path.join(volmgr_mount, "default/test",
+                         volume_uuid) in mpath
 
         assert inspect['VolumesRW'] == {
             '/opt': True,
-            '/random': False,
             }
 
         instance_activate_common_validation(resp)
@@ -1629,3 +1616,59 @@ def test_volmgr_restore_snapshot(agent, responses, mocker):
         instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/volmgr_instance_restore_volume', post_func=post)
+
+
+@if_docker
+def test_volmgr_delete_volume(agent, responses, mocker):
+    # need to setup path for previous volume
+    test_volmgr_instance_activate_volumes(agent, responses, mocker)
+
+    volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    volume_name = "test"
+
+    data = '''{
+        "Volumes": {
+            "0bcc6a7f-0c46-4d06-af51-224a47deeea8": {
+                "DevID": 2,
+                "Size": 1073741824,
+                "Snapshots": {
+                    "ebf6ab98-8714-464e-8966-32f790b9d4ff": {
+                        "DevID": 3
+                    },
+                    "c912c1f5-85d5-4488-9fbb-d58e876c44cc": {
+                        "DevID": 4
+                    },
+                    "b2896c11-13e4-41d8-bd82-161ec113c381": {
+                        "DevID": 5
+                    }
+                }
+            }
+        }
+    }'''
+    volume_response = json.loads(data)["Volumes"]
+    mounted = mocker.patch.object(service, "mounted", return_value=True)
+    list_volumes = mocker.patch.object(service.VolmgrService, "list_volumes",
+                                       return_value=volume_response)
+    delete_snapshot = mocker.patch.object(service.VolmgrService,
+                                          "delete_snapshot")
+    umount_volume = mocker.patch.object(service.VolmgrService,
+                                        "umount_volume")
+    delete_volume = mocker.patch.object(service.VolmgrService,
+                                        "delete_volume")
+
+    def post(req, resp):
+        mounted.assert_called()
+        list_volumes.assert_called_once_with(volume_uuid)
+        dc1 = mock.call("ebf6ab98-8714-464e-8966-32f790b9d4ff", volume_uuid)
+        dc2 = mock.call("c912c1f5-85d5-4488-9fbb-d58e876c44cc", volume_uuid)
+        dc3 = mock.call("b2896c11-13e4-41d8-bd82-161ec113c381", volume_uuid)
+        # json parse may reorder the entries
+        delete_snapshot.assert_has_calls([dc1, dc2, dc3], any_order=True)
+        umount_volume.assert_called_with(volume_uuid,
+                                         CONFIG_OVERRIDE[
+                                             "VOLMGR_MOUNT_NAMESPACE_FD"])
+        delete_volume.assert_called_with(volume_uuid)
+        assert not os.path.exists(path.join(
+            CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"], volume_name))
+
+    event_test(agent, 'docker/volmgr_volume_purge', post_func=post)

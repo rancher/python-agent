@@ -101,12 +101,12 @@ class VolmgrService(object):
         if uuid is None:
             data = _exec_output(self.base_cmdline +
                                 ["volume", "list"])
-            volumes = json.loads(data)
+            volumes = json.loads(data)["Volumes"]
             return volumes
 
         data = _exec_output(self.base_cmdline + ["volume", "list",
                                                  "--uuid", uuid])
-        volumes = json.loads(data)
+        volumes = json.loads(data)["Volumes"]
         return volumes
 
     def create_snapshot(self, volume_uuid):

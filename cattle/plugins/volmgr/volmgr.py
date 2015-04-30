@@ -83,6 +83,14 @@ def volume_exists(path):
     return service.mounted(path, Config.volmgr_mount_namespace_fd())
 
 
+def remove_internal_snapshots_for_volume(volume_uuid):
+    log.info("Removing snapshots for volume %s" % volume_uuid)
+    volume = v.list_volumes(volume_uuid)[volume_uuid]
+    snapshots = volume["Snapshots"]
+    for s in snapshots:
+        v.delete_snapshot(s, volume_uuid)
+
+
 def remove_volume(path):
     if not volume_exists(path):
         return
@@ -90,6 +98,7 @@ def remove_volume(path):
     volume_uuid = path.rsplit('/', 1)[1]
     log.info("Removing volume %s for instance %s" % (
              volume_uuid, get_volume_instance_name(volume_name_path)))
+    remove_internal_snapshots_for_volume(volume_uuid)
     v.umount_volume(volume_uuid, Config.volmgr_mount_namespace_fd())
     v.delete_volume(volume_uuid)
     shutil.rmtree(volume_name_path)
