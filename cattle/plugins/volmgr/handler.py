@@ -1,9 +1,10 @@
 import logging
+
 from cattle import Config
 from cattle.agent.handler import BaseHandler
 from cattle.progress import Progress
-
 from . import volmgr
+
 
 log = logging.getLogger('volmgr')
 

@@ -87,12 +87,10 @@ def remove_volume(path):
         return
     volume_name_path = path.rsplit('/', 1)[0]
     volume_uuid = path.rsplit('/', 1)[1]
-    log.info("About to remove volume %s for instance %s" % (
+    log.info("Removing volume %s for instance %s" % (
              volume_uuid, get_volume_instance_name(volume_name_path)))
     v.umount_volume(volume_uuid, Config.volmgr_mount_namespace_fd())
-    log.info("Umounted volume %s" % volume_uuid)
     v.delete_volume(volume_uuid)
-    log.info("Removed volume %s" % volume_uuid)
     shutil.rmtree(volume_name_path)
     log.info("Cleaned volume %s's mount directory at %s" % (
              volume_uuid, volume_name_path))
@@ -210,15 +208,16 @@ class Volmgr(object):
         metadata_file = Config.volmgr_dm_metadata_file()
 
         if os.path.exists(data_file) and os.path.exists(metadata_file):
-            log.info("Found existed device mapper data and metadata file, \
-                    load them to loopback device")
+            log.info("Found existed device mapper data and metadata file,"
+                     "load them to loopback device")
         elif not (os.path.exists(data_file) or os.path.exists(metadata_file)):
-            log.info("Existed device mapper data and metadata file not found, \
-                    create them")
+            log.info("Existed device mapper data and metadata file not found, "
+                     "create them")
             create_pool_files(data_file, metadata_file)
         else:
-            raise Exception("Only one of data or metadata file exists, please clean \
-                    up %s ,%s" % (data_file, metadata_file))
+            raise Exception("Only one of data or metadata file exists, "
+                            "please clean up %s ,%s" % (data_file,
+                                                        metadata_file))
 
         if data_dev == "":
             data_dev = register_loopback(data_file)
@@ -230,10 +229,10 @@ class Volmgr(object):
         mount_dir = Config.volmgr_mount_dir()
         if not os.path.exists(root_dir):
             os.makedirs(root_dir)
-        log.info("Root_dir for volmgr at ", root_dir)
+        log.info("Root_dir for volmgr at %s " % root_dir)
         if not os.path.exists(mount_dir):
             os.makedirs(mount_dir)
-        log.info("Mount_dir for volmgr at ", mount_dir)
+        log.info("Mount_dir for volmgr at %s " % mount_dir)
 
         base_cmdline = ["volmgr", "--debug",
                         "--log", Config.volmgr_log_file(),
