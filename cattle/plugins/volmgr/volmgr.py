@@ -1,11 +1,11 @@
 import logging
 import shutil
+from cattle.plugins.volmgr import service
 
 import os
 import os.path
 from cattle import Config
-from .service import VolmgrService, create_pool_files, \
-    register_loopback, mounted
+from .service import VolmgrService
 
 
 log = logging.getLogger("volmgr")
@@ -55,7 +55,8 @@ def get_volume(vol_name, vol_size, instance_name, user):
 
         if not create:
             mount_dir = os.path.join(path, volume_uuid)
-            if not mounted(mount_dir, Config.volmgr_mount_namespace_fd()):
+            if not service.mounted(mount_dir,
+                                   Config.volmgr_mount_namespace_fd()):
                 v.mount_volume(volume_uuid, mount_dir, False,
                                Config.volmgr_mount_namespace_fd())
             return mount_dir
@@ -79,7 +80,7 @@ def volume_exists(path):
         return False
     if not os.path.exists(path):
         return False
-    return mounted(path, Config.volmgr_mount_namespace_fd())
+    return service.mounted(path, Config.volmgr_mount_namespace_fd())
 
 
 def remove_volume(path):
@@ -213,16 +214,16 @@ class Volmgr(object):
         elif not (os.path.exists(data_file) or os.path.exists(metadata_file)):
             log.info("Existed device mapper data and metadata file not found, "
                      "create them")
-            create_pool_files(data_file, metadata_file)
+            service.create_pool_files(data_file, metadata_file)
         else:
             raise Exception("Only one of data or metadata file exists, "
                             "please clean up %s ,%s" % (data_file,
                                                         metadata_file))
 
         if data_dev == "":
-            data_dev = register_loopback(data_file)
+            data_dev = service.register_loopback(data_file)
             log.info("Loaded %s to %s" % (data_file, data_dev))
-            metadata_dev = register_loopback(metadata_file)
+            metadata_dev = service.register_loopback(metadata_file)
             log.info("Loaded %s to %s" % (metadata_file, metadata_dev))
 
         root_dir = Config.volmgr_root()

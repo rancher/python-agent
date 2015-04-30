@@ -60,14 +60,18 @@ class SnapshotHandler(BaseHandler):
                 snapshot, storage_pool, progress)
         )
 
+    def _get_volume_uuid(self, volume):
+        volume_uri = volume.uri
+        local_uri = volume_uri.split(Config.volmgr_mount_dir())[1]
+        volume_uuid = local_uri.rsplit('/', 1)[1]
+        return volume_uuid
+
     def _is_snapshot_created(self, snapshot):
         return 'snapshotUUID' in snapshot.data.fields
 
     def _do_snapshot_create(self, snapshot, progress):
         log.info("Creating snapshot")
-        volume_uri = snapshot.volume.uri
-        local_uri = volume_uri.split(Config.volmgr_mount_dir())[1]
-        volume_uuid = local_uri.rsplit('/', 1)[1]
+        volume_uuid = self._get_volume_uuid(snapshot.volume)
         log.info("Creating snapshot for volume %s" % volume_uuid)
         snapshot_uuid = volmgr.create_snapshot(volume_uuid)
         snapshot.data.fields['snapshotUUID'] = snapshot_uuid
@@ -80,9 +84,7 @@ class SnapshotHandler(BaseHandler):
 
     def _do_snapshot_backup(self, snapshot, storage_pool, progress):
         snapshot_uuid = snapshot.data.fields['snapshotUUID']
-        volume_uri = snapshot.volume.uri
-        local_uri = volume_uri.split(Config.volmgr_mount_dir())[1]
-        volume_uuid = local_uri.rsplit('/', 1)[1]
+        volume_uuid = self._get_volume_uuid(snapshot.volume)
         log.info("Backing up snapshot %s for volume %s" % (
             snapshot_uuid, volume_uuid))
         volmgr.backup_snapshot(snapshot_uuid, volume_uuid)
@@ -95,8 +97,8 @@ class SnapshotHandler(BaseHandler):
         return 'removed' in snapshot.data.fields
 
     def _do_snapshot_remove(self, snapshot, storage_pool, progress):
-        volume_uuid = snapshot.data.fields['volumeUUID']
         snapshot_uuid = snapshot.data.fields['snapshotUUID']
+        volume_uuid = self._get_volume_uuid(snapshot.volume)
         log.info("Removing snapshot %s for volume %s" % (
             snapshot_uuid, volume_uuid))
         volmgr.remove_snapshot_from_blockstore(snapshot_uuid, volume_uuid)

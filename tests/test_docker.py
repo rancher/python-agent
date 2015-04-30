@@ -12,13 +12,13 @@ from .common_fixtures import *  # NOQA
 import pytest
 import time
 from cattle import CONFIG_OVERRIDE, Config
+from cattle.plugins.volmgr import service, Volmgr
 
 from os import path
 import os
 
 if_docker = pytest.mark.skipif('os.environ.get("DOCKER_TEST") == "false"',
                                reason='DOCKER_TEST is not set')
-
 
 CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'
 
@@ -1412,3 +1412,220 @@ def _parse_repo_tag(image):
                     tag=tag,
                     fullName=image,
                     qualifiedName=qualifiedName)
+
+
+def _cleanup_volmgr():
+    test_root = "/tmp/volmgr_test"
+    CONFIG_OVERRIDE["VOLMGR_LOG_FILE"] = os.path.join(test_root, "volmgr.log")
+    CONFIG_OVERRIDE["VOLMGR_ROOT"] = os.path.join(test_root, "volmgr")
+    CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"] = os.path.join(test_root,
+                                                       "volmgr_mounts")
+    CONFIG_OVERRIDE["VOLMGR_DM_DATA_FILE"] = \
+        os.path.join(test_root, "volmgr_data_file")
+    CONFIG_OVERRIDE["VOLMGR_DM_METADATA_FILE"] = \
+        os.path.join(test_root, "volmgr_metadata_file")
+    CONFIG_OVERRIDE["VOLMGR_BLOCKSTORE_DIR"] = \
+        os.path.join(test_root, "volmgr_blockstore")
+    CONFIG_OVERRIDE["VOLMGR_MOUNT_NAMESPACE_FD"] = "/proc/1/ns/mnt"
+    if os.path.exists(test_root):
+        shutil.rmtree(test_root)
+
+
+@if_docker
+def _volmgr_setup(mocker):
+    mocker.patch.object(service, "create_pool_files")
+    mocker.patch.object(service, "register_loopback", size_effect=[
+        "/dev/testloop0", "/dev/testloop1"
+    ])
+    mocker.patch.object(service, "cleanup_loopback")
+    mocker.patch.object(service, "mounted")
+
+    blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
+    mocker.patch.object(service.VolmgrService, "init")
+    mocker.patch.object(service.VolmgrService, "register_vfs_blockstore",
+                        return_value=blockstore_uuid)
+    _cleanup_volmgr()
+    v = Volmgr()
+    v.on_startup()
+    assert os.path.exists(CONFIG_OVERRIDE["VOLMGR_ROOT"])
+    assert os.path.exists(CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"])
+    assert os.path.exists(CONFIG_OVERRIDE["VOLMGR_BLOCKSTORE_DIR"])
+
+
+@if_docker
+def test_volmgr_instance_activate_volumes(agent, responses, mocker):
+    _volmgr_setup(mocker)
+    _delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+
+    volmgr_mount = CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"]
+    volume1_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    volume2_uuid = "f3e79a9f-e35d-4b1b-b778-de6e860af5d8"
+
+    create_volume = mocker.patch.object(service.VolmgrService, "create_volume",
+                                        side_effect=[volume1_uuid,
+                                                     volume2_uuid])
+    add_volume = mocker.patch.object(service.VolmgrService,
+                                     "add_volume_to_blockstore")
+    mount_volume = mocker.patch.object(service.VolmgrService, "mount_volume")
+
+    def post(req, resp):
+        create_volume.assert_called()
+        add_volume.assert_called()
+        mount_volume.assert_called()
+
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        inspect = instance_data['dockerInspect']
+
+        assert len(inspect['Volumes']) == 2
+        path1 = inspect['Volumes']['/opt']
+        path2 = inspect['Volumes']['/random']
+
+        assert path1 is not None
+        assert path2 is not None
+
+        # Cannot use startswith because boot2docker link /tmp to /mnt/sda1/tmp
+        # which result in docker volume mount shows in different path.
+        # The path and volume ID match seems random, we didn't know which
+        # one would be called and assigned first
+        if path.join(volmgr_mount, "default/test_v1",
+                     volume1_uuid) in path1:
+            assert path.join(volmgr_mount, "default/test_v2",
+                             volume2_uuid) in path2
+        elif path.join(volmgr_mount, "default/test_v1",
+                       volume2_uuid) in path1:
+            assert path.join(volmgr_mount, "default/test_v2",
+                             volume1_uuid) in path2
+        else:
+            assert 0
+
+        assert inspect['VolumesRW'] == {
+            '/opt': True,
+            '/random': False,
+            }
+
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/volmgr_instance_activate_volumes',
+               post_func=post)
+
+
+@if_docker
+def test_volmgr_snapshot_create(agent, responses, mocker):
+    _cleanup_volmgr()
+    snapshot_uuid = "8464e7bf-0b07-417c-b6cf-a253a47dc6bb"
+    create_snapshot = mocker.patch.object(service.VolmgrService,
+                                          "create_snapshot",
+                                          return_value=snapshot_uuid)
+
+    def post_create(req, resp):
+        create_snapshot.assert_called_once_with(
+            "0bcc6a7f-0c46-4d06-af51-224a47deeea8")
+        snapshot = resp["data"]["snapshot"]
+        assert snapshot["+data"]["+fields"]["snapshotUUID"] == snapshot_uuid
+        del resp["data"]["snapshot"]["+data"]
+
+    event_test(agent, 'docker/volmgr_snapshot_create', post_func=post_create)
+
+
+@if_docker
+def test_volmgr_snapshot_backup(agent, responses, mocker):
+    _cleanup_volmgr()
+    snapshot_uuid = "8464e7bf-0b07-417c-b6cf-a253a47dc6bb"
+    volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    backup_snapshot = mocker.patch.object(service.VolmgrService,
+                                          "backup_snapshot_to_blockstore")
+    blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
+
+    def pre_backup(req):
+        snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
+        snapshot["data"]["fields"]["snapshotUUID"] = snapshot_uuid
+
+    def post_backup(req, resp):
+        # TODO we track blockstore internally so far, we need to track it
+        # in storage pool later
+        backup_snapshot.assert_called_once_with(snapshot_uuid,
+                                                volume_uuid,
+                                                blockstore_uuid)
+
+    event_test(agent, 'docker/volmgr_snapshot_backup',
+               pre_func=pre_backup, post_func=post_backup)
+
+
+@if_docker
+def test_volmgr_snapshot_remove(agent, responses, mocker):
+    _cleanup_volmgr()
+    snapshot_uuid = "8464e7bf-0b07-417c-b6cf-a253a47dc6bb"
+    volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
+
+    delete_snapshot = mocker.patch.object(service.VolmgrService,
+                                          "delete_snapshot")
+    remove_snapshot_from_blockstore = mocker.patch.object(
+        service.VolmgrService, "remove_snapshot_from_blockstore")
+
+    def post(req, resp):
+        delete_snapshot.assert_called_once_with(snapshot_uuid, volume_uuid)
+        remove_snapshot_from_blockstore.assert_called_with(snapshot_uuid,
+                                                           volume_uuid,
+                                                           blockstore_uuid)
+
+    event_test(agent, 'docker/volmgr_snapshot_remove', post_func=post)
+
+
+@if_docker
+def test_volmgr_restore_snapshot(agent, responses, mocker):
+    # need to setup path for previous volume
+    test_volmgr_instance_activate_volumes(agent, responses, mocker)
+
+    _delete_container("c-5f7d6bf1-0528-439d-abca-49daf59002aa")
+
+    volmgr_mount = CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"]
+    old_volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    snapshot_uuid = "8464e7bf-0b07-417c-b6cf-a253a47dc6bb"
+    volume_uuid = "312dadca-c6c4-4e65-bea3-7b2f6ca819ee"
+    volume_name = "test_restore"
+    blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
+
+    create_volume = mocker.patch.object(service.VolmgrService, "create_volume",
+                                        return_value=volume_uuid)
+    add_volume = mocker.patch.object(service.VolmgrService,
+                                     "add_volume_to_blockstore")
+    mount_volume = mocker.patch.object(service.VolmgrService, "mount_volume")
+
+    restore_snapshot = mocker.patch.object(service.VolmgrService,
+                                           "restore_snapshot_from_blockstore")
+
+    def post(req, resp):
+        create_volume.assert_called_once()
+        restore_snapshot.assert_called_once_with(snapshot_uuid,
+                                                 old_volume_uuid,
+                                                 volume_uuid,
+                                                 blockstore_uuid)
+        add_volume.assert_called(volume_uuid, blockstore_uuid)
+        mount_path = os.path.join(CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"],
+                                  volume_name,
+                                  volume_uuid)
+        mount_volume.assert_called(volume_uuid, mount_path, False,
+                                   CONFIG_OVERRIDE[
+                                       "VOLMGR_MOUNT_NAMESPACE_FD"])
+
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        inspect = instance_data['dockerInspect']
+
+        assert len(inspect['Volumes']) == 1
+        mpath = inspect['Volumes']['/opt']
+
+        assert mpath is not None
+
+        # Cannot use startswith because boot2docker link /tmp to /mnt/sda1/tmp
+        # which result in docker volume mount shows in different path
+        assert path.join(volmgr_mount, "default/test_restore",
+                         volume_uuid) in mpath
+
+        assert inspect['VolumesRW'] == {
+            '/opt': True,
+        }
+
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/volmgr_instance_restore_volume', post_func=post)
