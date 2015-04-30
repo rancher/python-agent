@@ -4,7 +4,7 @@ import shutil
 import os
 import os.path
 from cattle import Config
-from .volmgr_service import VolmgrService, create_pool_files, \
+from .service import VolmgrService, create_pool_files, \
     register_loopback, mounted
 
 
