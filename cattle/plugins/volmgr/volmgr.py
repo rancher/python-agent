@@ -1,4 +1,5 @@
 import logging
+import shutil
 
 import os
 import os.path
@@ -30,6 +31,16 @@ def get_volume_uuid(path):
     return volume_uuid
 
 
+def get_volume_instance_name(path):
+    old_instance_file = open(os.path.join(path, INSTANCE_TAG_FILE), "r")
+    old_instance_name = ""
+    try:
+        old_instance_name = old_instance_file.read()
+    finally:
+        old_instance_file.close()
+    return old_instance_name
+
+
 def get_volume(vol_name, vol_size, instance_name, user):
     path = get_volume_dir(vol_name, user)
     if os.path.exists(path):
@@ -40,13 +51,7 @@ def get_volume(vol_name, vol_size, instance_name, user):
                     volume! Create one")
             create = True
 
-        old_instance_file = open(os.path.join(path, INSTANCE_TAG_FILE), "r")
-        old_instance_name = ""
-        try:
-            old_instance_name = old_instance_file.read()
-        finally:
-            old_instance_file.close()
-        assert old_instance_name == instance_name
+        assert get_volume_instance_name(path) == instance_name
 
         if not create:
             mount_dir = os.path.join(path, volume_uuid)
@@ -67,6 +72,30 @@ def get_volume(vol_name, vol_size, instance_name, user):
     v.mount_volume(volume_uuid, mount_dir, True,
                    Config.volmgr_mount_namespace_fd())
     return mount_dir
+
+
+def volume_exists(path):
+    if not path.startswith(Config.volmgr_mount_dir()):
+        return False
+    if not os.path.exists(path):
+        return False
+    return mounted(path, Config.volmgr_mount_namespace_fd())
+
+
+def remove_volume(path):
+    if not volume_exists(path):
+        return
+    volume_name_path = path.rsplit('/', 1)[0]
+    volume_uuid = path.rsplit('/', 1)[1]
+    log.info("About to remove volume %s for instance %s" % (
+             volume_uuid, get_volume_instance_name(volume_name_path)))
+    v.umount_volume(volume_uuid, Config.volmgr_mount_namespace_fd())
+    log.info("Umounted volume %s" % volume_uuid)
+    v.delete_volume(volume_uuid)
+    log.info("Removed volume %s" % volume_uuid)
+    shutil.rmtree(volume_name_path)
+    log.info("Cleaned volume %s's mount directory at %s" % (
+             volume_uuid, volume_name_path))
 
 
 def create_snapshot(vol_uuid):
