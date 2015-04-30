@@ -169,21 +169,21 @@ class Volmgr(object):
         metadata_dev = Config.volmgr_dm_metadata_device()
         if data_dev != "" and metadata_dev != "":
             if os.path.exists(data_dev) and os.path.exists(metadata_dev):
-                log.warning("Provided data_dev %s and metadata_dev %s, \
-                             but unable to find the devices, \
-                             continue with default files",
-                            data_dev, metadata_dev)
-                data_dev = ""
-                metadata_dev = ""
+                raise Exception("Provided data_dev %s and metadata_dev %s, \
+                        but unable to find the devices" % (
+                    data_dev, metadata_dev))
+        elif (data_dev == "") ^ (metadata_dev == ""):
+            raise Exception("Only one of two device mapper devices \
+                    are specified")
 
         data_file = Config.volmgr_dm_data_file()
         metadata_file = Config.volmgr_dm_metadata_file()
 
         if os.path.exists(data_file) and os.path.exists(metadata_file):
-            log.debug("Found existed device mapper data and metadata file, \
+            log.info("Found existed device mapper data and metadata file, \
                     load them to loopback device")
         elif not (os.path.exists(data_file) or os.path.exists(metadata_file)):
-            log.debug("Existed device mapper data and metadata file not found, \
+            log.info("Existed device mapper data and metadata file not found, \
                     create them")
             create_pool_files(data_file, metadata_file)
         else:
@@ -192,14 +192,18 @@ class Volmgr(object):
 
         if data_dev == "":
             data_dev = register_loopback(data_file)
+            log.info("Loaded %s to %s" % (data_file, data_dev))
             metadata_dev = register_loopback(metadata_file)
+            log.info("Loaded %s to %s" % (metadata_file, metadata_dev))
 
         root_dir = Config.volmgr_root()
         mount_dir = Config.volmgr_mount_dir()
         if not os.path.exists(root_dir):
             os.makedirs(root_dir)
+        log.info("Root_dir for volmgr at ", root_dir)
         if not os.path.exists(mount_dir):
             os.makedirs(mount_dir)
+        log.info("Mount_dir for volmgr at ", mount_dir)
 
         base_cmdline = ["volmgr", "--debug",
                         "--log", Config.volmgr_log_file(),
@@ -210,9 +214,12 @@ class Volmgr(object):
         # TODO better for volmgr to verify cfg is the same
         if not os.path.exists(os.path.join(root_dir, "volmgr.cfg")):
             v.init(driver, data_dev, metadata_dev, pool_name)
+        log.info("Complete init for volmgr, init pool %s" % pool_name)
 
         global blockstore_uuid
         if not os.path.exists(Config.volmgr_blockstore_dir()):
             os.makedirs(Config.volmgr_blockstore_dir())
         blockstore_uuid = v.register_vfs_blockstore(
             Config.volmgr_blockstore_dir())
+        log.info("Complete register blockstore for volmgr at %s, uuid %s" % (
+                 Config.volmgr_blockstore_dir(), blockstore_uuid))
