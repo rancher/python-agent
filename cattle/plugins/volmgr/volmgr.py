@@ -110,11 +110,11 @@ def create_snapshot(vol_uuid):
     return v.create_snapshot(vol_uuid)
 
 
-def backup_snapshot(snapshot_uuid, vol_uuid):
+def backup_snapshot(snapshot_uuid, vol_uuid, blockstore_uuid):
     v.backup_snapshot_to_blockstore(snapshot_uuid, vol_uuid, blockstore_uuid)
 
 
-def remove_snapshot_from_blockstore(snapshot_uuid, vol_uuid):
+def remove_snapshot_from_blockstore(snapshot_uuid, vol_uuid, blockstore_uuid):
     v.remove_snapshot_from_blockstore(snapshot_uuid, vol_uuid,
                                       blockstore_uuid)
 
@@ -123,17 +123,13 @@ def delete_snapshot(snapshot_uuid, vol_uuid):
     v.delete_snapshot(snapshot_uuid, vol_uuid)
 
 
-def restore_snapshot(vol_name, old_vol_name, vol_size,
+def restore_snapshot(vol_name, old_volume_uuid, vol_size,
                      snapshot_uuid, instance_name, user):
     path = get_volume_dir(vol_name, user)
     if os.path.exists(path):
         log.info("Already found the volume, skip restore")
         volume_uuid = get_volume_uuid(path)
         return os.path.join(path, volume_uuid)
-    old_path = get_volume_dir(old_vol_name, user)
-    if not os.path.exists(old_path):
-        raise Exception("Cannot find old volume")
-    old_volume_uuid = get_volume_uuid(old_path)
     volume_uuid = v.create_volume(vol_size)
     v.restore_snapshot_from_blockstore(snapshot_uuid, old_volume_uuid,
                                        volume_uuid, blockstore_uuid)
@@ -168,13 +164,13 @@ def update_managed_volume(instance, config, start_config):
             words = vol_command.split("/")
             vol_name = words[0]
             command = ""
-            old_vol_name = ""
+            old_volume_uuid = ""
             snapshot_uuid = ""
             if len(words) > 1:
                 command = words[1]
                 if command == "restore":
                     assert len(words) == 4
-                    old_vol_name = words[2]
+                    old_volume_uuid = words[2]
                     snapshot_uuid = words[3]
                 else:
                     log.error("unsupported command %s, \
@@ -183,7 +179,7 @@ def update_managed_volume(instance, config, start_config):
             if command == "restore":
                 log.info("About to restore snapshot")
                 mount_point = restore_snapshot(
-                    vol_name, old_vol_name,
+                    vol_name, old_volume_uuid,
                     Config.volmgr_default_volume_size(), snapshot_uuid,
                     instance_name, user)
                 new_binds_map[mount_point] = dst

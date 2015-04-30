@@ -29,7 +29,7 @@
                         "imageUuid": "docker:ibuildthecloud/helloworld",
                         "command": "sleep 5",
                         "publishAllPorts": true,
-                        "dataVolumes": ["/rancher/test_restore/restore/test_v1/8464e7bf-0b07-417c-b6cf-a253a47dc6bb:/opt"],
+                        "dataVolumes": ["/rancher/test_restore/restore/0bcc6a7f-0c46-4d06-af51-224a47deeea8/8464e7bf-0b07-417c-b6cf-a253a47dc6bb:/opt"],
                         "startOnCreate": true
                     }
                 },
