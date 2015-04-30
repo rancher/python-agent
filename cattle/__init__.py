@@ -345,3 +345,8 @@ class Config:
     def volmgr_blockstore_dir():
         return default_value('VOLMGR_BLOCKSTORE_DIR',
                              '/var/lib/rancher/volmgr_blockstore/')
+
+    @staticmethod
+    def volmgr_mount_namespace_fd():
+        return default_value('VOLMGR_MOUNT_NAMESPACE_FD',
+                             '/host/proc/1/ns/mnt')

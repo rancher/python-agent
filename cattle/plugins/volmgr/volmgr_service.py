@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import atexit
 
 import subprocess
 import json
@@ -9,9 +10,47 @@ import os
 EXT4_FS = "ext4"
 
 
+def register_loopback(data_file):
+    # ideally we shouldn't have any leftover...
+    output = subprocess.check_output(["losetup", "-j", data_file])
+    if output == "":
+        output = subprocess.check_output(["losetup", "-v", "-f",
+                                          data_file])
+        data_dev = output.strip().split(" ")[3]
+    else:
+        data_dev = output.split(":")[0].strip()
+    atexit.register(cleanup_loopback, data_dev)
+    assert data_dev.startswith("/dev/loop")
+    return data_dev
+
+
+def cleanup_loopback(dev):
+    subprocess.call(["losetup", "-d", dev])
+
+
+def create_pool_files(data_file, metadata_file):
+    subprocess.check_call(["truncate", "-s", "100G", data_file])
+    subprocess.check_call(["truncate", "-s", "5G", metadata_file])
+
+
+def mounted(mount_dir, ns):
+    output = subprocess.check_output(["volmgr_mount", ns, "-m"])
+    if output.find(mount_dir) != -1:
+        return True
+    return False
+
+
 class VolmgrService(object):
     def __init__(self, cmdline):
         self.base_cmdline = cmdline
+
+    def init(self, driver, data_dev, metadata_dev, pool_name):
+        subprocess.check_call(self.base_cmdline + [
+            "init",
+            "--driver", driver,
+            "--driver-opts", "dm.datadev=" + data_dev,
+            "--driver-opts", "dm.metadatadev=" + metadata_dev,
+            "--driver-opts", "dm.thinpoolname=" + pool_name])
 
     def create_volume(self, size):
         data = subprocess.check_output(self.base_cmdline + [
@@ -26,10 +65,10 @@ class VolmgrService(object):
         subprocess.check_call(self.base_cmdline + ["volume", "delete",
                                                    "--uuid", uuid])
 
-    def mount_volume(self, uuid, path, need_format):
+    def mount_volume(self, uuid, path, need_format, ns):
         assert os.path.exists(path)
         cmdline = self.base_cmdline + ["volume", "mount",
-                                       "--switch-ns", "/host/proc/1/ns/mnt",
+                                       "--switch-ns", ns,
                                        "--uuid", uuid,
                                        "--mountpoint", path,
                                        "--fs", EXT4_FS]
@@ -38,9 +77,9 @@ class VolmgrService(object):
 
         subprocess.check_call(cmdline)
 
-    def umount_volume(self, uuid):
+    def umount_volume(self, uuid, ns):
         cmdline = self.base_cmdline + ["volume", "umount",
-                                       "--switch-ns", "/host/proc/1/ns/mnt",
+                                       "--switch-ns", ns,
                                        "--uuid", uuid]
         subprocess.check_call(cmdline)
 

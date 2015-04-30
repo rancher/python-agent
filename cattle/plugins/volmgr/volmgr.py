@@ -1,11 +1,10 @@
-import atexit
 import logging
-import subprocess
 
 import os
 import os.path
 from cattle import Config
-from .volmgr_service import VolmgrService
+from .volmgr_service import VolmgrService, create_pool_files, \
+    register_loopback, mounted
 
 
 log = logging.getLogger("volmgr")
@@ -17,33 +16,8 @@ v = VolmgrService("")
 blockstore_uuid = ""
 
 
-def register_loopback(data_file):
-    # ideally we shouldn't have any leftover...
-    output = subprocess.check_output(["losetup", "-j", data_file])
-    if output == "":
-        output = subprocess.check_output(["losetup", "-v", "-f",
-                                          data_file])
-        data_dev = output.strip().split(" ")[3]
-    else:
-        data_dev = output.split(":")[0].strip()
-    atexit.register(cleanup_loopback, data_dev)
-    assert data_dev.startswith("/dev/loop")
-    return data_dev
-
-
-def cleanup_loopback(dev):
-    subprocess.call(["losetup", "-d", dev])
-
-
 def get_volume_dir(vol_name, user):
     return os.path.join(Config.volmgr_mount_dir(), user, vol_name)
-
-
-def mounted(mount_dir):
-    output = subprocess.check_output(["mount"])
-    if output.find(mount_dir):
-        return True
-    return False
 
 
 def get_volume_uuid(path):
@@ -66,7 +40,7 @@ def get_volume(vol_name, vol_size, instance_name, user):
                     volume! Create one")
             create = True
 
-        old_instance_file = os.open(os.path.join(path, INSTANCE_TAG_FILE), "r")
+        old_instance_file = open(os.path.join(path, INSTANCE_TAG_FILE), "r")
         old_instance_name = ""
         try:
             old_instance_name = old_instance_file.read()
@@ -76,8 +50,9 @@ def get_volume(vol_name, vol_size, instance_name, user):
 
         if not create:
             mount_dir = os.path.join(path, volume_uuid)
-            if not mounted(mount_dir):
-                v.mount_volume(volume_uuid, mount_dir, False)
+            if not mounted(mount_dir, Config.volmgr_mount_namespace_fd()):
+                v.mount_volume(volume_uuid, mount_dir, False,
+                               Config.volmgr_mount_namespace_fd())
             return mount_dir
 
     volume_uuid = v.create_volume(vol_size)
@@ -89,7 +64,8 @@ def get_volume(vol_name, vol_size, instance_name, user):
         f.write(instance_name)
     finally:
         f.close()
-    v.mount_volume(volume_uuid, mount_dir, True)
+    v.mount_volume(volume_uuid, mount_dir, True,
+                   Config.volmgr_mount_namespace_fd())
     return mount_dir
 
 
@@ -209,8 +185,7 @@ class Volmgr(object):
         elif not (os.path.exists(data_file) or os.path.exists(metadata_file)):
             log.debug("Existed device mapper data and metadata file not found, \
                     create them")
-            subprocess.check_call(["truncate", "-s", "100G", data_file])
-            subprocess.check_call(["truncate", "-s", "5G", metadata_file])
+            create_pool_files(data_file, metadata_file)
         else:
             raise Exception("Only one of data or metadata file exists, please clean \
                     up %s ,%s" % (data_file, metadata_file))
@@ -229,17 +204,12 @@ class Volmgr(object):
         base_cmdline = ["volmgr", "--debug",
                         "--log", Config.volmgr_log_file(),
                         "--root", root_dir]
+        global v
+        v = VolmgrService(base_cmdline)
         pool_name = Config.volmgr_pool_name()
         # TODO better for volmgr to verify cfg is the same
         if not os.path.exists(os.path.join(root_dir, "volmgr.cfg")):
-            subprocess.check_call(base_cmdline + [
-                "init",
-                "--driver", driver,
-                "--driver-opts", "dm.datadev=" + data_dev,
-                "--driver-opts", "dm.metadatadev=" + metadata_dev,
-                "--driver-opts", "dm.thinpoolname=" + pool_name])
-        global v
-        v = VolmgrService(base_cmdline)
+            v.init(driver, data_dev, metadata_dev, pool_name)
 
         global blockstore_uuid
         if not os.path.exists(Config.volmgr_blockstore_dir()):
