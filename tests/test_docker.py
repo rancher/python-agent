@@ -14,7 +14,7 @@ import mock
 import pytest
 import time
 from cattle import CONFIG_OVERRIDE, Config
-from cattle.plugins.volmgr import service, Volmgr
+from cattle.plugins.volmgr import volmgr, service, Volmgr
 
 from os import path
 import os
@@ -1418,6 +1418,7 @@ def _parse_repo_tag(image):
 
 def _cleanup_volmgr():
     test_root = "/tmp/volmgr_test"
+    CONFIG_OVERRIDE["VOLMGR_ENABLED"] = "True"
     CONFIG_OVERRIDE["VOLMGR_LOG_FILE"] = os.path.join(test_root, "volmgr.log")
     CONFIG_OVERRIDE["VOLMGR_ROOT"] = os.path.join(test_root, "volmgr")
     CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"] = os.path.join(test_root,
@@ -1685,3 +1686,26 @@ def test_volmgr_delete_volume(agent, responses, mocker):
             CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"], volume_name))
 
     event_test(agent, 'docker/volmgr_volume_purge', post_func=post)
+
+
+@if_docker
+def test_volmgr_disabled(agent, responses, mocker):
+    CONFIG_OVERRIDE["VOLMGR_ENABLED"] = "False"
+
+    get_volume = mocker.patch.object(volmgr, "_get_volume")
+    restore_snapshot = mocker.patch.object(volmgr, "_restore_snapshot")
+    remove_volume = mocker.patch.object(volmgr, "remove_volume")
+
+    def post(req, resp):
+        get_volume.assert_not_called()
+        restore_snapshot.assert_not_called()
+        instance_activate_common_validation(resp)
+
+    def post_vol(req, resp):
+        remove_volume.assert_not_called()
+
+    event_test(agent, 'docker/volmgr_instance_activate_volumes',
+               post_func=post)
+    event_test(agent, 'docker/volmgr_instance_restore_volume',
+               post_func=post)
+    event_test(agent, 'docker/volmgr_volume_purge', post_func=post_vol)

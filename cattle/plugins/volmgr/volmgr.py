@@ -17,11 +17,15 @@ v = VolmgrService("")
 blockstore_uuid = ""
 
 
-def get_volume_dir(vol_name, user):
+def enabled():
+    return Config.volmgr_enabled().lower() == "true"
+
+
+def _get_volume_dir(vol_name, user):
     return os.path.join(Config.volmgr_mount_dir(), user, vol_name)
 
 
-def get_volume_uuid(path):
+def _get_volume_uuid(path):
     filelist = os.listdir(path)
     volume_uuid = ""
     for i in filelist:
@@ -31,7 +35,7 @@ def get_volume_uuid(path):
     return volume_uuid
 
 
-def get_volume_instance_name(path):
+def _get_volume_instance_name(path):
     old_instance_file = open(os.path.join(path, INSTANCE_TAG_FILE), "r")
     old_instance_name = ""
     try:
@@ -41,17 +45,17 @@ def get_volume_instance_name(path):
     return old_instance_name
 
 
-def get_volume(vol_name, vol_size, instance_name, user):
-    path = get_volume_dir(vol_name, user)
+def _get_volume(vol_name, vol_size, instance_name, user):
+    path = _get_volume_dir(vol_name, user)
     if os.path.exists(path):
-        volume_uuid = get_volume_uuid(path)
+        volume_uuid = _get_volume_uuid(path)
         create = False
         if volume_uuid == "":
             log.warning("Found volume directory but cannot find related \
                     volume! Create one")
             create = True
 
-        assert get_volume_instance_name(path) == instance_name
+        assert _get_volume_instance_name(path) == instance_name
 
         if not create:
             mount_dir = os.path.join(path, volume_uuid)
@@ -76,6 +80,8 @@ def get_volume(vol_name, vol_size, instance_name, user):
 
 
 def volume_exists(path):
+    if not enabled():
+        return False
     if not path.startswith(Config.volmgr_mount_dir()):
         return False
     if not os.path.exists(path):
@@ -92,12 +98,14 @@ def remove_internal_snapshots_for_volume(volume_uuid):
 
 
 def remove_volume(path):
+    if not enabled():
+        return
     if not volume_exists(path):
         return
     volume_name_path = path.rsplit('/', 1)[0]
     volume_uuid = path.rsplit('/', 1)[1]
     log.info("Removing volume %s for instance %s" % (
-             volume_uuid, get_volume_instance_name(volume_name_path)))
+             volume_uuid, _get_volume_instance_name(volume_name_path)))
     remove_internal_snapshots_for_volume(volume_uuid)
     v.umount_volume(volume_uuid, Config.volmgr_mount_namespace_fd())
     v.delete_volume(volume_uuid)
@@ -123,12 +131,12 @@ def delete_snapshot(snapshot_uuid, vol_uuid):
     v.delete_snapshot(snapshot_uuid, vol_uuid)
 
 
-def restore_snapshot(vol_name, old_volume_uuid, vol_size,
-                     snapshot_uuid, instance_name, user):
-    path = get_volume_dir(vol_name, user)
+def _restore_snapshot(vol_name, old_volume_uuid, vol_size,
+                      snapshot_uuid, instance_name, user):
+    path = _get_volume_dir(vol_name, user)
     if os.path.exists(path):
         log.info("Already found the volume, skip restore")
-        volume_uuid = get_volume_uuid(path)
+        volume_uuid = _get_volume_uuid(path)
         return os.path.join(path, volume_uuid)
     volume_uuid = v.create_volume(vol_size)
     v.restore_snapshot_from_blockstore(snapshot_uuid, old_volume_uuid,
@@ -148,6 +156,8 @@ def restore_snapshot(vol_name, old_volume_uuid, vol_size,
 
 
 def update_managed_volume(instance, config, start_config):
+    if not enabled():
+        return
     if 'binds' not in start_config:
         return
     binds_map = start_config['binds']
@@ -178,15 +188,15 @@ def update_managed_volume(instance, config, start_config):
 
             if command == "restore":
                 log.info("About to restore snapshot")
-                mount_point = restore_snapshot(
+                mount_point = _restore_snapshot(
                     vol_name, old_volume_uuid,
                     Config.volmgr_default_volume_size(), snapshot_uuid,
                     instance_name, user)
                 new_binds_map[mount_point] = dst
             else:
-                mount_point = get_volume(vol_name,
-                                         Config.volmgr_default_volume_size(),
-                                         instance_name, user)
+                mount_point = _get_volume(vol_name,
+                                          Config.volmgr_default_volume_size(),
+                                          instance_name, user)
                 new_binds_map[mount_point] = dst
         else:
             new_binds_map[src] = binds_map[src]
@@ -195,6 +205,9 @@ def update_managed_volume(instance, config, start_config):
 
 class Volmgr(object):
     def on_startup(self):
+        if not enabled():
+            return
+        log.info("Volmgr enabled")
         driver = Config.volmgr_storage_driver()
         if driver != "devicemapper":
             raise Exception("Unknown volmgr driver %s" % (driver))

@@ -17,6 +17,8 @@ class SnapshotHandler(BaseHandler):
         return "storage"
 
     def _check_supports(self, req):
+        if not volmgr.enabled():
+            return False
         return True
 
     def snapshot_create(self, req=None, snapshot=None, **kw):

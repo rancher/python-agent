@@ -300,6 +300,10 @@ class Config:
         return default_value('CADVISOR_WRAPPER', '')
 
     @staticmethod
+    def volmgr_enabled():
+        return default_value('VOLMGR_ENABLED', 'False')
+
+    @staticmethod
     def volmgr_storage_driver():
         return default_value('VOLMGR_STORAGE_DRIVER', 'devicemapper')
 
@@ -326,12 +330,13 @@ class Config:
     @staticmethod
     def volmgr_dm_data_file():
         return default_value('VOLMGR_DM_DATA_FILE',
-                             '/var/lib/rancher/volmgr_data_file')
+                             '/var/lib/rancher/volmgr/data/volmgr_data_file')
 
     @staticmethod
     def volmgr_dm_metadata_file():
-        return default_value('VOLMGR_DM_METADATA_FILE',
-                             '/var/lib/rancher/volmgr_metadata_file')
+        return default_value(
+            'VOLMGR_DM_METADATA_FILE',
+            '/var/lib/rancher/volmgr/data/volmgr_metadata_file')
 
     @staticmethod
     def volmgr_dm_data_device():
@@ -344,7 +349,7 @@ class Config:
     @staticmethod
     def volmgr_blockstore_dir():
         return default_value('VOLMGR_BLOCKSTORE_DIR',
-                             '/var/lib/rancher/volmgr_blockstore/')
+                             '/var/lib/rancher/volmgr/data/volmgr_blockstore/')
 
     @staticmethod
     def volmgr_mount_namespace_fd():

@@ -31,6 +31,12 @@ def cleanup_loopback(dev):
 
 
 def create_pool_files(data_file, metadata_file):
+    dir = os.path.dirname(data_file)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    dir = os.path.dirname(metadata_file)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
     _exec_check(["truncate", "-s", "100G", data_file])
     _exec_check(["truncate", "-s", "5G", metadata_file])
 
