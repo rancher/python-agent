@@ -4,8 +4,8 @@ import shutil
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
+from cattle.plugins.volmgr import volmgr
 from . import docker_client, get_compute
-
 
 log = logging.getLogger('docker')
 
@@ -116,13 +116,16 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                                     volume.instance)
             return container is None
         else:
+            path = self._path_to_volume(volume)
+            # Check for volmgr managed volume, must be done before "isHostPath"
+            if volmgr.volume_exists(path):
+                return False
             if volume.data.fields['isHostPath']:
                 # If this is a host path volume, we'll never really remove it
                 # from disk, so just report is as removed for the purpose of
                 # handling the event.
                 return True
 
-            path = self._path_to_volume(volume)
             return not os.path.exists(path)
 
     def _do_volume_remove(self, volume, storage_pool, progress):
@@ -133,8 +136,13 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                 return
             docker_client().remove_container(container)
         else:
+            path = self._path_to_volume(volume)
+            # Check for volmgr managed volume, must be done before "isHostPath"
+            if volmgr.volume_exists(path):
+                log.info("Deleting volmgr managed volume: %s" % path)
+                volmgr.remove_volume(path)
+                return
             if not volume.data.fields['isHostPath']:
-                path = self._path_to_volume(volume)
                 if os.path.exists(path):
                     log.info("Deleting volume: %s" % volume.uri)
                     shutil.rmtree(path)

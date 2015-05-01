@@ -1,0 +1,13 @@
+{
+   "name":"reply.2069705149459331420",
+   "resourceType":"snapshotStoragePoolMap",
+   "resourceId":"1sspm2",
+   "previousNames":[
+      "storage.snapshot.remove"
+   ],
+   "previousIds":[
+      "e91689f8-1607-493a-a5c8-c6a5ac3c710b"
+   ],
+   "data":{
+   }
+}
