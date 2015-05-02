@@ -5,6 +5,8 @@ from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
 from cattle.plugins.volmgr import volmgr
+from cattle.lock import lock
+from cattle.progress import Progress
 from . import docker_client, get_compute
 
 log = logging.getLogger('docker')
@@ -165,6 +167,21 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         return {'repo': image_uuid,
                 'tag': 'latest',
                 'uuid': image_uuid + ':latest'}
+
+    def volume_remove(self, req=None, volumeStoragePoolMap=None, **kw):
+        volume = volumeStoragePoolMap.volume
+        storage_pool = volumeStoragePoolMap.storagePool
+        progress = Progress(req)
+
+        with lock(volume):
+            if volume.deviceNumber == 0:
+                get_compute().purge_state(docker_client(), volume.instance)
+
+            if not self._is_volume_removed(volume, storage_pool):
+                self._do_volume_remove(volume, storage_pool, progress)
+
+            data = self._get_response_data(req, volumeStoragePoolMap)
+            return self._reply(req, data)
 
 
 class ImageValidationError(Exception):
