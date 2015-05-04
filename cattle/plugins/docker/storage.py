@@ -5,6 +5,7 @@ from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
 from cattle.plugins.volmgr import volmgr
+from cattle.plugins.docker.util import is_no_op
 from cattle.lock import lock
 from cattle.progress import Progress
 from . import docker_client, get_compute
@@ -42,10 +43,16 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             self._do_image_activate(image, None, progress)
 
     def _is_image_active(self, image, storage_pool):
+        if is_no_op(image):
+            return True
+
         image_obj = self._get_image_by_label(image.data.dockerImage.fullName)
         return image_obj is not None
 
     def _do_image_activate(self, image, storage_pool, progress):
+        if is_no_op(image):
+            return
+
         auth_config = None
         try:
             if 'registryCredential' in image:
@@ -93,11 +100,12 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
     def _get_image_storage_pool_map_data(self, obj):
         image = self._get_image_by_label(obj.image.data.dockerImage.fullName)
-        return {
-            '+data': {
-                'dockerImage': image
+        if image:
+            return {
+                '+data': {
+                    'dockerImage': image
+                }
             }
-        }
 
     def _get_volume_storage_pool_map_data(self, obj):
         return {
