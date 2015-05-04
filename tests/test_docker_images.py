@@ -225,6 +225,38 @@ def _test_instance_pull_credential(agent, responses):
                no_diff=True)
 
 
+@if_docker
+def test_image_activate_no_op(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    repo = 'ubuntu'
+    tag = '10.04'
+    image_name = repo + ':' + tag
+    client = docker_client()
+    try:
+        client.remove_image(image_name)
+    except APIError:
+        pass
+
+    def pre(req):
+        image = req['data']['imageStoragePoolMap']['image']
+        remap_dockerImage(image, image_name)
+
+        class Expando(object):
+            pass
+        req['data']['processData'] = Expando()
+        req['data']['processData'].containerNoOpEvent = True
+
+    def post(req, resp):
+        images = client.images(name=repo)
+        for i in images:
+            for t in i['RepoTags']:
+                assert tag not in t
+        assert not resp['data']['imageStoragePoolMap']
+
+    event_test(agent, 'docker/image_activate', pre_func=pre,
+               post_func=post, no_diff=True)
+
+
 def image_pull_invalid_credential(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     image_name = 'quay.io/wizardofmath/whisperdocker'
