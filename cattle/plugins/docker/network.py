@@ -43,7 +43,8 @@ def setup_mac_and_ip(instance, create_config):
                     break
 
             if ip_address:
-                add_label(create_config, RANCHER_IP=ip_address)
+                add_label(create_config,
+                          {'io.rancher.container.ip': ip_address})
     except (KeyError, AttributeError):
         pass
 

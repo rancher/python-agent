@@ -51,7 +51,7 @@ def _volmgr_setup(mocker):
 @if_docker
 def test_volmgr_instance_activate_volumes(agent, responses, mocker):
     _volmgr_setup(mocker)
-    delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     volmgr_mount = CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"]
     volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"

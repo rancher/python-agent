@@ -629,7 +629,7 @@ def test_instance_activate_agent_instance(agent, responses):
 
 @if_docker
 def test_instance_activate_volumes(agent, responses):
-    delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     delete_container('/target_volumes_from_by_uuid')
     delete_container('/target_volumes_from_by_id')
 
@@ -680,7 +680,7 @@ def test_instance_activate_volumes(agent, responses):
 
 @if_docker
 def test_instance_activate_null_command(agent, responses):
-    delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
         instance_activate_common_validation(resp)
@@ -690,7 +690,7 @@ def test_instance_activate_null_command(agent, responses):
 
 @if_docker
 def test_instance_activate_command(agent, responses):
-    delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
         instance_activate_common_validation(resp)
@@ -700,7 +700,7 @@ def test_instance_activate_command(agent, responses):
 
 @if_docker
 def test_instance_activate_command_args(agent, responses):
-    delete_container('/ca-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
     def post(req, resp):
         instance_activate_common_validation(resp)
@@ -786,7 +786,7 @@ def test_ping_stat_exception(agent, responses, mocker):
 
 @if_docker
 def test_volume_purge(agent, responses):
-    delete_container('/c-c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     delete_container('/target_volumes_from')
 
     client = docker_client()

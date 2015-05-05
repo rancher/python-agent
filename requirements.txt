@@ -1,5 +1,5 @@
 mako
-git+https://github.com/hibooboo2/docker-py.git@pull_auth
+docker-py==1.2.2
 portalocker
 subprocess32
 psutil
