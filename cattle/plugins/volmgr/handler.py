@@ -74,8 +74,10 @@ class SnapshotHandler(BaseHandler):
     def _do_snapshot_create(self, snapshot, progress):
         log.info("Creating snapshot")
         volume_uuid = self._get_volume_uuid(snapshot.volume)
+        snapshot_uuid = snapshot.uuid
         log.info("Creating snapshot for volume %s" % volume_uuid)
-        snapshot_uuid = volmgr.create_snapshot(volume_uuid)
+        snapshot_uuid = volmgr.create_snapshot(volume_uuid,
+                                               snapshot_uuid)
         snapshot.data.fields['managedSnapshotUUID'] = snapshot_uuid
         snapshot.data.fields['managedVolumeUUID'] = volume_uuid
         log.info("New snapshot for volume, uuid is %s" % snapshot_uuid)
@@ -85,7 +87,7 @@ class SnapshotHandler(BaseHandler):
         return 'backup' in snapshot.data.fields
 
     def _do_snapshot_backup(self, snapshot, storage_pool, progress):
-        snapshot_uuid = snapshot.data.fields['managedSnapshotUUID']
+        snapshot_uuid = snapshot.uuid
         volume_uuid = snapshot.data.fields['managedVolumeUUID']
         blockstore_uuid = volmgr.blockstore_uuid
         if 'blockstoreUUID' in storage_pool.data.fields:
@@ -103,8 +105,7 @@ class SnapshotHandler(BaseHandler):
         return 'removed' in snapshot.data.fields
 
     def _do_snapshot_remove(self, snapshot, storage_pool, progress):
-        print snapshot
-        snapshot_uuid = snapshot.data.fields['managedSnapshotUUID']
+        snapshot_uuid = snapshot.uuid
         volume_uuid = snapshot.data.fields['managedVolumeUUID']
         blockstore_uuid = volmgr.blockstore_uuid
         if 'blockstoreUUID' in storage_pool.data.fields:

@@ -115,13 +115,15 @@ class VolmgrService(object):
         volumes = json.loads(data)["Volumes"]
         return volumes
 
-    def create_snapshot(self, volume_uuid):
+    def create_snapshot(self, volume_uuid, snapshot_uuid):
         data = _exec_output(self.base_cmdline +
                             ["snapshot", "create",
-                             "--volume-uuid", volume_uuid])
+                             "--volume-uuid", volume_uuid,
+                             "--uuid", snapshot_uuid])
         snapshot = json.loads(data)
+        assert snapshot["UUID"] == snapshot_uuid
         assert snapshot["VolumeUUID"] == volume_uuid
-        return snapshot["UUID"]
+        return snapshot_uuid
 
     def delete_snapshot(self, snapshot_uuid, volume_uuid):
         _exec_check(self.base_cmdline +

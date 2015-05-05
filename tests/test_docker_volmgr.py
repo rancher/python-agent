@@ -99,8 +99,12 @@ def test_volmgr_snapshot_create(agent, responses, mocker):
                                           return_value=snapshot_uuid)
     volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
 
-    def post_create(req, resp):
-        create_snapshot.assert_called_once_with(volume_uuid)
+    def pre(req):
+        req["data"]["snapshot"]["uuid"] = snapshot_uuid
+
+    def post(req, resp):
+        create_snapshot.assert_called_once_with(volume_uuid,
+                                                snapshot_uuid)
         snapshot = resp["data"]["snapshot"]
         assert snapshot["+data"]["+fields"]["managedSnapshotUUID"] == \
             snapshot_uuid
@@ -108,7 +112,9 @@ def test_volmgr_snapshot_create(agent, responses, mocker):
             volume_uuid
         del resp["data"]["snapshot"]["+data"]
 
-    event_test(agent, 'docker/volmgr_snapshot_create', post_func=post_create)
+    event_test(agent, 'docker/volmgr_snapshot_create',
+               pre_func=pre,
+               post_func=post)
 
 
 @if_docker
@@ -122,7 +128,7 @@ def test_volmgr_snapshot_backup(agent, responses, mocker):
 
     def pre(req):
         snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
-        snapshot["data"]["fields"]["managedSnapshotUUID"] = snapshot_uuid
+        snapshot["uuid"] = snapshot_uuid
         snapshot["data"]["fields"]["managedVolumeUUID"] = volume_uuid
         sp = req["data"]["snapshotStoragePoolMap"]["storagePool"]
         sp["data"]["fields"]["blockstoreUUID"] = blockstore_uuid
@@ -150,7 +156,7 @@ def test_volmgr_snapshot_remove(agent, responses, mocker):
 
     def pre(req):
         snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
-        snapshot["data"]["fields"]["managedSnapshotUUID"] = snapshot_uuid
+        snapshot["uuid"] = snapshot_uuid
         snapshot["data"]["fields"]["managedVolumeUUID"] = volume_uuid
         sp = req["data"]["snapshotStoragePoolMap"]["storagePool"]
         sp["data"]["fields"]["blockstoreUUID"] = blockstore_uuid

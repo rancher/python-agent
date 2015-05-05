@@ -114,8 +114,8 @@ def remove_volume(path):
              volume_uuid, volume_name_path))
 
 
-def create_snapshot(vol_uuid):
-    return v.create_snapshot(vol_uuid)
+def create_snapshot(vol_uuid, snapshot_uuid):
+    return v.create_snapshot(vol_uuid, snapshot_uuid)
 
 
 def backup_snapshot(snapshot_uuid, vol_uuid, blockstore_uuid):
