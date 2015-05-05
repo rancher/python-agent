@@ -203,6 +203,22 @@ def update_managed_volume(instance, config, start_config):
     start_config['binds'] = new_binds_map
 
 
+def snapshot_exists_internally(snapshot_uuid, volume_uuid):
+    volumes = v.check_snapshot(snapshot_uuid, volume_uuid)
+    if volume_uuid not in volumes:
+        return False
+    return snapshot_uuid in volumes[volume_uuid]["Snapshots"]
+
+
+def snapshot_exists_in_blockstore(snapshot_uuid, volume_uuid, blockstore_uuid):
+    volumes = v.check_snapshot_from_blockstore(snapshot_uuid,
+                                               volume_uuid,
+                                               blockstore_uuid)
+    if volume_uuid not in volumes:
+        return False
+    return snapshot_uuid in volumes[volume_uuid]["Snapshots"]
+
+
 class Volmgr(object):
     def on_startup(self):
         if not enabled():

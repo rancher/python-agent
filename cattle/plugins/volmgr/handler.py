@@ -69,7 +69,8 @@ class SnapshotHandler(BaseHandler):
         return volume_uuid
 
     def _is_snapshot_created(self, snapshot):
-        return 'managedSnapshotUUID' in snapshot.data.fields
+        volume_uuid = self._get_volume_uuid(snapshot.volume)
+        return volmgr.snapshot_exists_internally(snapshot.uuid, volume_uuid)
 
     def _do_snapshot_create(self, snapshot, progress):
         log.info("Creating snapshot")
@@ -84,7 +85,13 @@ class SnapshotHandler(BaseHandler):
         return True
 
     def _is_snapshot_backed_up(self, snapshot, storage_pool):
-        return 'backup' in snapshot.data.fields
+        blockstore_uuid = volmgr.blockstore_uuid
+        if 'blockstoreUUID' in storage_pool.data.fields:
+            blockstore_uuid = storage_pool.data.fields['blockstoreUUID']
+        volume_uuid = snapshot.data.fields['managedVolumeUUID']
+        return volmgr.snapshot_exists_in_blockstore(snapshot.uuid,
+                                                    volume_uuid,
+                                                    blockstore_uuid)
 
     def _do_snapshot_backup(self, snapshot, storage_pool, progress):
         snapshot_uuid = snapshot.uuid
@@ -102,7 +109,13 @@ class SnapshotHandler(BaseHandler):
         return True
 
     def _is_snapshot_removed(self, snapshot, storage_pool):
-        return 'removed' in snapshot.data.fields
+        blockstore_uuid = volmgr.blockstore_uuid
+        if 'blockstoreUUID' in storage_pool.data.fields:
+            blockstore_uuid = storage_pool.data.fields['blockstoreUUID']
+        volume_uuid = snapshot.data.fields['managedVolumeUUID']
+        return not volmgr.snapshot_exists_in_blockstore(snapshot.uuid,
+                                                        volume_uuid,
+                                                        blockstore_uuid)
 
     def _do_snapshot_remove(self, snapshot, storage_pool, progress):
         snapshot_uuid = snapshot.uuid

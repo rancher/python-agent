@@ -182,3 +182,25 @@ class VolmgrService(object):
                      "--uuid", snapshot_uuid,
                      "--volume-uuid", volume_uuid,
                      "--blockstore-uuid", bs_uuid])
+
+    def check_snapshot(self, snapshot_uuid, volume_uuid):
+        data = _exec_output(self.base_cmdline + ["volume", "list",
+                                                 "--snapshot-uuid",
+                                                 snapshot_uuid,
+                                                 "--uuid",
+                                                 volume_uuid])
+        volumes = json.loads(data)["Volumes"]
+        return volumes
+
+    def check_snapshot_from_blockstore(self,
+                                       snapshot_uuid,
+                                       volume_uuid,
+                                       bs_uuid):
+        data = _exec_output(self.base_cmdline + ["blockstore", "list",
+                                                 "--snapshot-uuid",
+                                                 snapshot_uuid,
+                                                 "--volume-uuid",
+                                                 volume_uuid,
+                                                 "--uuid", bs_uuid])
+        volumes = json.loads(data)["Volumes"]
+        return volumes
