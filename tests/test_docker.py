@@ -106,22 +106,22 @@ def test_instance_activate_links(agent, responses):
         env = inspect['Config']['Env']
 
         assert 'MYSQL_NAME=/cattle/mysql' in env
-        assert 'MYSQL_PORT=udp://127.0.0.2:12346' in env
-        assert 'MYSQL_PORT_3307_UDP=udp://127.0.0.2:12346' in env
-        assert 'MYSQL_PORT_3307_UDP_ADDR=127.0.0.2' in env
-        assert 'MYSQL_PORT_3307_UDP_PORT=12346' in env
+        assert 'MYSQL_PORT=udp://mysql:3307' in env
+        assert 'MYSQL_PORT_3307_UDP=udp://mysql:3307' in env
+        assert 'MYSQL_PORT_3307_UDP_ADDR=mysql' in env
+        assert 'MYSQL_PORT_3307_UDP_PORT=3307' in env
         assert 'MYSQL_PORT_3307_UDP_PROTO=udp' in env
 
-        assert 'MYSQL_PORT_3306_TCP=tcp://127.0.0.1:12345' in env
-        assert 'MYSQL_PORT_3306_TCP_ADDR=127.0.0.1' in env
-        assert 'MYSQL_PORT_3306_TCP_PORT=12345' in env
+        assert 'MYSQL_PORT_3306_TCP=tcp://mysql:3306' in env
+        assert 'MYSQL_PORT_3306_TCP_ADDR=mysql' in env
+        assert 'MYSQL_PORT_3306_TCP_PORT=3306' in env
         assert 'MYSQL_PORT_3306_TCP_PROTO=tcp' in env
 
         assert 'REDIS_NAME=/cattle/redis' in env
-        assert 'REDIS_PORT=udp://127.0.0.1:23456' in env
-        assert 'REDIS_PORT_26_UDP=udp://127.0.0.1:23456' in env
-        assert 'REDIS_PORT_26_UDP_ADDR=127.0.0.1' in env
-        assert 'REDIS_PORT_26_UDP_PORT=23456' in env
+        assert 'REDIS_PORT=udp://redis:26' in env
+        assert 'REDIS_PORT_26_UDP=udp://redis:26' in env
+        assert 'REDIS_PORT_26_UDP_ADDR=redis' in env
+        assert 'REDIS_PORT_26_UDP_PORT=26' in env
         assert 'REDIS_PORT_26_UDP_PROTO=udp' in env
 
     event_test(agent, 'docker/instance_activate_links', post_func=post)
@@ -135,7 +135,7 @@ def test_instance_activate_links_no_service(agent, responses):
 
     client = docker_client()
     c = client.create_container('ibuildthecloud/helloworld',
-                                ports=['3307/udp', '3306/tcp'],
+                                ports=[(3307, 'udp'), (3306, 'tcp')],
                                 name='target_mysql')
     client.start(c, port_bindings={
         '3307/udp': ('127.0.0.2', 12346),
