@@ -95,8 +95,8 @@ def setup_links(instance, create_config, start_config):
         try:
             for link_port in link.data.fields.ports:
                 proto = link_port.protocol
-                ip = link_port.ipAddress
-                dst = link_port.publicPort
+                ip = name.lower()
+                dst = link_port.privatePort
                 port = link_port.privatePort
 
                 full_port = '{0}://{1}:{2}'.format(proto, ip, dst)
