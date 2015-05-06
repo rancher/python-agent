@@ -121,8 +121,6 @@ def test_volmgr_snapshot_create(agent, responses, mocker):
         create_snapshot.assert_called_once_with(volume_uuid,
                                                 snapshot_uuid)
         snapshot = resp["data"]["snapshot"]
-        assert snapshot["+data"]["+fields"]["managedSnapshotUUID"] == \
-            snapshot_uuid
         assert snapshot["+data"]["+fields"]["managedVolumeUUID"] == \
             volume_uuid
         del resp["data"]["snapshot"]["+data"]

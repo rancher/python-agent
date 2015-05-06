@@ -79,8 +79,6 @@ class SnapshotHandler(BaseHandler):
         log.info("Creating snapshot for volume %s" % volume_uuid)
         snapshot_uuid = volmgr.create_snapshot(volume_uuid,
                                                snapshot_uuid)
-        snapshot.data.fields['managedSnapshotUUID'] = snapshot_uuid
-        snapshot.data.fields['managedVolumeUUID'] = volume_uuid
         log.info("New snapshot for volume, uuid is %s" % snapshot_uuid)
         return True
 
@@ -138,10 +136,8 @@ class SnapshotHandler(BaseHandler):
         return {
             '+data': {
                 '+fields': {
-                    'managedSnapshotUUID':
-                        snapshot.data.fields['managedSnapshotUUID'],
                     'managedVolumeUUID':
-                        snapshot.data.fields['managedVolumeUUID'],
+                        self._get_volume_uuid(snapshot.volume),
                 }
             }
         }
