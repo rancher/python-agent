@@ -103,7 +103,7 @@
               "stdinOpen": true,
               "directory": null,
               "environment": {
-                "RANCHER_NETWORK": "true"
+                "io.rancher.container.network": "true"
               },
               "command": [
                 "bash"

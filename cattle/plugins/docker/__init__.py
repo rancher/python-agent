@@ -40,7 +40,7 @@ class DockerConfig:
 
     @staticmethod
     def api_version():
-        return default_value('DOCKER_API_VERSION', '1.15')
+        return default_value('DOCKER_API_VERSION', '1.18')
 
     @staticmethod
     def docker_required():

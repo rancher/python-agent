@@ -15,7 +15,7 @@
                         "Labels": {},
                         "Image": "ibuildthecloud/helloworld:latest",
                         "Names": [
-                            "/ca-c861f990-4472-4fa1-960f-65171b544c28"
+                            "/c861f990-4472-4fa1-960f-65171b544c28"
                         ],
                         "Ports": [
                             {
@@ -28,7 +28,10 @@
                                 "Type": "tcp",
                                 "PrivatePort": 8080
                             }
-                        ]
+                        ],
+                        "Labels": {
+                            "io.rancher.container.uuid": "c861f990-4472-4fa1-960f-65171b544c28"
+                        }
                     }
                 }
             }

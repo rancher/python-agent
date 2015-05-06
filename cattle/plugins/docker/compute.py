@@ -408,7 +408,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         self._setup_simple_config_fields(start_config, instance,
                                          START_CONFIG_FIELDS)
 
-        add_label(create_config, RANCHER_UUID=instance.uuid)
+        add_label(create_config, {'io.rancher.container.uuid': instance.uuid})
 
         self._setup_hostname(create_config, instance)
 
@@ -423,6 +423,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         self._setup_links(start_config, instance)
 
         self._setup_networking(instance, host, create_config, start_config)
+
+        self._flag_system_container(instance, create_config)
 
         setup_cattle_config_url(instance, create_config)
 
@@ -455,6 +457,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 else:
                     raise
         return container
+
+    def _flag_system_container(self, instance, create_config):
+        try:
+            if instance.systemContainer:
+                add_label(create_config, {
+                    'io.rancher.container.system': instance.systemContainer})
+        except (KeyError, AttributeError):
+            pass
 
     def _setup_simple_config_fields(self, config, instance, fields):
         for src, dest in fields:

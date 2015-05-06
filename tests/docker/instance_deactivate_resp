@@ -14,7 +14,11 @@
                         "Names": [
                             "/c861f990-4472-4fa1-960f-65171b544c28"
                         ],
-                        "Ports": []
+                        "Ports": [],
+                        "Labels": {
+                            "io.rancher.container.uuid": "c861f990-4472-4fa1-960f-65171b544c28",
+                            "io.rancher.container.ip": "10.10.10.10/24"
+                        }
                     }
                 }
             }

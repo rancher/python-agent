@@ -91,7 +91,7 @@
                 "requestedState": null,
                 "state": "starting",
                 "type": "instance",
-                "uuid": "ca-c861f990-4472-4fa1-960f-65171b544c28",
+                "uuid": "c861f990-4472-4fa1-960f-65171b544c28",
                 "volumes": [
                     {
                         "accountId": 1,

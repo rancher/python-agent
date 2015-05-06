@@ -87,17 +87,11 @@ def instance_only_activate(agent, responses):
     def post(req, resp):
         docker_inspect = resp['data']['instanceHostMap']['instance']['+data'][
             'dockerInspect']
-        envs = docker_inspect['Config']['Env']
-        found_ip_env = False
+        labels = docker_inspect['Config']['Labels']
         ip = req['data']['instanceHostMap']['instance']['nics'][
             0]['ipAddresses'][0]
-        expected_ip_env_var = "RANCHER_IP={0}/{1}".format(ip.address,
-                                                          ip.subnet.cidrSize)
-        for env in envs:
-            if env == expected_ip_env_var:
-                found_ip_env = True
-                break
-        assert found_ip_env
+        expected_ip = "{0}/{1}".format(ip.address, ip.subnet.cidrSize)
+        assert labels['io.rancher.container.ip'] == expected_ip
         instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post)

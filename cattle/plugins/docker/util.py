@@ -36,8 +36,14 @@ def add_to_env(config, *args, **kw):
             env[k] = v
 
 
-def add_label(config, **kw):
-    add_to_env(config, **kw)
+def add_label(config, new_labels):
+    try:
+        labels = config['labels']
+    except KeyError:
+        labels = {}
+        config['labels'] = labels
+
+    labels.update(new_labels)
 
 
 def is_nonrancher_container(instance):
