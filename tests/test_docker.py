@@ -746,6 +746,9 @@ def ping_post_process(req, resp):
         assert instance['dockerId'] is not None
         del instance['dockerId']
 
+        assert instance['created'] is not None
+        del instance['created']
+
         resources = filter(lambda x: x.get('kind') == 'docker', resources)
         resources.append(instance)
 
@@ -822,3 +825,59 @@ def test_instance_activate_ipsec_lb_agent(agent, responses):
 
     event_test(agent, 'docker/instance_activate_ipsec_lb_agent',
                post_func=post)
+
+
+@if_docker
+def test_instance_force_stop(agent, responses):
+    delete_container('/force-stop-test')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='force-stop-test')
+    client.start(c)
+    inspect = client.inspect_container(c)
+    assert inspect['State']['Running'] is True
+
+    def pre(req):
+        req['data']['instanceForceStop']['id'] = c['Id']
+
+    def post(req, resp):
+        inspect = client.inspect_container(c)
+        assert inspect['State']['Running'] is False
+
+    event_test(agent, 'docker/instance_force_stop',
+               pre_func=pre, post_func=post, no_diff=True)
+
+    # Assert that you can call on a stop container without issue
+    event_test(agent, 'docker/instance_force_stop',
+               pre_func=pre, post_func=post, no_diff=True)
+
+    # And a non-existent one
+    client.remove_container(c)
+    event_test(agent, 'docker/instance_force_stop', pre_func=pre, no_diff=True)
+
+
+def test_instance_remove(agent, responses):
+    instance_only_activate(agent, responses)
+    container = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    assert container is not None
+
+    def post(req, resp):
+        c = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        assert c is None
+    event_test(agent, 'docker/instance_remove', post_func=post)
+
+    # Test finding and removing by externalId instead of uuid
+    instance_only_activate(agent, responses)
+    container = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    assert container is not None
+
+    def pre(req):
+        req['data']['instanceHostMap']['instance']['externalId'] = container[
+            'Id']
+        req['data']['instanceHostMap']['instance']['uuid'] = 'wont be found'
+
+    def post(req, resp):
+        c = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        assert c is None
+    event_test(agent, 'docker/instance_remove', pre_func=pre, post_func=post)

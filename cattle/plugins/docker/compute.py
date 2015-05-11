@@ -92,24 +92,85 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if not utils.ping_include_instances(ping):
             return
 
-        containers = []
-        for c in docker_client().containers():
-            names = c.get('Names')
-            if names is None:
-                continue
+        utils.ping_add_resources(pong, {
+            'type': 'hostUuid',
+            'uuid': DockerConfig.docker_uuid()
+        })
 
-            for name in names:
-                if name.startswith('/'):
-                    name = name[1:]
-                    containers.append({
-                        'type': 'instance',
-                        'uuid': name,
-                        'state': 'running',
-                        'dockerId': c.get('Id')
-                    })
+        containers = []
+        running, stopped = self._get_all_containers_by_state()
+
+        for key, container in running.iteritems():
+            self.add_container('running', container, containers)
+
+        for key, container in stopped.iteritems():
+            self.add_container('stopped', container, containers)
 
         utils.ping_add_resources(pong, *containers)
         utils.ping_set_option(pong, 'instances', True)
+
+    def add_container(self, state, container, containers):
+        container_data = {
+            'type': 'instance',
+            'uuid': self._get_uuid(container),
+            'state': state,
+            'systemContainer': self._get_sys_container(container),
+            'dockerId': container['Id'],
+            'image': container['Image'],
+            'labels': container['Labels'],
+            'created': container['Created'],
+        }
+        containers.append(container_data)
+
+    def _get_all_containers_by_state(self):
+        client = docker_client()
+
+        all_containers = {}
+        for a in client.containers(all=True):
+            all_containers[a['Id']] = a
+
+        stopped_containers = {}
+        for s in client.containers(all=True, filters={'status': 'exited'}):
+            stopped_containers[s['Id']] = s
+            del all_containers[s['Id']]
+
+        return all_containers, stopped_containers
+
+    def _get_sys_container(self, container):
+        try:
+            return container['Labels']['io.rancher.container.system']
+        except KeyError:
+            pass
+
+    def _get_uuid(self, container):
+        try:
+            uuid = container['Labels']['io.rancher.container.uuid']
+            if uuid:
+                return uuid
+        except KeyError:
+            pass
+
+        names = container['Names']
+        if not names:
+            # No name?? Make one up
+            return 'no-uuid-%s' % container['Id']
+
+        if names[0].startswith('/'):
+            return names[0][1:]
+        else:
+            return names[0]
+
+    def _determine_state(self, container):
+        status = container['Status']
+        if status == '':
+            return 'created'
+        elif 'Up ' in status:
+            return 'running'
+        elif 'Exited ' in status:
+            return 'stopped'
+        else:
+            # Unknown. Assume running and state should sync up eventually.
+            return 'running'
 
     def _add_resources(self, ping, pong):
         if not utils.ping_include_resources(ping):
@@ -626,3 +687,23 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if not _is_stopped(c, container):
             raise Exception('Failed to stop container {0}'
                             .format(instance.uuid))
+
+    def _do_instance_force_stop(self, instanceForceStop):
+        try:
+            docker_client().stop(instanceForceStop['id'])
+        except APIError as e:
+            if e.message.response.status_code != 404:
+                raise e
+
+    def _is_instance_removed(self, instance, host):
+        client = self._get_docker_client(host)
+        container = self.get_container(client, instance)
+        return container is None
+
+    def _do_instance_remove(self, instance, host, progress):
+        client = self._get_docker_client(host)
+        container = self.get_container(client, instance)
+        if container is None:
+            return
+
+        client.remove_container(container, force=True, v=True)

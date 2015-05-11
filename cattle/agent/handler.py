@@ -107,6 +107,7 @@ class KindBasedMixin(object):
         ["volumeStoragePoolMap", "storagePool", "kind"],
         ["snapshotStoragePoolMap", "storagePool", "kind"],
         ["instanceHostMap", "host", "kind"],
+        ["instanceForceStop", "kind"]
     ]
 
     def __init__(self, kind=None):

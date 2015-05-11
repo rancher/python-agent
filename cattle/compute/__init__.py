@@ -47,6 +47,26 @@ class BaseComputeDriver(BaseHandler):
                                                         progress)
         )
 
+    def instance_remove(self, req=None, instanceHostMap=None,
+                        processData=None, **kw):
+        instance, host = self.get_instance_host_from_map(instanceHostMap)
+
+        progress = Progress(req)
+
+        if instance is not None:
+            instance.processData = processData
+
+        return self._do(
+            req=req,
+            check=lambda: self._is_instance_removed(instance, host),
+            result=lambda: {},
+            lock_obj=instance,
+            action=lambda: self._do_instance_remove(instance, host, progress)
+        )
+
+    def instance_force_stop(self, req=None, instanceForceStop=None):
+        self._do_instance_force_stop(instanceForceStop)
+
     def get_instance_host_from_map(self, instanceHostMap):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
@@ -82,4 +102,10 @@ class BaseComputeDriver(BaseHandler):
         raise Exception("Not implemented")
 
     def _do_instance_deactivate(self, instance, host):
+        raise Exception("Not implemented")
+
+    def _do_instance_force_stop(self, instanceForceStop):
+        raise Exception("Not implemented")
+
+    def _do_instance_remove(self, instance, host):
         raise Exception("Not implemented")
