@@ -1,5 +1,5 @@
 import logging
-from os import path, remove, makedirs, rename
+from os import path, remove, makedirs, rename, environ
 
 from . import docker_client, pull_image
 from . import DockerConfig
@@ -426,6 +426,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         self._flag_system_container(instance, create_config)
 
+        self._setup_proxy(instance, create_config)
+
         setup_cattle_config_url(instance, create_config)
 
         container = self._create_container(client, create_config,
@@ -463,6 +465,20 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             if instance.systemContainer:
                 add_label(create_config, {
                     'io.rancher.container.system': instance.systemContainer})
+        except (KeyError, AttributeError):
+            pass
+
+    def _setup_proxy(self, instance, create_config):
+        try:
+            if instance.systemContainer:
+                if 'environment' not in create_config:
+                    create_config['environment'] = {}
+
+                for i in ['http_proxy', 'https_proxy', 'NO_PROXY']:
+                    try:
+                        create_config['environment'][i] = environ[i]
+                    except KeyError:
+                        pass
         except (KeyError, AttributeError):
             pass
 
