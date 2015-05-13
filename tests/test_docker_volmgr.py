@@ -98,17 +98,36 @@ def test_volmgr_snapshot_create(agent, responses, mocker):
                                           "create_snapshot",
                                           return_value=snapshot_uuid)
     volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    volume_content1 = {'DevID': 7,
+                       'Snapshots': {},
+                       'Size': 104857600}
+    volume_content2 = {'DevID': 7,
+                       'Snapshots': {snapshot_uuid: {}},
+                       'Size': 104857600}
+    check_snapshot_value1 = {volume_uuid: volume_content1}
+    check_snapshot_value2 = {volume_uuid: volume_content2}
+    check_snapshot = mocker.patch.object(service.VolmgrService,
+                                         "check_snapshot",
+                                         side_effect=[{},
+                                                      check_snapshot_value1,
+                                                      check_snapshot_value2])
 
-    def post_create(req, resp):
-        create_snapshot.assert_called_once_with(volume_uuid)
+    def pre(req):
+        req["data"]["snapshot"]["uuid"] = snapshot_uuid
+
+    def post(req, resp):
+        assert check_snapshot.call_count == 3
+        check_snapshot.assert_called_with(snapshot_uuid, volume_uuid)
+        create_snapshot.assert_called_once_with(volume_uuid,
+                                                snapshot_uuid)
         snapshot = resp["data"]["snapshot"]
-        assert snapshot["+data"]["+fields"]["managedSnapshotUUID"] == \
-            snapshot_uuid
         assert snapshot["+data"]["+fields"]["managedVolumeUUID"] == \
             volume_uuid
         del resp["data"]["snapshot"]["+data"]
 
-    event_test(agent, 'docker/volmgr_snapshot_create', post_func=post_create)
+    event_test(agent, 'docker/volmgr_snapshot_create',
+               pre_func=pre,
+               post_func=post)
 
 
 @if_docker
@@ -116,18 +135,33 @@ def test_volmgr_snapshot_backup(agent, responses, mocker):
     _cleanup_volmgr()
     snapshot_uuid = "8464e7bf-0b07-417c-b6cf-a253a47dc6bb"
     volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
+    volume_content1 = {"Base": "", "UUID": volume_uuid, "Snapshots": {}}
+    volume_content2 = {"Base": "", "UUID": volume_uuid, "Snapshots": {
+        snapshot_uuid: {}
+    }}
+    check_bs_value1 = {volume_uuid: volume_content1}
+    check_bs_value2 = {volume_uuid: volume_content2}
+    check_bs = mocker.patch.object(service.VolmgrService,
+                                   "check_snapshot_from_blockstore",
+                                   side_effect=[{},
+                                                check_bs_value1,
+                                                check_bs_value2])
     backup_snapshot = mocker.patch.object(service.VolmgrService,
                                           "backup_snapshot_to_blockstore")
     blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
 
     def pre(req):
         snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
-        snapshot["data"]["fields"]["managedSnapshotUUID"] = snapshot_uuid
+        snapshot["uuid"] = snapshot_uuid
         snapshot["data"]["fields"]["managedVolumeUUID"] = volume_uuid
         sp = req["data"]["snapshotStoragePoolMap"]["storagePool"]
         sp["data"]["fields"]["blockstoreUUID"] = blockstore_uuid
 
     def post(req, resp):
+        assert check_bs.call_count == 3
+        check_bs.assert_called_with(snapshot_uuid,
+                                    volume_uuid,
+                                    blockstore_uuid)
         backup_snapshot.assert_called_once_with(snapshot_uuid,
                                                 volume_uuid,
                                                 blockstore_uuid)
@@ -143,6 +177,17 @@ def test_volmgr_snapshot_remove(agent, responses, mocker):
     volume_uuid = "0bcc6a7f-0c46-4d06-af51-224a47deeea8"
     blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
 
+    volume_content1 = {"Base": "", "UUID": volume_uuid, "Snapshots": {
+        snapshot_uuid: {}
+    }}
+    volume_content2 = {"Base": "", "UUID": volume_uuid, "Snapshots": {}}
+    check_bs_value1 = {volume_uuid: volume_content1}
+    check_bs_value2 = {volume_uuid: volume_content2}
+    check_bs = mocker.patch.object(service.VolmgrService,
+                                   "check_snapshot_from_blockstore",
+                                   side_effect=[check_bs_value1,
+                                                check_bs_value1,
+                                                check_bs_value2])
     delete_snapshot = mocker.patch.object(service.VolmgrService,
                                           "delete_snapshot")
     remove_snapshot_from_blockstore = mocker.patch.object(
@@ -150,12 +195,16 @@ def test_volmgr_snapshot_remove(agent, responses, mocker):
 
     def pre(req):
         snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
-        snapshot["data"]["fields"]["managedSnapshotUUID"] = snapshot_uuid
+        snapshot["uuid"] = snapshot_uuid
         snapshot["data"]["fields"]["managedVolumeUUID"] = volume_uuid
         sp = req["data"]["snapshotStoragePoolMap"]["storagePool"]
         sp["data"]["fields"]["blockstoreUUID"] = blockstore_uuid
 
     def post(req, resp):
+        assert check_bs.call_count == 3
+        check_bs.assert_called_with(snapshot_uuid,
+                                    volume_uuid,
+                                    blockstore_uuid)
         delete_snapshot.assert_called_once_with(snapshot_uuid, volume_uuid)
         remove_snapshot_from_blockstore.assert_called_with(
             snapshot_uuid,

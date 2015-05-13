@@ -114,8 +114,8 @@ def remove_volume(path):
              volume_uuid, volume_name_path))
 
 
-def create_snapshot(vol_uuid):
-    return v.create_snapshot(vol_uuid)
+def create_snapshot(vol_uuid, snapshot_uuid):
+    return v.create_snapshot(vol_uuid, snapshot_uuid)
 
 
 def backup_snapshot(snapshot_uuid, vol_uuid, blockstore_uuid):
@@ -201,6 +201,22 @@ def update_managed_volume(instance, config, start_config):
         else:
             new_binds_map[src] = binds_map[src]
     start_config['binds'] = new_binds_map
+
+
+def snapshot_exists_internally(snapshot_uuid, volume_uuid):
+    volumes = v.check_snapshot(snapshot_uuid, volume_uuid)
+    if volume_uuid not in volumes:
+        return False
+    return snapshot_uuid in volumes[volume_uuid]["Snapshots"]
+
+
+def snapshot_exists_in_blockstore(snapshot_uuid, volume_uuid, blockstore_uuid):
+    volumes = v.check_snapshot_from_blockstore(snapshot_uuid,
+                                               volume_uuid,
+                                               blockstore_uuid)
+    if volume_uuid not in volumes:
+        return False
+    return snapshot_uuid in volumes[volume_uuid]["Snapshots"]
 
 
 class Volmgr(object):
