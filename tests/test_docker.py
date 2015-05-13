@@ -881,3 +881,13 @@ def test_instance_remove(agent, responses):
         c = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
         assert c is None
     event_test(agent, 'docker/instance_remove', pre_func=pre, post_func=post)
+
+
+def test_instance_activate_labels(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/instance_activate_labels',
+               post_func=post)

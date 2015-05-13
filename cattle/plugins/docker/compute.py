@@ -23,6 +23,7 @@ log = logging.getLogger('docker')
 
 # Docker-py doesn't support working_dir, maybe in 0.2.4?
 CREATE_CONFIG_FIELDS = [
+    ('labels', 'labels'),
     ('environment', 'environment'),
     ('directory', 'working_dir'),
     ('user', 'user'),
