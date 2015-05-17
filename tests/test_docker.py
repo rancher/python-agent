@@ -733,31 +733,47 @@ def test_instance_deactivate(agent, responses):
     assert end - start > 1
 
 
+def assert_ping_stat_resources(resp):
+    hostname = Config.hostname()
+    pool_name = hostname + ' Storage Pool'
+    assert resp['data']['resources'][0]['name'] == hostname
+    assert resp['data']['resources'][1]['name'] == pool_name
+    resp['data']['resources'][0]['name'] = 'localhost'
+    resp['data']['resources'][1]['name'] = 'localhost Storage Pool'
+
+
 def ping_post_process(req, resp):
-        hostname = Config.hostname()
-        pool_name = hostname + ' Storage Pool'
-        resources = resp['data']['resources']
+    resources = resp['data']['resources']
 
-        uuid = 'c861f990-4472-4fa1-960f-65171b544c28'
-        instances = filter(lambda x: x['type'] == 'instance' and
-                           x['uuid'] == uuid, resources)
-        assert len(instances) == 1
-        instance = instances[0]
-        assert instance['dockerId'] is not None
-        del instance['dockerId']
+    uuids = ['uuid-running', 'uuid-stopped', 'uuid-created']
+    instances = []
+    for r in resources:
+        if r['type'] == 'instance' and r['uuid'] in uuids:
+            if r['uuid'] == 'uuid-running':
+                assert r['state'] == 'running'
+            elif r['uuid'] == 'uuid-stopped':
+                assert r['state'] == 'stopped'
 
-        assert instance['created'] is not None
-        del instance['created']
+            assert r['dockerId'] is not None
+            del r['dockerId']
+            assert r['created'] is not None
+            del r['created']
+            instances.append(r)
 
-        resources = filter(lambda x: x.get('kind') == 'docker', resources)
-        resources.append(instance)
+    assert len(instances) == 2
 
-        resp['data']['resources'] = resources
+    resources = filter(lambda x: x.get('kind') == 'docker', resources)
+    resources += instances
+    resp['data']['resources'] = resources
+    assert_ping_stat_resources(resp)
 
-        assert resp['data']['resources'][0]['name'] == hostname
-        assert resp['data']['resources'][1]['name'] == pool_name
-        resp['data']['resources'][0]['name'] = 'localhost'
-        resp['data']['resources'][1]['name'] = 'localhost Storage Pool'
+
+def ping_post_process_state_exception(req, resp):
+    # This filters down the returned resources to just the stat-based ones.
+    # In other words, it gets rid of all containers from the response.
+    resp['data']['resources'] = filter(lambda x: x.get('kind') == 'docker',
+                                       resp['data']['resources'])
+    assert_ping_stat_resources(resp)
 
 
 @if_docker
@@ -765,7 +781,26 @@ def test_ping(agent, responses, mocker):
     mocker.patch.object(HostInfo, 'collect_data',
                         return_value=json_data('docker/host_info_resp'))
 
-    instance_only_activate(agent, responses)
+    client = docker_client()
+
+    delete_container('/named-running')
+    delete_container('/named-stopped')
+    delete_container('/named-created')
+
+    client.create_container('ibuildthecloud/helloworld',
+                            name='named-created', labels={
+                                'io.rancher.container.uuid': 'uuid-created'})
+    running = client.create_container('ibuildthecloud/helloworld',
+                                      name='named-running', labels={
+                                          'io.rancher.container.uuid':
+                                          'uuid-running'})
+    client.start(running)
+    stopped = client.create_container('ibuildthecloud/helloworld',
+                                      name='named-stopped', labels={
+                                          'io.rancher.container.uuid':
+                                          'uuid-stopped'})
+    client.start(stopped)
+    client.kill(stopped)
 
     CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
     CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
@@ -778,13 +813,11 @@ def test_ping_stat_exception(agent, responses, mocker):
     mocker.patch.object(HostInfo, 'collect_data',
                         side_effect=ValueError('Bad Value Found'))
 
-    instance_only_activate(agent, responses)
-
     CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
     CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
 
     event_test(agent, 'docker/ping_stat_exception',
-               post_func=ping_post_process)
+               post_func=ping_post_process_state_exception)
 
 
 @if_docker

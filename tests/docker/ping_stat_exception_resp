@@ -18,15 +18,6 @@
                 "hostUuid" : "testuuid",
                 "name" : "localhost Storage Pool",
                 "kind" : "docker"
-            },
-            {
-                "type" : "instance",
-                "uuid" : "c861f990-4472-4fa1-960f-65171b544c28",
-                "state" : "running",
-                "image": "ibuildthecloud/helloworld:latest",
-                "systemContainer": null,
-                "labels": {"io.rancher.container.uuid": "c861f990-4472-4fa1-960f-65171b544c28",
-                "io.rancher.container.ip": "10.10.10.10/24"}
             }
         ],
         "options" : {

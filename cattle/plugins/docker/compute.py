@@ -99,12 +99,12 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         })
 
         containers = []
-        running, stopped = self._get_all_containers_by_state()
+        running, nonrunning = self._get_all_containers_by_state()
 
         for key, container in running.iteritems():
             self.add_container('running', container, containers)
 
-        for key, container in stopped.iteritems():
+        for key, container in nonrunning.iteritems():
             self.add_container('stopped', container, containers)
 
         utils.ping_add_resources(pong, *containers)
@@ -126,16 +126,18 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _get_all_containers_by_state(self):
         client = docker_client()
 
-        all_containers = {}
-        for a in client.containers(all=True):
-            all_containers[a['Id']] = a
+        nonrunning_containers = {}
+        for c in client.containers(all=True):
+            # Blank status only wait to distinguish created from stopped
+            if c['Status'] != '':
+                nonrunning_containers[c['Id']] = c
 
-        stopped_containers = {}
-        for s in client.containers(all=True, filters={'status': 'exited'}):
-            stopped_containers[s['Id']] = s
-            del all_containers[s['Id']]
+        running_containers = {}
+        for c in client.containers(all=False):
+            running_containers[c['Id']] = c
+            del nonrunning_containers[c['Id']]
 
-        return all_containers, stopped_containers
+        return running_containers, nonrunning_containers
 
     def _get_sys_container(self, container):
         try:
