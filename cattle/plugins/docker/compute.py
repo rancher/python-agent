@@ -15,7 +15,7 @@ from cattle.plugins.docker.util import add_label, is_no_op
 from cattle.progress import Progress
 from cattle.lock import lock
 from cattle.plugins.docker.network import setup_ipsec, setup_links, \
-    setup_mac_and_ip, setup_ports
+    setup_mac_and_ip, setup_ports, setup_network_mode
 from cattle.plugins.docker.agent import setup_cattle_config_url
 from cattle.plugins.volmgr import volmgr
 
@@ -237,6 +237,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         return id == container_id
 
     def get_container(self, client, instance):
+        if instance is None:
+            return None
+
         name = '/{0}'.format(instance.uuid)
         container = self.get_container_by(client,
                                           lambda x: self._name_filter(name, x))
@@ -600,6 +603,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
     def _setup_networking(self, instance, host, create_config, start_config):
+        client = self._get_docker_client(host)
+
+        setup_network_mode(instance, self, client, create_config, start_config)
         setup_mac_and_ip(instance, create_config)
         setup_ports(instance, create_config, start_config)
         setup_links(instance, create_config, start_config)
