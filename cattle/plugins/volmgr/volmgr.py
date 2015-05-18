@@ -97,6 +97,21 @@ def remove_internal_snapshots_for_volume(volume_uuid):
         v.delete_snapshot(s, volume_uuid)
 
 
+def cleanup_internal_snapshots(latest_snapshots_set,
+                               volume_uuid,
+                               blockstore_uuid):
+    snapshots = v.list_volumes(volume_uuid)[volume_uuid]["Snapshots"]
+    for snapshot_uuid in snapshots:
+        if snapshot_uuid not in latest_snapshots_set:
+            # Don't cleanup if it's not backed up yet
+            if snapshot_exists_in_blockstore(snapshot_uuid,
+                                             volume_uuid,
+                                             blockstore_uuid):
+                log.info("Removing snapshot %s for volume %s" % (
+                    snapshot_uuid, volume_uuid))
+                v.delete_snapshot(snapshot_uuid, volume_uuid)
+
+
 def remove_volume(path):
     if not enabled():
         return
