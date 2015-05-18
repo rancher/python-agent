@@ -11,7 +11,7 @@ from cattle import CONFIG_OVERRIDE, Config
 from .common_fixtures import TEST_DIR
 
 CONFIG_OVERRIDE['DOCKER_REQUIRED'] = 'false'  # NOQA
-CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'
+CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'  # NOQA
 
 from datadiff.tools import assert_equals
 

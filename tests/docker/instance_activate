@@ -128,7 +128,10 @@
                                     "cidrSize": 24
                                 }
                             }
-                        ]
+                        ],
+                        "network": {
+                            "kind": "dockerBridge"
+                        }
                     }
                 ],
                 "zoneId": 1

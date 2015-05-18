@@ -7,6 +7,28 @@ from cattle.utils import get_or_create_map, get_or_create_list
 log = logging.getLogger('docker')
 
 
+def setup_network_mode(instance, compute, client, create_config, start_config):
+    """
+    Based on the network configuration we choose the network mode to set in
+    Docker.  We only really look for none, host, or container.  For all
+    all other configurations we assume bridge mode
+    """
+    try:
+        kind = instance.nics[0].network.kind
+        if kind == 'dockerHost':
+            start_config['network_mode'] = 'host'
+        elif kind == 'dockerNone':
+            create_config['network_disabled'] = True
+        elif kind == 'dockerContainer':
+            id = instance.networkContainer.uuid
+            other = compute.get_container(client, instance.networkContainer)
+            if other is not None:
+                id = other['Id']
+            start_config['network_mode'] = 'container:{}'.format(id)
+    except (KeyError, AttributeError, IndexError):
+        pass
+
+
 def setup_mac_and_ip(instance, create_config):
     """
     Configures the mac address and primary ip address for the the supplied
