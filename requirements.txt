@@ -4,3 +4,5 @@ portalocker
 subprocess32
 psutil
 arrow
+ndg-httpsclient
+requests==2.7.0
