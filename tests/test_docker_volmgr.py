@@ -139,16 +139,60 @@ def test_volmgr_snapshot_backup(agent, responses, mocker):
     volume_content2 = {"Base": "", "UUID": volume_uuid, "Snapshots": {
         snapshot_uuid: {}
     }}
-    check_bs_value1 = {volume_uuid: volume_content1}
-    check_bs_value2 = {volume_uuid: volume_content2}
+    snap1_uuid = "c912c1f5-85d5-4488-9fbb-d58e876c44cc"
+    snap2_uuid = "b2896c11-13e4-41d8-bd82-161ec113c381"
+
+    global call_count
+    call_count = 0
+
+    def check_bs_side_effect(sp_uuid, vol_uuid, bs_uuid):
+        if sp_uuid == snap1_uuid or sp_uuid == snap2_uuid:
+            volume_content_cleanup = {volume_uuid: {"Base": "",
+                                                    "UUID": volume_uuid,
+                                                    "Snapshots": {sp_uuid: {}}
+                                                    }
+                                      }
+            return volume_content_cleanup
+        if sp_uuid == snapshot_uuid:
+            global call_count
+            call_count += 1
+            return {
+                1: {},
+                2: {volume_uuid: volume_content1},
+                3: {volume_uuid: volume_content2},
+            }[call_count]
+
     check_bs = mocker.patch.object(service.VolmgrService,
                                    "check_snapshot_from_blockstore",
-                                   side_effect=[{},
-                                                check_bs_value1,
-                                                check_bs_value2])
+                                   side_effect=check_bs_side_effect)
     backup_snapshot = mocker.patch.object(service.VolmgrService,
                                           "backup_snapshot_to_blockstore")
     blockstore_uuid = "57c26b32-b3f3-4ceb-8a26-3c567d7d4166"
+
+    data = '''{
+        "Volumes": {
+            "0bcc6a7f-0c46-4d06-af51-224a47deeea8": {
+                "DevID": 2,
+                "Size": 1073741824,
+                "Snapshots": {
+                    "c912c1f5-85d5-4488-9fbb-d58e876c44cc": {
+                        "DevID": 4
+                    },
+                    "b2896c11-13e4-41d8-bd82-161ec113c381": {
+                        "DevID": 5
+                    },
+                    "8464e7bf-0b07-417c-b6cf-a253a47dc6bb": {
+                        "DevID": 6
+                    }
+                }
+            }
+        }
+    }'''
+    volume_response = json.loads(data)["Volumes"]
+    list_volumes = mocker.patch.object(service.VolmgrService, "list_volumes",
+                                       return_value=volume_response)
+    delete_snapshot = mocker.patch.object(service.VolmgrService,
+                                          "delete_snapshot")
 
     def pre(req):
         snapshot = req["data"]["snapshotStoragePoolMap"]["snapshot"]
@@ -158,13 +202,19 @@ def test_volmgr_snapshot_backup(agent, responses, mocker):
         sp["data"]["fields"]["blockstoreUUID"] = blockstore_uuid
 
     def post(req, resp):
-        assert check_bs.call_count == 3
-        check_bs.assert_called_with(snapshot_uuid,
-                                    volume_uuid,
-                                    blockstore_uuid)
         backup_snapshot.assert_called_once_with(snapshot_uuid,
                                                 volume_uuid,
                                                 blockstore_uuid)
+        list_volumes.assert_called_once_with(volume_uuid)
+        assert delete_snapshot.call_count == 2
+        delete_calls = [mock.call(snap1_uuid, volume_uuid),
+                        mock.call(snap2_uuid, volume_uuid)]
+        delete_snapshot.assert_has_calls(delete_calls, any_order=True)
+        assert check_bs.call_count == 5
+        check_calls = [mock.call(snapshot_uuid, volume_uuid, blockstore_uuid),
+                       mock.call(snap1_uuid, volume_uuid, blockstore_uuid),
+                       mock.call(snap2_uuid, volume_uuid, blockstore_uuid)]
+        check_bs.assert_has_calls(check_calls, any_order=True)
 
     event_test(agent, 'docker/volmgr_snapshot_backup',
                pre_func=pre, post_func=post)

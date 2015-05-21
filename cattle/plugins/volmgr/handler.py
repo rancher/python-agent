@@ -23,12 +23,13 @@ class SnapshotHandler(BaseHandler):
 
     def snapshot_create(self, req=None, snapshot=None, **kw):
         progress = Progress(req)
+        volume = snapshot.volume
 
         return self._do(
             req=req,
             check=lambda: self._is_snapshot_created(snapshot),
             result=lambda: self._get_response_data(req, snapshot),
-            lock_obj=snapshot,
+            lock_obj=volume,
             action=lambda: self._do_snapshot_create(snapshot, progress)
         )
 
@@ -36,13 +37,14 @@ class SnapshotHandler(BaseHandler):
         snapshot = snapshotStoragePoolMap.snapshot
         storage_pool = snapshotStoragePoolMap.storagePool
         progress = Progress(req)
+        volume = snapshot.volume
 
         return self._do(
             req=req,
             check=lambda: self._is_snapshot_backed_up(snapshot, storage_pool),
             result=lambda: self._get_response_data(
                 req, snapshotStoragePoolMap),
-            lock_obj=snapshot,
+            lock_obj=volume,
             action=lambda: self._do_snapshot_backup(
                 snapshot, storage_pool, progress)
         )
@@ -51,13 +53,14 @@ class SnapshotHandler(BaseHandler):
         snapshot = snapshotStoragePoolMap.snapshot
         storage_pool = snapshotStoragePoolMap.storagePool
         progress = Progress(req)
+        volume = snapshot.volume
 
         return self._do(
             req=req,
             check=lambda: self._is_snapshot_removed(snapshot, storage_pool),
             result=lambda: self._get_response_data(
                 req, snapshotStoragePoolMap),
-            lock_obj=snapshot,
+            lock_obj=volume,
             action=lambda: self._do_snapshot_remove(
                 snapshot, storage_pool, progress)
         )
@@ -103,7 +106,11 @@ class SnapshotHandler(BaseHandler):
                                blockstore_uuid)
         log.info("Backed up snapshot %s for volume %s" % (
             snapshot_uuid, volume_uuid))
-        snapshot.data.fields['backup'] = True
+        latest_snapshots_set = set([snapshot_uuid])
+        volmgr.cleanup_internal_snapshots(latest_snapshots_set,
+                                          volume_uuid,
+                                          blockstore_uuid)
+        log.info("Cleaned up snapshots for volume %s" % volume_uuid)
         return True
 
     def _is_snapshot_removed(self, snapshot, storage_pool):
@@ -128,7 +135,6 @@ class SnapshotHandler(BaseHandler):
         volmgr.delete_snapshot(snapshot_uuid, volume_uuid)
         log.info("Removed snapshot %s for volume %s" % (
             snapshot_uuid, volume_uuid))
-        snapshot.data.fields['removed'] = True
         return True
 
     def _get_snapshot_data(self, obj):
