@@ -23,11 +23,7 @@ def test_image_activate(agent, responses):
     except APIError:
         pass
 
-    def post(req, resp):
-        image_data = resp['data']['imageStoragePoolMap']['+data']
-        del image_data['dockerImage']['VirtualSize']
-
-    event_test(agent, 'docker/image_activate', post_func=post)
+    event_test(agent, 'docker/image_activate')
 
 
 @if_docker
@@ -51,11 +47,7 @@ def test_image_activate_no_reg_cred_pull_image(agent, responses):
         image = req['data']['imageStoragePoolMap']['image']
         image['registryCredential'] = None
 
-    def post(req, resp):
-        image_data = resp['data']['imageStoragePoolMap']['+data']
-        del image_data['dockerImage']['VirtualSize']
-
-    event_test(agent, 'docker/image_activate', pre_func=pre, post_func=post)
+    event_test(agent, 'docker/image_activate', pre_func=pre)
 
 
 def _pull_image_by_name(agent, responses, image_name):
@@ -69,27 +61,7 @@ def _pull_image_by_name(agent, responses, image_name):
         image = req['data']['imageStoragePoolMap']['image']
         remap_dockerImage(image, image_name)
 
-    def post(req, resp):
-        responseImage = resp['data']['imageStoragePoolMap']['+data']
-        responseImage = responseImage['dockerImage']
-        correct = False
-        sent_parsed = _parse_repo_tag(image_name)
-        for resp_img_uuid in responseImage['RepoTags']:
-            parsed_name = _parse_repo_tag(resp_img_uuid)
-            assert parsed_name['repository'] == sent_parsed['repository']
-            if sent_parsed['tag'] != '':
-                if sent_parsed['tag'] == 'latest':
-                    if parsed_name['tag'] is not None:
-                        correct = True
-                else:
-                    if parsed_name['tag'] == sent_parsed['tag']:
-                        correct = True
-            else:
-                correct = True
-        assert correct is True
-
-    event_test(agent, 'docker/image_activate', pre_func=pre, post_func=post,
-               no_diff=True)
+    event_test(agent, 'docker/image_activate', pre_func=pre, no_diff=True)
 
 
 def remap_dockerImage(dockerImage, image_name):
@@ -118,7 +90,13 @@ def test_image_pull_variants(agent, responses):
         # 'registry.rancher.io/rancher/scratch:new_stuff',  pulls.
         'cirros',
         'cirros:latest',
-        'cirros:0.3.3'
+        'cirros:0.3.3',
+        'docker.io/tianon/true',
+        'docker.io/library/cirros',
+        'docker.io/cirros',
+        'index.docker.io/tianon/true',
+        'index.docker.io/library/cirros',
+        'index.docker.io/cirros'
     ]
 
     for i in image_names:
@@ -329,8 +307,9 @@ def _parse_repo_tag(image):
                 first = forwardSlash[0]
                 second = forwardSlash[1].split(":")
                 if '.' in first or ':' in first or\
-                        'localhost' in first:
-                    server = first
+                        'localhost' in first\
+                        and first != 'docker.io':
+                        server = first
                 else:
                     namespace = first
                 if len(second) == 2:
@@ -356,7 +335,7 @@ def _parse_repo_tag(image):
         else:
             lookUpName = repo
 
-        if server == "index.docker.io":
+        if server == "index.docker.io" or server == "docker.io":
             if namespace is None:
                 qualifiedName = repo
             else:
@@ -367,6 +346,8 @@ def _parse_repo_tag(image):
                 qualifiedName = server + "/" + repo
             else:
                 qualifiedName = server + "/" + namespace + "/" + repo
+        if server == "docker.io":
+            server = "index.docker.io"
 
         return dict(repository=repo,
                     lookUpName=lookUpName,
