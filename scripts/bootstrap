@@ -4,13 +4,14 @@ set -e
 cd $(dirname $0)/..
 
 apt-get update
-apt-get install -y arptables python-pip python-dev rsync
+apt-get install -y arptables python-pip python-dev rsync libssl-dev libffi-dev
 
 pip install --upgrade pip tox virtualenv
 
 # Switch to pip installed pip...
 /usr/local/bin/pip install psutil
 /usr/local/bin/pip install subprocess32
+/usr/local/bin/pip install ndg-httpsclient
 
 
 if [ ! -x "$(which nsenter)" ]; then

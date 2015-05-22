@@ -22,7 +22,7 @@ python_deps()
         rm -rf dist
     fi
 
-    for req in $(grep -iv "websockify\|psutil\|subprocess32" < requirements.txt); do
+    for req in $(grep -iv "websockify\|psutil\|subprocess32\|ndg-httpsclient" < requirements.txt); do
         pip install -t dist $req
     done
     cp requirements.txt dist
