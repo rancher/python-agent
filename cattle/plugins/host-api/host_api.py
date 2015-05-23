@@ -9,7 +9,8 @@ class HostApi(object):
 
     def on_startup(self):
         env = dict(os.environ)
-        env['HOST_API_CONFIG_FILE'] = host_api_config()
+        env['HOST_API_CATTLE_ACCESS_KEY'] = Config.access_key()
+        env['HOST_API_CATTLE_SECRET_KEY'] = Config.secret_key()
 
         url = 'http://{0}:{1}'.format(Config.cadvisor_ip(),
                                       Config.cadvisor_port())
@@ -23,8 +24,6 @@ class HostApi(object):
                     '-host-uuid', DockerConfig.docker_uuid(),
                     '-public-key', Config.jwt_public_key_file(),
                     '-cattle-url', Config.api_url(),
-                    '-cattle-access-key', Config.access_key(),
-                    '-cattle-secret-key', Config.secret_key(),
                     '-cattle-state-dir', Config.container_state_dir()],
                    env=env)
 
