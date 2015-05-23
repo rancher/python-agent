@@ -9,6 +9,7 @@ from cattle.plugins.docker.util import is_no_op
 from cattle.lock import lock
 from cattle.progress import Progress
 from . import docker_client, get_compute
+from docker.errors import APIError
 
 log = logging.getLogger('docker')
 
@@ -27,17 +28,6 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             return templates[0]
         return None
 
-    @staticmethod
-    def _get_image_by_label(tag):
-        parsed_tag = DockerPool.parse_repo_tag(tag)
-        templates = docker_client().images(all=True, name=parsed_tag['repo'])
-        templates = filter(lambda x: parsed_tag['uuid'] in x['RepoTags'],
-                           templates)
-
-        if len(templates) > 0:
-            return templates[0]
-        return None
-
     def pull_image(self, image, progress):
         if not self._is_image_active(image, None):
             self._do_image_activate(image, None, progress)
@@ -45,9 +35,13 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
     def _is_image_active(self, image, storage_pool):
         if is_no_op(image):
             return True
-
-        image_obj = self._get_image_by_label(image.data.dockerImage.fullName)
-        return image_obj is not None
+        parsed_tag = DockerPool.parse_repo_tag(image.data.dockerImage.fullName)
+        try:
+            if len(docker_client().inspect_image(parsed_tag['uuid'])):
+                return True
+        except APIError:
+            pass
+        return False
 
     def _do_image_activate(self, image, storage_pool, progress):
         if is_no_op(image):
@@ -65,6 +59,9 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                         'serveraddress': image.registryCredential['registry']
                         ['data']['fields']['serverAddress']
                     }
+                    if auth_config['serveraddress'] == "https://docker.io":
+                        auth_config['serveraddress'] =\
+                            "https://index.docker.io"
                     log.debug('Auth_Config: [%s]', auth_config)
             else:
                 log.debug('No Registry credential found. Pulling non-authed')
@@ -76,14 +73,17 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         client = docker_client()
         data = image.data.dockerImage
         marshaller = get_type(MARSHALLER)
+        temp = data.qualifiedName
+        if data.qualifiedName.startswith('docker.io/'):
+            temp = 'index.' + data.qualifiedName
         if progress is None:
-            result = client.pull(repository=data.qualifiedName,
+            result = client.pull(repository=temp,
                                  tag=data.tag, auth_config=auth_config)
             if 'error' in result:
                 raise ImageValidationError('Image [%s] failed to pull' %
                                            data.fullName)
         else:
-            for status in client.pull(repository=data.qualifiedName,
+            for status in client.pull(repository=temp,
                                       tag=data.tag,
                                       auth_config=auth_config,
                                       stream=True):
@@ -99,13 +99,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                 progress.update(message)
 
     def _get_image_storage_pool_map_data(self, obj):
-        image = self._get_image_by_label(obj.image.data.dockerImage.fullName)
-        if image:
-            return {
-                '+data': {
-                    'dockerImage': image
-                }
-            }
+        return {}
 
     def _get_volume_storage_pool_map_data(self, obj):
         return {
