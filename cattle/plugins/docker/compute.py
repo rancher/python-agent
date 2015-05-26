@@ -716,3 +716,25 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return
 
         client.remove_container(container, force=True, v=True)
+
+    def _do_instance_inspect(self, instanceInspectRequest):
+        client = docker_client()
+        container = None
+        try:
+            container_id = instanceInspectRequest.id
+            container = self.get_container_by(client, lambda x:
+                                              self._id_filter(container_id, x))
+        except (KeyError, AttributeError):
+            pass
+
+        if not container:
+            try:
+                name = '/{0}'.format(instanceInspectRequest.name)
+                container = self.get_container_by(client, lambda x:
+                                                  self._name_filter(name, x))
+            except (KeyError, AttributeError):
+                pass
+
+        if container:
+            inspect = client.inspect_container(container)
+            return inspect
