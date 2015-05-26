@@ -3,6 +3,7 @@ from cattle.plugins.docker.network import setup_mac_and_ip
 from cattle.plugins.host_info.main import HostInfo
 from .common_fixtures import *  # NOQA
 from .docker_common import *  # NOQA
+from docker.errors import APIError
 
 
 @if_docker
@@ -204,6 +205,36 @@ def test_instance_activate_cpu_set(agent, responses):
 
 
 @if_docker
+def test_instance_activate_read_only(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    schema = 'docker/instance_activate_fields'
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['readOnly'] = True
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['ReadonlyRootfs']
+        container_field_test_boiler_plate(resp)
+
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+    # Now test default value is False
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert not docker_inspect['HostConfig']['ReadonlyRootfs']
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, post_func=post)
+
+
+@if_docker
 def test_instance_activate_memory_swap(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
@@ -217,6 +248,107 @@ def test_instance_activate_memory_swap(agent, responses):
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['MemorySwap'] == 16000000
         assert docker_inspect['Config']['Memory'] == 8000000
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_extra_hosts(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['extraHosts'] = ['host:1.1.1.1',
+                                                    'b:2.2.2.2']
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['ExtraHosts'] == ['host:1.1.1.1',
+                                                              'b:2.2.2.2']
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_pid_mode(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['pidMode'] = 'host'
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['PidMode'] == 'host'
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_log_config(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['logConfig'] = {'type': 'json-file',
+                                                   'config': {
+                                                       'tag': 'foo',
+                                                   }}
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['LogConfig'] == {
+            'Type': 'json-file',
+            'Config': {
+                'tag': 'foo',
+            }
+        }
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_security_opt(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['securityOpt'] = ["label:foo", "label:bar"]
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['SecurityOpt'] == ["label:foo",
+                                                               "label:bar"]
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_working_dir(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['workingDir'] = "/tmp"
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['Config']['WorkingDir'] == "/tmp"
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
@@ -359,7 +491,10 @@ def test_instance_activate_lxc_conf(agent, responses):
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
-    event_test(agent, schema, pre_func=pre, post_func=post)
+    with pytest.raises(APIError) as e:
+        event_test(agent, schema, pre_func=pre, post_func=post)
+    assert e.value.explanation == \
+        'Cannot use --lxc-conf with execdriver: native-0.2'
 
 
 @if_docker

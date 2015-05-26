@@ -10,6 +10,7 @@ from cattle.type_manager import get_type, MARSHALLER
 from cattle import utils
 from docker.errors import APIError
 from docker import tls
+from docker.utils import create_host_config
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.docker.util import add_label, is_no_op
 from cattle.progress import Progress
@@ -21,7 +22,6 @@ from cattle.plugins.volmgr import volmgr
 
 log = logging.getLogger('docker')
 
-# Docker-py doesn't support working_dir, maybe in 0.2.4?
 CREATE_CONFIG_FIELDS = [
     ('labels', 'labels'),
     ('environment', 'environment'),
@@ -35,6 +35,7 @@ CREATE_CONFIG_FIELDS = [
     ('tty', 'tty'),
     ('stdinOpen', 'stdin_open'),
     ('detach', 'detach'),
+    ('workingDir', 'working_dir'),
     ('entryPoint', 'entrypoint')]
 
 START_CONFIG_FIELDS = [
@@ -42,8 +43,13 @@ START_CONFIG_FIELDS = [
     ('capDrop', 'cap_drop'),
     ('dnsSearch', 'dns_search'),
     ('dns', 'dns'),
+    ('extraHosts', 'extra_hosts'),
     ('publishAllPorts', 'publish_all_ports'),
     ('lxcConf', 'lxc_conf'),
+    ('logConfig', 'log_config'),
+    ('securityOpt', 'security_opt'),
+    ('restartPolicy', 'restart_policy'),
+    ('pidMode', 'pid_mode'),
     ('devices', 'devices')]
 
 
@@ -463,7 +469,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         start_config = {
             'publish_all_ports': False,
-            'privileged': self._is_privileged(instance)
+            'privileged': self._is_true(instance, 'privileged'),
+            'read_only': self._is_true(instance, 'readOnly'),
         }
 
         # These _setup_simple_config_fields calls should happen before all
@@ -485,8 +492,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         self._setup_volumes(create_config, instance, start_config, client)
 
-        self._setup_restart_policy(instance, start_config)
-
         self._setup_links(start_config, instance)
 
         self._setup_networking(instance, host, create_config, start_config)
@@ -497,6 +502,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         setup_cattle_config_url(instance, create_config)
 
+        create_config['host_config'] = create_host_config(**start_config)
+
         container = self._create_container(client, create_config,
                                            image_tag, instance, name,
                                            progress)
@@ -505,7 +512,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         log.info('Starting docker container [%s] docker id [%s] %s', name,
                  container_id, start_config)
 
-        client.start(container_id, **start_config)
+        client.start(container_id)
 
         self._record_state(client, instance, docker_id=container['Id'])
 
@@ -587,17 +594,6 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except KeyError:
             pass
 
-    def _setup_restart_policy(self, instance, start_config):
-        try:
-            restart_policy = instance.data.fields['restartPolicy']
-            refactored_res_policy = {}
-            for res_pol_key in restart_policy.keys():
-                refactored_res_policy[_to_upper_case(res_pol_key)] = \
-                    restart_policy[res_pol_key]
-            start_config['restart_policy'] = refactored_res_policy
-        except (KeyError, AttributeError):
-            pass
-
     def _setup_hostname(self, create_config, instance):
         try:
             create_config['hostname'] = instance.hostname
@@ -613,9 +609,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         setup_links(instance, create_config, start_config)
         setup_ipsec(instance, host, create_config, start_config)
 
-    def _is_privileged(self, instance):
+    def _is_true(self, instance, key):
         try:
-            return instance.data.fields['privileged']
+            return instance.data.fields[key] is True
         except (KeyError, AttributeError):
             return False
 
