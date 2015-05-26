@@ -67,6 +67,11 @@ class BaseComputeDriver(BaseHandler):
     def instance_force_stop(self, req=None, instanceForceStop=None):
         self._do_instance_force_stop(instanceForceStop)
 
+    def instance_inspect(self, req=None, instanceInspect=None):
+        inspect = self._do_instance_inspect(instanceInspect)
+        result = {req.get("resourceType"): inspect}
+        return self._reply(req, result)
+
     def get_instance_host_from_map(self, instanceHostMap):
         instance = instanceHostMap.instance
         host = instanceHostMap.host
@@ -108,4 +113,7 @@ class BaseComputeDriver(BaseHandler):
         raise Exception("Not implemented")
 
     def _do_instance_remove(self, instance, host):
+        raise Exception("Not implemented")
+
+    def _do_instance_inspect(self, instanceInspect):
         raise Exception("Not implemented")
