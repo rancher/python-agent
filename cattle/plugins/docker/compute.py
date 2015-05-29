@@ -198,6 +198,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'type': 'host',
             'kind': 'docker',
             'name': Config.hostname(),
+            'labels': Config.labels(),
             'physicalHostUuid': physical_host['uuid'],
             'uuid': DockerConfig.docker_uuid(),
             'info': stats

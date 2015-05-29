@@ -1,6 +1,6 @@
 import os
 import socket
-
+from urlparse import parse_qsl
 from os import path
 from uuid import uuid4
 
@@ -355,3 +355,11 @@ class Config:
     def volmgr_mount_namespace_fd():
         return default_value('VOLMGR_MOUNT_NAMESPACE_FD',
                              '/host/proc/1/ns/mnt')
+
+    @staticmethod
+    def labels():
+        val = default_value('HOST_LABELS', None)
+        if val:
+            return dict(parse_qsl(val))
+        else:
+            return None
