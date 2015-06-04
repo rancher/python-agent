@@ -184,18 +184,21 @@ def test_instance_activate_cpu_set(agent, responses):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == '0,1'
+        assert docker_inspect['HostConfig']['CpusetCpus'] == '0,1'
         container_field_test_boiler_plate(resp)
 
     def postNull(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == ''
+        assert docker_inspect['HostConfig']['CpusetCpus'] == ''
         container_field_test_boiler_plate(resp)
 
     def postEmpty(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == ''
+        assert docker_inspect['HostConfig']['CpusetCpus'] == ''
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
@@ -248,6 +251,8 @@ def test_instance_activate_memory_swap(agent, responses):
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['MemorySwap'] == 16000000
         assert docker_inspect['Config']['Memory'] == 8000000
+        assert docker_inspect['HostConfig']['MemorySwap'] == 16000000
+        assert docker_inspect['HostConfig']['Memory'] == 8000000
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
@@ -387,6 +392,7 @@ def test_instance_activate_memory(agent, responses):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Memory'] == 8000000
+        assert docker_inspect['HostConfig']['Memory'] == 8000000
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
@@ -700,6 +706,7 @@ def test_instance_activate_cpu_shares(agent, responses):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['CpuShares'] == 400
+        assert docker_inspect['HostConfig']['CpuShares'] == 400
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
