@@ -346,6 +346,10 @@ def random_string(length=64):
     return binascii.hexlify(os.urandom(length/2))
 
 
+def is_str_set(map, key):
+    return key in map and map[key] is not None and len(map[key]) > 0
+
+
 def is_uuid(str):
     if str is None:
         return False

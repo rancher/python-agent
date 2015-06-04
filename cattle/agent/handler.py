@@ -3,6 +3,7 @@ import logging
 
 from cattle import utils
 from cattle.lock import lock
+from cattle.utils import JsonObject
 
 log = logging.getLogger("agent")
 
@@ -55,7 +56,7 @@ class BaseHandler(object):
         if req is None:
             return None
         resp = utils.reply(req)
-        resp.data = response_data
+        resp.data = JsonObject(response_data)
 
         return resp
 

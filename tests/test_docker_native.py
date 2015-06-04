@@ -85,7 +85,7 @@ def test_native_container_activate_removed(agent, responses):
         assert not get_container('/native_container')
 
     event_test(agent, 'docker/native_container_not_running',
-               pre_func=pre, post_func=post, no_diff=True)
+               pre_func=pre, post_func=post, diff=False)
 
 
 @if_docker

@@ -1,6 +1,8 @@
 import logging
 import os.path
 import shutil
+import requests
+from contextlib import closing
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
@@ -10,6 +12,7 @@ from cattle.lock import lock
 from cattle.progress import Progress
 from . import docker_client, get_compute
 from docker.errors import APIError
+from cattle.utils import is_str_set
 
 log = logging.getLogger('docker')
 
@@ -43,9 +46,57 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             pass
         return False
 
+    def _image_build(self, image, progress):
+        client = docker_client()
+        opts = dict(image.data.fields.build)
+
+        def do_build():
+            for key in ['context', 'remote']:
+                if key in opts:
+                    del opts[key]
+            opts['stream'] = True
+            marshaller = get_type(MARSHALLER)
+            for status in client.build(**opts):
+                try:
+                    status = marshaller.from_string(status)
+                    progress.update(status['stream'])
+                except:
+                    pass
+
+        if is_str_set(opts, 'context'):
+            with closing(requests.get(opts['context'], stream=True)) as r:
+                if r.status_code != 200:
+                    raise Exception('Bad response {} from {}'
+                                    .format(r.status_code,
+                                            opts['context']))
+                del opts['context']
+                opts['fileobj'] = ResponseWrapper(r)
+                opts['custom_context'] = True
+                do_build()
+        else:
+            remote = opts['remote']
+            if remote.startswith('git@github.com:'):
+                remote = remote.replace('git@github.com:', 'git://github.com/')
+            del opts['remote']
+            opts['path'] = remote
+            do_build()
+
+    def _is_build(self, image):
+        try:
+            if is_str_set(image.data.fields.build, 'context') or \
+                    is_str_set(image.data.fields.build, 'remote'):
+                return True
+        except (KeyError, AttributeError):
+            pass
+
+        return False
+
     def _do_image_activate(self, image, storage_pool, progress):
         if is_no_op(image):
             return
+
+        if self._is_build(image):
+            return self._image_build(image, progress)
 
         auth_config = None
         try:
@@ -192,3 +243,16 @@ class ImageValidationError(Exception):
 
 class AuthConfigurationError(Exception):
     pass
+
+
+class ResponseWrapper(object):
+    """"
+    This wrapper is to prevent requests from incorrectly setting the
+    Content-Length on the request.  If you do not use this wrapper requests
+    finds r.raw.fileno and uses the size of that FD, which is 0
+    """
+    def __init__(self, response):
+        self.r = response
+
+    def __iter__(self):
+        return self.r.raw.__iter__()
