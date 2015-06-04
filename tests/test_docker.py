@@ -303,7 +303,7 @@ def test_instance_activate_log_config(agent, responses):
 
     def pre(req):
         instance = req['data']['instanceHostMap']['instance']
-        instance['data']['fields']['logConfig'] = {'type': 'json-file',
+        instance['data']['fields']['logConfig'] = {'driver': 'json-file',
                                                    'config': {
                                                        'tag': 'foo',
                                                    }}
@@ -321,6 +321,36 @@ def test_instance_activate_log_config(agent, responses):
 
     schema = 'docker/instance_activate_fields'
     event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_log_config_null(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['logConfig'] = {'driver': None,
+                                                   'config': None}
+
+    def pre2(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['logConfig'] = None
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        assert docker_inspect['HostConfig']['LogConfig'] == {
+            'Type': 'json-file',
+            'Config': None
+        }
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    event_test(agent, schema, pre_func=pre2, post_func=post)
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    event_test(agent, schema, post_func=post)
 
 
 @if_docker

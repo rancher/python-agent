@@ -482,6 +482,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         add_label(create_config, {'io.rancher.container.uuid': instance.uuid})
 
+        self._setup_logging(start_config, instance)
+
         self._setup_hostname(create_config, instance)
 
         self._setup_command(create_config, instance)
@@ -597,6 +599,27 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return instance.image.data.dockerImage.fullName
         except (KeyError, AttributeError):
             raise Exception('Can not start container with no image')
+
+    def _setup_logging(self, start_config, instance):
+        try:
+            if start_config.get('log_config', None) is None:
+                return
+
+            type = start_config['log_config']['driver']
+            del start_config['log_config']['driver']
+            start_config['log_config']['type'] = type
+        except (KeyError, AttributeError):
+            pass
+
+        for i in ['type', 'config']:
+            bad = True
+            try:
+                if start_config['log_config'][i] is not None:
+                    bad = False
+            except (KeyError, AttributeError):
+                pass
+            if bad and 'log_config' in start_config:
+                del start_config['log_config']
 
     def _setup_hostname(self, create_config, instance):
         try:
