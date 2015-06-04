@@ -16,7 +16,7 @@ def test_inspect_by_name(agent, responses):
         diff_dict(inspect, response_inspect)
 
     event_test(agent, 'docker/instance_inspect',
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)
 
 
 @if_docker
@@ -38,7 +38,7 @@ def test_inspect_by_id(agent, responses):
         diff_dict(inspect, response_inspect)
 
     event_test(agent, 'docker/instance_inspect', pre_func=pre,
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)
 
 
 @if_docker
@@ -48,4 +48,4 @@ def test_inspect_not_found(agent, responses):
     def post(req, resp):
         assert resp['data']['instanceInspect'] is None
 
-    event_test(agent, 'docker/instance_inspect', post_func=post, no_diff=True)
+    event_test(agent, 'docker/instance_inspect', post_func=post, diff=False)

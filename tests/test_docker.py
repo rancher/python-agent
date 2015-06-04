@@ -1014,15 +1014,15 @@ def test_instance_force_stop(agent, responses):
         assert inspect['State']['Running'] is False
 
     event_test(agent, 'docker/instance_force_stop',
-               pre_func=pre, post_func=post, no_diff=True)
+               pre_func=pre, post_func=post, diff=False)
 
     # Assert that you can call on a stop container without issue
     event_test(agent, 'docker/instance_force_stop',
-               pre_func=pre, post_func=post, no_diff=True)
+               pre_func=pre, post_func=post, diff=False)
 
     # And a non-existent one
     client.remove_container(c)
-    event_test(agent, 'docker/instance_force_stop', pre_func=pre, no_diff=True)
+    event_test(agent, 'docker/instance_force_stop', pre_func=pre, diff=False)
 
 
 def test_instance_remove(agent, responses):

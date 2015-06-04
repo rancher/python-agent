@@ -16,7 +16,7 @@ def test_network_mode_none(agent, responses):
         assert docker_inspect['Config']['NetworkDisabled']
 
     event_test(agent, 'docker/instance_activate', pre_func=pre,
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)
 
 
 @if_docker
@@ -34,7 +34,7 @@ def test_network_mode_host(agent, responses):
         assert docker_inspect['HostConfig']['NetworkMode'] == 'host'
 
     event_test(agent, 'docker/instance_activate', pre_func=pre,
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)
 
 
 @if_docker
@@ -62,4 +62,4 @@ def test_network_mode_container(agent, responses):
             'container:{}'.format(c['Id'])
 
     event_test(agent, 'docker/instance_activate', pre_func=pre,
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)

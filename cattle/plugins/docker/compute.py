@@ -456,10 +456,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         client = self._get_docker_client(host)
 
-        try:
-            image_tag = instance.image.data.dockerImage.fullName
-        except KeyError:
-            raise Exception('Can not start container with no image')
+        image_tag = self._get_image_tag(instance)
 
         name = instance.uuid
 
@@ -594,6 +591,12 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 start_config['volumes_from'] = containers
         except KeyError:
             pass
+
+    def _get_image_tag(self, instance):
+        try:
+            return instance.image.data.dockerImage.fullName
+        except (KeyError, AttributeError):
+            raise Exception('Can not start container with no image')
 
     def _setup_hostname(self, create_config, instance):
         try:

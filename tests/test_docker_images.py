@@ -61,7 +61,7 @@ def _pull_image_by_name(agent, responses, image_name):
         image = req['data']['imageStoragePoolMap']['image']
         remap_dockerImage(image, image_name)
 
-    event_test(agent, 'docker/image_activate', pre_func=pre, no_diff=True)
+    event_test(agent, 'docker/image_activate', pre_func=pre, diff=False)
 
 
 def remap_dockerImage(dockerImage, image_name):
@@ -153,7 +153,7 @@ def _test_image_pull_credential(agent, responses):
         assert correct is True
 
     event_test(agent, 'docker/image_activate', pre_func=pre, post_func=post,
-               no_diff=True)
+               diff=False)
 
 
 @if_docker
@@ -200,7 +200,7 @@ def _test_instance_pull_credential(agent, responses):
                 assert parsed_name['tag'] == sent_parsed['tag']
 
     event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post,
-               no_diff=True)
+               diff=False)
 
 
 @if_docker
@@ -232,7 +232,7 @@ def test_image_activate_no_op(agent, responses):
         assert not resp['data']['imageStoragePoolMap']
 
     event_test(agent, 'docker/image_activate', pre_func=pre,
-               post_func=post, no_diff=True)
+               post_func=post, diff=False)
 
 
 def image_pull_invalid_credential(agent, responses):

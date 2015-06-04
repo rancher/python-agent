@@ -5,6 +5,7 @@ from cattle.plugins.docker import docker_client
 import cattle.plugins.docker  # NOQA
 
 import os
+import time
 from os import path
 import pytest
 from cattle import CONFIG_OVERRIDE, Config
@@ -55,7 +56,7 @@ def diff_dict(left, right):
             pass
 
 
-def event_test(agent, name, pre_func=None, post_func=None, no_diff=False):
+def event_test(agent, name, pre_func=None, post_func=None, diff=True):
     req = json_data(name)
     resp_valid = json_data(name + '_resp')
 
@@ -66,7 +67,7 @@ def event_test(agent, name, pre_func=None, post_func=None, no_diff=False):
     if post_func is not None:
         post_func(req, resp)
 
-    if not no_diff:
+    if diff:
         del resp["id"]
         del resp["time"]
 
@@ -126,6 +127,10 @@ def delete_container(name):
                     client.kill(c)
                 except:
                     pass
+                for i in range(10):
+                    if client.inspect_container(c['Id'])['State']['Pid'] == 0:
+                        break
+                    time.sleep(0.5)
                 client.remove_container(c)
                 remove_state_file(c)
 
