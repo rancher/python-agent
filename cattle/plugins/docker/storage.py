@@ -127,9 +127,13 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
         temp = data.qualifiedName
         if data.qualifiedName.startswith('docker.io/'):
             temp = 'index.' + data.qualifiedName
+        # Always pass insecure_registry=True to prevent docker-py
+        # from pre-verifying the registry. Let the docker daemon handle
+        # the verification of and connection to the registry.
         if progress is None:
             result = client.pull(repository=temp,
-                                 tag=data.tag, auth_config=auth_config)
+                                 tag=data.tag, auth_config=auth_config,
+                                 insecure_registry=True)
             if 'error' in result:
                 raise ImageValidationError('Image [%s] failed to pull' %
                                            data.fullName)
@@ -137,7 +141,8 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             for status in client.pull(repository=temp,
                                       tag=data.tag,
                                       auth_config=auth_config,
-                                      stream=True):
+                                      stream=True,
+                                      insecure_registry=True):
                 log.info('Pulling [%s] status : %s', data.fullName, status)
                 status = marshaller.from_string(status)
                 try:
