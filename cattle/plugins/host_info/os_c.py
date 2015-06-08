@@ -1,8 +1,10 @@
 import platform
-import cattle.utils
 
 
 class OSCollector(object):
+    def __init__(self, docker_client=None):
+        self.docker_client = docker_client
+
     def key_name(self):
         return "osInfo"
 
@@ -20,8 +22,14 @@ class OSCollector(object):
         data = {}
 
         if platform.system() == 'Linux':
-            data['dockerVersion'] = \
-                cattle.utils.check_output(['docker', '-v']).rstrip()
+            version = "Unknown"
+            if self.docker_client:
+                ver_resp = self.docker_client.version()
+                version = "Docker version {0}, build {1}".format(
+                    ver_resp.get("Version", "Unknown"),
+                    ver_resp.get("GitCommit", "Unknown"))
+
+            data['dockerVersion'] = version
 
         return data
 

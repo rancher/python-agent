@@ -76,7 +76,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def __init__(self):
         KindBasedMixin.__init__(self, kind='docker')
         BaseComputeDriver.__init__(self)
-        self.host_info = HostInfo()
+        self.host_info = HostInfo(docker_client())
 
     @staticmethod
     def get_container_by(client, func):
