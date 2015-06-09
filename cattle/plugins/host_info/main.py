@@ -9,9 +9,11 @@ log = logging.getLogger('host_info')
 
 
 class HostInfo(object):
-    def __init__(self):
+    def __init__(self, docker_client=None):
+        self.docker_client = docker_client
+
         self.collectors = [MemoryCollector(),
-                           OSCollector(),
+                           OSCollector(docker_client),
                            DiskCollector(),
                            CpuCollector()]
 

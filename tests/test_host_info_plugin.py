@@ -3,12 +3,13 @@ import os
 import tests
 import platform
 import json
-import cattle.utils
 
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.host_info.cpu import CpuCollector
 from cattle.plugins.host_info.memory import MemoryCollector
+from cattle.plugins.docker import docker_client
 from cattle.utils import CadvisorAPIClient
+from docker.client import Client
 
 TEST_DIR = os.path.join(os.path.dirname(tests.__file__))
 
@@ -28,6 +29,12 @@ def cadvisor_stats_data():
         return json.loads(mf.read())
 
 
+def docker_client_version_data():
+    return json.loads('{"KernelVersion": "4.0.3-boot2docker", "Arch": "amd64",'
+                      '"ApiVersion": "1.18", "Version": "1.6.0", "GitCommit": '
+                      '"4749651", "Os": "linux", "GoVersion": "go1.4.2"}')
+
+
 @pytest.fixture()
 def host_data(mocker):
     mocker.patch.object(platform, 'system', return_value='Linux')
@@ -45,10 +52,10 @@ def host_data(mocker):
     mocker.patch.object(CadvisorAPIClient, 'get_containers',
                         return_value=cadvisor_stats_data())
 
-    mocker.patch('cattle.utils.check_output',
-                 return_value='Docker version 1.4.1, build 5bc2ff8')
+    mocker.patch.object(Client, 'version',
+                        return_value=docker_client_version_data())
 
-    host = HostInfo()
+    host = HostInfo(docker_client())
     data = host.collect_data()
 
     assert isinstance(data, dict)
@@ -56,8 +63,7 @@ def host_data(mocker):
     CpuCollector._get_cpuinfo_data.assert_called_once_with()
     MemoryCollector._get_meminfo_data.assert_called_once_with()
     CadvisorAPIClient.get_containers.assert_called_with()
-    cattle.utils.check_output.assert_called_once_with(
-        ['docker', '-v'])
+    Client.version.assert_called_once_with()
 
     return data
 
@@ -78,9 +84,6 @@ def no_cadvisor_host_data(mocker):
 
     mocker.patch.object(CadvisorAPIClient, '_get',
                         return_value=None)
-
-    mocker.patch('cattle.utils.check_output',
-                 return_value='Docker version 1.4.1, build 5bc2ff8')
 
     host = HostInfo()
     data = host.collect_data()
@@ -130,7 +133,7 @@ def test_collect_data_osinfo(host_data):
         sorted(expected_osinfo_keys)
 
     assert host_data['osInfo']['dockerVersion'] == \
-        'Docker version 1.4.1, build 5bc2ff8'
+        'Docker version 1.6.0, build 4749651'
 
 
 def test_collect_data_diskinf(host_data):
