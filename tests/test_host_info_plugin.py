@@ -63,7 +63,7 @@ def host_data(mocker):
     CpuCollector._get_cpuinfo_data.assert_called_once_with()
     MemoryCollector._get_meminfo_data.assert_called_once_with()
     CadvisorAPIClient.get_containers.assert_called_with()
-    Client.version.asswert_called_once_with()
+    Client.version.assert_called_once_with()
 
     return data
 
