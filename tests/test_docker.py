@@ -1,6 +1,8 @@
 import time
 from cattle.plugins.docker.network import setup_mac_and_ip
 from cattle.plugins.host_info.main import HostInfo
+from cattle.plugins.docker.compute import _remove_container
+
 from .common_fixtures import *  # NOQA
 from .docker_common import *  # NOQA
 from docker.errors import APIError
@@ -1062,6 +1064,7 @@ def test_instance_force_stop(agent, responses):
     event_test(agent, 'docker/instance_force_stop', pre_func=pre, diff=False)
 
 
+@if_docker
 def test_instance_remove(agent, responses):
     instance_only_activate(agent, responses)
     container = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
@@ -1088,6 +1091,7 @@ def test_instance_remove(agent, responses):
     event_test(agent, 'docker/instance_remove', pre_func=pre, post_func=post)
 
 
+@if_docker
 def test_instance_activate_labels(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
@@ -1096,3 +1100,18 @@ def test_instance_activate_labels(agent, responses):
 
     event_test(agent, 'docker/instance_activate_labels',
                post_func=post)
+
+
+@if_docker
+def test_404_on_remove():
+    # This tests the functionality in DockerCompute._do_instance_remove(),
+    # but recreating a scenario where a 404 is returned on a delete is pretty
+    # difficult from the event_test framework, so just testing the function
+    # ecplicitly
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='double_remove')
+
+    client.remove_container(c, force=True, v=True)
+    _remove_container(client, c)
+    _remove_container(client, c)

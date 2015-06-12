@@ -738,7 +738,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if container is None:
             return
 
-        client.remove_container(container, force=True, v=True)
+        _remove_container(client, container)
 
     def _do_instance_inspect(self, instanceInspectRequest):
         client = docker_client()
@@ -761,3 +761,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if container:
             inspect = client.inspect_container(container)
             return inspect
+
+
+def _remove_container(client, container):
+    try:
+        client.remove_container(container, force=True, v=True)
+    except APIError as e:
+        try:
+            if e.response.status_code != 404:
+                raise e
+        except AttributeError:
+            raise e
