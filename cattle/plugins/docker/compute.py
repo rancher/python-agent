@@ -171,7 +171,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _determine_state(self, container):
         status = container['Status']
-        if status == '':
+        if status == '' or (
+                status is not None and status.lower() == 'created'):
             return 'created'
         elif 'Up ' in status:
             return 'running'
