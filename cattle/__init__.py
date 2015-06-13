@@ -263,12 +263,6 @@ class Config:
         return int(default_value('CONSOLE_AGENT_PORT', '9346'))
 
     @staticmethod
-    def console_agent_main():
-        return default_value('CONSOLE_AGENT_MAIN',
-                             os.path.join(Config.home(), 'console-agent',
-                                          'agent.js'))
-
-    @staticmethod
     def jwt_public_key_file():
         value = os.path.join(Config.home(), 'etc', 'cattle', 'api.crt')
         return default_value('CONSOLE_HOST_API_PUBLIC_KEY', value)
