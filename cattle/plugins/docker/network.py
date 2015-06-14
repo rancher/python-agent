@@ -113,33 +113,71 @@ def setup_links(instance, create_config, start_config):
 
     result = {}
     for link in instance.instanceLinks:
-        name = link.linkName
+        link_name = link.linkName
+        _add_link_env(link_name, link, result)
+        _copy_link_env(link_name, link, result)
 
         try:
-            for link_port in link.data.fields.ports:
-                proto = link_port.protocol
-                ip = name.lower()
-                dst = link_port.privatePort
-                port = link_port.privatePort
+            for name in link.data.fields.instanceNames:
+                _add_link_env(name, link, result, in_ip=link_name)
+                _copy_link_env(name, link, result)
 
-                full_port = '{0}://{1}:{2}'.format(proto, ip, dst)
+                # This does assume the format {env}_{name}
+                parts = name.split('_', 1)
+                if len(parts) == 1:
+                    continue
 
-                data = {
-                    'NAME': '/cattle/{0}'.format(name),
-                    'PORT': full_port,
-                    'PORT_{0}_{1}'.format(port, proto): full_port,
-                    'PORT_{0}_{1}_ADDR'.format(port, proto): ip,
-                    'PORT_{0}_{1}_PORT'.format(port, proto): dst,
-                    'PORT_{0}_{1}_PROTO'.format(port, proto): proto,
-                }
-
-                for k, v in data.items():
-                    result['{0}_{1}'.format(name, k).upper()] = v
+                _add_link_env(parts[1], link, result, in_ip=link_name)
+                _copy_link_env(parts[1], link, result)
         except AttributeError:
             pass
 
     if len(result) > 0:
         add_to_env(create_config, **result)
+
+
+def _copy_link_env(name, link, result):
+    try:
+        targetInstance = link.targetInstance
+        for env in targetInstance.data.dockerInspect.Config.Env:
+            parts = env.split('=', 1)
+            if len(parts) == 1:
+                continue
+            key, value = parts[0], parts[1]
+            if key in ['HOME', 'PATH']:
+                continue
+
+            name = name.replace('-', '_').upper()
+            result['{}_ENV_{}'.format(name, key)] = value
+    except AttributeError:
+        pass
+
+
+def _add_link_env(name, link, result, in_ip=None):
+    try:
+        for link_port in link.data.fields.ports:
+            proto = link_port.protocol
+            ip = name.lower()
+            if in_ip is not None:
+                ip = in_ip
+            dst = link_port.privatePort
+            port = link_port.privatePort
+
+            full_port = '{0}://{1}:{2}'.format(proto, ip, dst)
+
+            data = {
+                'NAME': '/cattle/{0}'.format(name),
+                'PORT': full_port,
+                'PORT_{0}_{1}'.format(port, proto): full_port,
+                'PORT_{0}_{1}_ADDR'.format(port, proto): ip,
+                'PORT_{0}_{1}_PORT'.format(port, proto): dst,
+                'PORT_{0}_{1}_PROTO'.format(port, proto): proto,
+            }
+
+            for k, v in data.items():
+                result['{0}_{1}'.format(name, k).upper()] = v
+    except AttributeError:
+        pass
 
 
 def setup_ipsec(instance, host, create_config, start_config):

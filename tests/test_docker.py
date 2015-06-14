@@ -127,6 +127,29 @@ def test_instance_activate_links(agent, responses):
         assert 'REDIS_PORT_26_UDP_PORT=26' in env
         assert 'REDIS_PORT_26_UDP_PROTO=udp' in env
 
+        assert 'REDIS_ENV_ONE=TWO' in env
+        assert 'REDIS_ENV_THREE=FOUR' in env
+        assert 'REDIS_1_ENV_ONE=TWO' in env
+        assert 'REDIS_1_ENV_THREE=FOUR' in env
+        assert 'REDIS_2_ENV_ONE=TWO' in env
+        assert 'REDIS_2_ENV_THREE=FOUR' in env
+        assert 'ENV_REDIS_1_ENV_ONE=TWO' in env
+        assert 'ENV_REDIS_1_ENV_THREE=FOUR' in env
+        assert 'ENV_REDIS_2_ENV_ONE=TWO' in env
+        assert 'ENV_REDIS_2_ENV_THREE=FOUR' in env
+
+        assert 'REDIS_1_PORT=udp://redis:26' in env
+        assert 'REDIS_1_PORT_26_UDP=udp://redis:26' in env
+        assert 'REDIS_1_PORT_26_UDP_ADDR=redis' in env
+        assert 'REDIS_1_PORT_26_UDP_PORT=26' in env
+        assert 'REDIS_1_PORT_26_UDP_PROTO=udp' in env
+
+        assert 'ENV_REDIS_1_PORT=udp://redis:26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP=udp://redis:26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_ADDR=redis' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_PORT=26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_PROTO=udp' in env
+
     event_test(agent, 'docker/instance_activate_links', post_func=post)
 
 

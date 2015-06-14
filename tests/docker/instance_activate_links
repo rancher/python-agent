@@ -67,12 +67,29 @@
                                         "privatePort" : "26",
                                         "protocol" : "udp"
                                     }
+                                ],
+                                "instanceNames" : [
+                                    "env_redis_1",
+                                    "env_redis_2"
                                 ]
                             }
                         },
                         "targetInstanceId" : 42,
                         "targetInstance" : {
-                            "uuid" : "anothercontainer"
+                            "uuid" : "anothercontainer",
+                            "data" : {
+                                "dockerInspect": {
+                                    "Config": {
+                                        "Env": [
+                                            "JUSTKEY",
+                                            "PATH=x",
+                                            "HOME=x",
+                                            "ONE=TWO",
+                                            "THREE=FOUR"
+                                        ]
+                                    }
+                                }
+                            }
                         }
                     }
                 ],
