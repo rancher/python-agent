@@ -97,6 +97,32 @@ def test_instance_activate_ports(agent, responses):
 
 
 @if_docker
+def test_instance_activate_links_null_ports(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        links = req.data.instanceHostMap.instance.instanceLinks
+        links.append(JsonObject({
+            'type': 'instanceLink',
+            'linkName': 'null',
+            'data': {
+                'fields': {
+                    'ports': None
+                }
+            },
+            'targetInstanceId': None,
+        }))
+
+    def post(req, resp):
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
+        instance_activate_common_validation(resp)
+
+    event_test(agent, 'docker/instance_activate_links', pre_func=pre,
+               post_func=post)
+
+
+@if_docker
 def test_instance_activate_links(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 

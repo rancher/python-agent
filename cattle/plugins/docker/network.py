@@ -139,6 +139,8 @@ def setup_links(instance, create_config, start_config):
 def _copy_link_env(name, link, result):
     try:
         targetInstance = link.targetInstance
+        if targetInstance.data.dockerInspect.Config.Env is None:
+            return
         for env in targetInstance.data.dockerInspect.Config.Env:
             parts = env.split('=', 1)
             if len(parts) == 1:
@@ -155,6 +157,9 @@ def _copy_link_env(name, link, result):
 
 def _add_link_env(name, link, result, in_ip=None):
     try:
+        if link.data.fields.ports is None:
+            return
+
         for link_port in link.data.fields.ports:
             proto = link_port.protocol
             ip = name.lower()
