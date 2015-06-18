@@ -35,6 +35,7 @@ CREATE_CONFIG_FIELDS = [
     ('tty', 'tty'),
     ('stdinOpen', 'stdin_open'),
     ('detach', 'detach'),
+    ('volumeDriver', 'volume_driver'),
     ('workingDir', 'working_dir'),
     ('entryPoint', 'entrypoint')]
 
