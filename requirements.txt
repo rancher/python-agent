@@ -1,5 +1,5 @@
 mako
-git+https://github.com/rancherio/docker-py.git@1.2.3-rancher-2
+git+https://github.com/rancherio/docker-py.git@1.2.3-rancher-3
 portalocker
 subprocess32
 psutil
