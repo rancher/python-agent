@@ -12,7 +12,7 @@ from docker.errors import APIError
 from docker import tls
 from docker.utils import create_host_config
 from cattle.plugins.host_info.main import HostInfo
-from cattle.plugins.docker.util import add_label, is_no_op
+from cattle.plugins.docker.util import add_label, is_no_op, remove_container
 from cattle.progress import Progress
 from cattle.lock import lock
 from cattle.plugins.docker.network import setup_ipsec, setup_links, \
@@ -740,7 +740,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if container is None:
             return
 
-        _remove_container(client, container)
+        remove_container(client, container)
 
     def _do_instance_inspect(self, instanceInspectRequest):
         client = docker_client()
@@ -763,14 +763,3 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if container:
             inspect = client.inspect_container(container)
             return inspect
-
-
-def _remove_container(client, container):
-    try:
-        client.remove_container(container, force=True, v=True)
-    except APIError as e:
-        try:
-            if e.response.status_code != 404:
-                raise e
-        except AttributeError:
-            raise e

@@ -1,6 +1,8 @@
 import logging
 import os
 
+from docker.errors import APIError
+
 log = logging.getLogger('docker')
 
 
@@ -58,3 +60,14 @@ def is_no_op(resource):
         return resource.processData.containerNoOpEvent
     except (AttributeError, KeyError):
         return False
+
+
+def remove_container(client, container):
+    try:
+        client.remove_container(container, force=True, v=True)
+    except APIError as e:
+        try:
+            if e.response.status_code != 404:
+                raise e
+        except AttributeError:
+            raise e
