@@ -7,7 +7,7 @@ from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
 from cattle.plugins.volmgr import volmgr
-from cattle.plugins.docker.util import is_no_op
+from cattle.plugins.docker.util import is_no_op, remove_container
 from cattle.lock import lock
 from cattle.progress import Progress
 from . import docker_client, get_compute
@@ -194,7 +194,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                                     volume.instance)
             if container is None:
                 return
-            docker_client().remove_container(container)
+            remove_container(docker_client(), container)
         else:
             path = self._path_to_volume(volume)
             # Check for volmgr managed volume, must be done before "isHostPath"

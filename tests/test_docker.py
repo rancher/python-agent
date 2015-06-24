@@ -1,7 +1,7 @@
 import time
 from cattle.plugins.docker.network import setup_mac_and_ip
 from cattle.plugins.host_info.main import HostInfo
-from cattle.plugins.docker.compute import _remove_container
+from cattle.plugins.docker.util import remove_container
 
 from .common_fixtures import *  # NOQA
 from .docker_common import *  # NOQA
@@ -1162,5 +1162,5 @@ def test_404_on_remove():
                                 name='double_remove')
 
     client.remove_container(c, force=True, v=True)
-    _remove_container(client, c)
-    _remove_container(client, c)
+    remove_container(client, c)
+    remove_container(client, c)
