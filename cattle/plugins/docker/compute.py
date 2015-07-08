@@ -118,6 +118,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         utils.ping_set_option(pong, 'instances', True)
 
     def add_container(self, state, container, containers):
+        try:
+            labels = container['Labels']
+        except KeyError:
+            labels = []
+
         container_data = {
             'type': 'instance',
             'uuid': self._get_uuid(container),
@@ -125,7 +130,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'systemContainer': self._get_sys_container(container),
             'dockerId': container['Id'],
             'image': container['Image'],
-            'labels': container['Labels'],
+            'labels': labels,
             'created': container['Created'],
         }
         containers.append(container_data)
@@ -149,7 +154,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _get_sys_container(self, container):
         try:
             return container['Labels']['io.rancher.container.system']
-        except KeyError:
+        except (TypeError, KeyError):
             pass
 
     def _get_uuid(self, container):
@@ -157,7 +162,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             uuid = container['Labels']['io.rancher.container.uuid']
             if uuid:
                 return uuid
-        except KeyError:
+        except (TypeError, KeyError):
             pass
 
         names = container['Names']
