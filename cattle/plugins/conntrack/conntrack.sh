@@ -4,7 +4,7 @@ set -e
 watch()
 {
     conntrack -E -p udp --dport=$1 --sport=$1 | sed -E 's/.*src=(.*)dst=.*dport=(.*)src=.*dst=(.*)sport=.*dport=([^ ]* ).*/\1\2\3\4/g' | while read IP_SRC PORT_SRC IP_DST PORT_DST; do
-    if [ "$PORT_DST" != "$PORT_SRC" ] && [ "$IP_SRC" == "$IP_DST" ]; then
+    if [ "$PORT_DST" == "$PORT_SRC" ] && [ "$IP_SRC" != "$IP_DST" ]; then
         echo Bad rule $IP_SRC $PORT_SRC $IP_DST $PORT_DST
         conntrack -L
         iptables -L -t nat
