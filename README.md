@@ -31,9 +31,9 @@ Steps to get the tests running and passing:
 
 ## Contact
 For bugs, questions, comments, corrections, suggestions, etc., open an issue in
- [rancherio/rancher](//github.com/rancherio/rancher/issues) with a title starting with `[Python-Agent] `.
+ [rancher/rancher](//github.com/rancher/rancher/issues) with a title starting with `[Python-Agent] `.
 
-Or just [click here](//github.com/rancherio/rancher/issues/new?title=%5BPython-Agent%5D%20) to create a new issue.
+Or just [click here](//github.com/rancher/rancher/issues/new?title=%5BPython-Agent%5D%20) to create a new issue.
 
 
 # License
