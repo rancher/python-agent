@@ -5,10 +5,10 @@ set -e
 
 check()
 {
-    if conntrack  -L -p udp --dport $1 --sport $1 2>/dev/null | grep UNREPLIED; then
+    if conntrack  -L -p udp --dport $1 --sport $1 --reply-port-src $1 --reply-port-dst $1 2>/dev/null | grep UNREPLIED; then
        if [ "$2" = "delete" ]; then
            echo Deleting conntrack rule for port $1
-           conntrack -D -p udp --dport $1 --sport $1 || true
+           conntrack -D -p udp --dport $1 --sport $1 --reply-port-src $1 --reply-port-dst $1 || true
        else
            return 1
        fi
@@ -18,7 +18,7 @@ check()
 while sleep 1; do
     for i in 500 4500; do
         if ! check $i; then
-            sleep 2
+            sleep 10
             check  $i || check $i delete
         fi
     done
