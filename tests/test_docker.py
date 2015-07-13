@@ -391,10 +391,10 @@ def test_instance_activate_log_config_null(agent, responses):
     def post(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
-        assert docker_inspect['HostConfig']['LogConfig'] == {
-            'Type': 'json-file',
-            'Config': None
-        }
+        assert docker_inspect['HostConfig']['LogConfig']['Type'] == 'json-file'
+        # Note: This is obscuring the fact that LogConfig.Config can be either
+        # None or an empty map, but thats ok.
+        assert not docker_inspect['HostConfig']['LogConfig']['Config']
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
