@@ -63,9 +63,9 @@ def test_volmgr_instance_activate_volumes(agent, responses, mocker):
     mount_volume = mocker.patch.object(service.VolmgrService, "mount_volume")
 
     def post(req, resp):
-        create_volume.assert_called()
-        add_volume.assert_called()
-        mount_volume.assert_called()
+        create_volume.assert_called_with(mock.ANY)
+        add_volume.assert_called_with(mock.ANY, mock.ANY)
+        mount_volume.assert_called_with(mock.ANY, mock.ANY, mock.ANY, mock.ANY)
 
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         inspect = instance_data['dockerInspect']
@@ -289,18 +289,19 @@ def test_volmgr_restore_snapshot(agent, responses, mocker):
                                            "restore_snapshot_from_blockstore")
 
     def post(req, resp):
-        create_volume.assert_called_once()
+        create_volume.assert_called_once_with(mock.ANY)
         restore_snapshot.assert_called_once_with(snapshot_uuid,
                                                  old_volume_uuid,
                                                  volume_uuid,
                                                  blockstore_uuid)
-        add_volume.assert_called(volume_uuid, blockstore_uuid)
+        add_volume.assert_called_with(volume_uuid, blockstore_uuid)
         mount_path = os.path.join(CONFIG_OVERRIDE["VOLMGR_MOUNT_DIR"],
+                                  'default',
                                   volume_name,
                                   volume_uuid)
-        mount_volume.assert_called(volume_uuid, mount_path, False,
-                                   CONFIG_OVERRIDE[
-                                       "VOLMGR_MOUNT_NAMESPACE_FD"])
+        mount_volume.assert_called_with(volume_uuid, mount_path, False,
+                                        CONFIG_OVERRIDE[
+                                            "VOLMGR_MOUNT_NAMESPACE_FD"])
 
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         inspect = instance_data['dockerInspect']
@@ -363,7 +364,7 @@ def test_volmgr_delete_volume(agent, responses, mocker):
                                         "delete_volume")
 
     def post(req, resp):
-        mounted.assert_called()
+        mounted.assert_called_with(mock.ANY, mock.ANY)
         list_volumes.assert_called_once_with(volume_uuid)
         dc1 = mock.call("ebf6ab98-8714-464e-8966-32f790b9d4ff", volume_uuid)
         dc2 = mock.call("c912c1f5-85d5-4488-9fbb-d58e876c44cc", volume_uuid)
