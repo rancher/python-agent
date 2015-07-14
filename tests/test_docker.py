@@ -1014,12 +1014,12 @@ def test_ping(agent, responses, mocker):
     client.create_container('ibuildthecloud/helloworld',
                             name='named-created', labels={
                                 'io.rancher.container.uuid': 'uuid-created'})
-    running = client.create_container('ibuildthecloud/helloworld',
+    running = client.create_container('ibuildthecloud/helloworld:latest',
                                       name='named-running', labels={
                                           'io.rancher.container.uuid':
                                           'uuid-running'})
     client.start(running)
-    stopped = client.create_container('ibuildthecloud/helloworld',
+    stopped = client.create_container('ibuildthecloud/helloworld:latest',
                                       name='named-stopped', labels={
                                           'io.rancher.container.uuid':
                                           'uuid-stopped'})
