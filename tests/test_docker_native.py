@@ -10,7 +10,7 @@ def test_native_container_activate_only(agent, responses):
     delete_container('/native_container')
 
     client = docker_client()
-    c = client.create_container('ibuildthecloud/helloworld',
+    c = client.create_container('ibuildthecloud/helloworld:latest',
                                 name='native_container')
     client.start(c)
     inspect = docker_client().inspect_container(c['Id'])
@@ -39,7 +39,7 @@ def test_native_container_activate_not_running(agent, responses):
     delete_container('/native_container')
 
     client = docker_client()
-    c = client.create_container('ibuildthecloud/helloworld',
+    c = client.create_container('ibuildthecloud/helloworld:latest',
                                 name='native_container')
     inspect = docker_client().inspect_container(c['Id'])
 
