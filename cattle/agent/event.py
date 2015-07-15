@@ -1,11 +1,11 @@
-import json
 import logging
 import os
 import re
-import requests
 import sys
 import time
 import uuid
+import websocket
+import base64
 
 from cattle import Config
 from cattle import type_manager
@@ -28,15 +28,18 @@ def _get_event_suffix(agent_id):
         return ';agent=' + agent_id
 
 
-def _data(events, agent_id):
-    event = {}
+def _events_query_string(events, agent_id):
+    params = []
+    suffix = ''
+
     if agent_id is not None:
-        event['agentId'] = agent_id
+        params.append('agentId=%s' % agent_id)
         suffix = _get_event_suffix(agent_id)
-        event['eventNames'] = [x + suffix for x in events]
-    else:
-        event['eventNames'] = events
-    return json.dumps(event)
+
+    params.extend(['eventNames=' + event + suffix for event in events])
+
+    qs = '&'.join(params)
+    return qs
 
 
 def _check_ts():
@@ -151,56 +154,75 @@ class EventClient:
 
     def _run(self, events):
         ppid = os.environ.get("AGENT_PARENT_PID")
-        headers = {}
-        args = {
-            "data": _data(events, self._agent_id),
-            "stream": True,
-            "headers": headers,
-            "timeout": Config.event_read_timeout()
-        }
+        headers = []
 
         if self._auth is not None:
-            if isinstance(self._auth, basestring):
-                headers["Authorization", self._auth]
-            else:
-                args["auth"] = self._auth
+            auth_header = 'Authorization: Basic ' + base64.b64encode(
+                ('%s:%s' % self._auth).encode('latin1')).strip()
+            headers.append(auth_header)
+
+        subscribe_url = self._url.replace('http', 'ws')
+        query_string = _events_query_string(events, self._agent_id)
+        subscribe_url = subscribe_url + '?' + query_string
 
         try:
-            drop_count = 0
-            ping_drop = 0
-            r = requests.post(self._url, **args)
-            if r.status_code != 201:
-                raise Exception("{} : {}".format(r.status_code, r.text))
-
+            drops = {
+                'drop_count': 0,
+                'ping_drop': 0,
+            }
             self._start_children()
 
-            for line in r.iter_lines(chunk_size=512):
-                line = line.strip()
+            def on_message(ws, message):
+                line = message.strip()
                 try:
                     ping = '"ping' in line
                     if len(line) > 0:
                         # TODO Need a better approach here
                         if ping:
                             self._ping_queue.put(line, block=False)
-                            ping_drop = 0
+                            drops['ping_drop'] = 0
                         else:
                             self._queue.put(line, block=False)
                 except Full:
                     log.info("Dropping request %s" % line)
-                    drop_count += 1
-                    max = Config.max_dropped_requests()
-                    if ping:
-                        ping_drop += 1
-                        max = Config.max_dropped_ping()
+                    drops['drop_count'] += 1
+                    drop_max = Config.max_dropped_requests()
+                    drop_type = 'overall'
+                    drop_test = drops['drop_count']
 
-                    if drop_count > max:
-                        log.error('Max dropped requests [%s] exceeded', max)
-                        break
+                    if ping:
+                        drops['ping_drop'] += 1
+                        drop_type = 'ping'
+                        drop_test = drops['ping_drop']
+                        drop_max = Config.max_dropped_ping()
+
+                    if drop_test > drop_max:
+                        log.error('Max of [%s] dropped [%s] requests exceeded',
+                                  drop_max, drop_type)
+                        ws.close()
 
                 if not _should_run(ppid):
                     log.info("Parent process has died or stamp changed,"
                              " exiting")
-                    break
+                    ws.close()
+
+            def on_error(ws, error):
+                raise Exception('Received websocket error: [%s]', error)
+
+            def on_close(ws):
+                log.info('Websocket connection closed.')
+
+            def on_open(ws):
+                log.info('Websocket connection opened')
+
+            ws = websocket.WebSocketApp(subscribe_url,
+                                        header=headers,
+                                        on_message=on_message,
+                                        on_error=on_error,
+                                        on_close=on_close,
+                                        on_open=on_open)
+            ws.run_forever()
+
         finally:
             for child in self._children:
                 if hasattr(child, "terminate"):
