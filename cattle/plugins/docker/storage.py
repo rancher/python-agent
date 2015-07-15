@@ -143,7 +143,6 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                       auth_config=auth_config,
                                       stream=True,
                                       insecure_registry=True):
-                log.info('Pulling [%s] status : %s', data.fullName, status)
                 status = marshaller.from_string(status)
                 try:
                     message = status['status']
