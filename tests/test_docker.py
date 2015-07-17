@@ -1194,3 +1194,36 @@ def test_no_label_field():
     dc.add_container('running', container, containers)
     assert containers[0]['uuid'] == 'no-label-test'
     assert containers[0]['systemContainer'] is None
+
+
+@if_docker
+def test_instance_links_net_host(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/target_redis')
+    delete_container('/target_mysql')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                ports=[(3307, 'udp'), (3306, 'tcp')],
+                                name='target_mysql')
+    client.start(c, port_bindings={
+        '3307/udp': ('127.0.0.2', 12346),
+        '3306/tcp': ('127.0.0.2', 12345)
+    })
+
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='target_redis')
+    client.start(c)
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['nics'][0]['network']['kind'] = 'dockerHost'
+
+    def post(req, resp):
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
+        inspect = docker_client().inspect_container(id)
+        assert inspect['HostConfig']['Links'] is None
+
+    event_test(agent, 'docker/instance_activate_links_no_service',
+                      pre_func=pre, post_func=post, diff=False)

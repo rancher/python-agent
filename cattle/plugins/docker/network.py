@@ -17,14 +17,17 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
         kind = instance.nics[0].network.kind
         if kind == 'dockerHost':
             start_config['network_mode'] = 'host'
+            del start_config['links']
         elif kind == 'dockerNone':
             create_config['network_disabled'] = True
+            del start_config['links']
         elif kind == 'dockerContainer':
             id = instance.networkContainer.uuid
             other = compute.get_container(client, instance.networkContainer)
             if other is not None:
                 id = other['Id']
             start_config['network_mode'] = 'container:{}'.format(id)
+            del start_config['links']
     except (KeyError, AttributeError, IndexError):
         pass
 
