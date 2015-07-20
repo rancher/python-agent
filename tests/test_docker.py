@@ -124,6 +124,66 @@ def test_instance_activate_links_null_ports(agent, responses):
 
 
 @if_docker
+def test_instance_activate_double_links(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def post(req, resp):
+        id = resp['data']['instanceHostMap']['instance']
+        id = id['+data']['dockerContainer']['Id']
+        inspect = docker_client().inspect_container(id)
+        instance_activate_common_validation(resp)
+
+        env = inspect['Config']['Env']
+
+        for line in env:
+            assert 'LVL' not in line
+
+        assert 'MYSQL_NAME=/cattle/mysql' in env
+        assert 'MYSQL_PORT=udp://mysql:3307' in env
+        assert 'MYSQL_PORT_3307_UDP=udp://mysql:3307' in env
+        assert 'MYSQL_PORT_3307_UDP_ADDR=mysql' in env
+        assert 'MYSQL_PORT_3307_UDP_PORT=3307' in env
+        assert 'MYSQL_PORT_3307_UDP_PROTO=udp' in env
+
+        assert 'MYSQL_PORT_3306_TCP=tcp://mysql:3306' in env
+        assert 'MYSQL_PORT_3306_TCP_ADDR=mysql' in env
+        assert 'MYSQL_PORT_3306_TCP_PORT=3306' in env
+        assert 'MYSQL_PORT_3306_TCP_PROTO=tcp' in env
+
+        assert 'REDIS_NAME=/cattle/redis' in env
+        assert 'REDIS_PORT=udp://redis:26' in env
+        assert 'REDIS_PORT_26_UDP=udp://redis:26' in env
+        assert 'REDIS_PORT_26_UDP_ADDR=redis' in env
+        assert 'REDIS_PORT_26_UDP_PORT=26' in env
+        assert 'REDIS_PORT_26_UDP_PROTO=udp' in env
+
+        assert 'REDIS_ENV_ONE=TWO' in env
+        assert 'REDIS_ENV_THREE=FOUR' in env
+        assert 'REDIS_1_ENV_ONE=TWO' in env
+        assert 'REDIS_1_ENV_THREE=FOUR' in env
+        assert 'REDIS_2_ENV_ONE=TWO' in env
+        assert 'REDIS_2_ENV_THREE=FOUR' in env
+        assert 'ENV_REDIS_1_ENV_ONE=TWO' in env
+        assert 'ENV_REDIS_1_ENV_THREE=FOUR' in env
+        assert 'ENV_REDIS_2_ENV_ONE=TWO' in env
+        assert 'ENV_REDIS_2_ENV_THREE=FOUR' in env
+
+        assert 'REDIS_1_PORT=udp://redis:26' in env
+        assert 'REDIS_1_PORT_26_UDP=udp://redis:26' in env
+        assert 'REDIS_1_PORT_26_UDP_ADDR=redis' in env
+        assert 'REDIS_1_PORT_26_UDP_PORT=26' in env
+        assert 'REDIS_1_PORT_26_UDP_PROTO=udp' in env
+
+        assert 'ENV_REDIS_1_PORT=udp://redis:26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP=udp://redis:26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_ADDR=redis' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_PORT=26' in env
+        assert 'ENV_REDIS_1_PORT_26_UDP_PROTO=udp' in env
+
+    event_test(agent, 'docker/instance_activate_double_links', post_func=post)
+
+
+@if_docker
 def test_instance_activate_links(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 
