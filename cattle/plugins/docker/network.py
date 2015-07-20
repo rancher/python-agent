@@ -1,4 +1,5 @@
 import logging
+import re
 
 from cattle.plugins.docker.util import add_to_env, add_label, \
     is_nonrancher_container
@@ -141,7 +142,30 @@ def _copy_link_env(name, link, result):
         targetInstance = link.targetInstance
         if targetInstance.data.dockerInspect.Config.Env is None:
             return
+
+        ignores = set()
+
         for env in targetInstance.data.dockerInspect.Config.Env:
+            parts = env.split('=', 1)
+            if len(parts) == 1:
+                continue
+
+            if parts[1].startswith('/cattle/'):
+                env_name = to_env_name(parts[1][len('/cattle/'):])
+                ignores.add(env_name + '_NAME')
+                ignores.add(env_name + '_PORT')
+                ignores.add(env_name + '_ENV')
+
+        for env in targetInstance.data.dockerInspect.Config.Env:
+            should_ignore = False
+            for ignore in ignores:
+                if env.startswith(ignore):
+                    should_ignore = True
+                    break
+
+            if should_ignore:
+                continue
+
             parts = env.split('=', 1)
             if len(parts) == 1:
                 continue
@@ -149,14 +173,20 @@ def _copy_link_env(name, link, result):
             if key in ['HOME', 'PATH']:
                 continue
 
-            name = name.replace('-', '_').upper()
-            result['{}_ENV_{}'.format(name, key)] = value
+            result['{}_ENV_{}'.format(to_env_name(name), key)] = value
     except AttributeError:
         pass
 
 
+def to_env_name(name):
+    return re.sub(r'[^a-zA-Z0-9_]', '_', name).upper()
+
+
 def _add_link_env(name, link, result, in_ip=None):
     try:
+        result['{0}_NAME'.format(to_env_name(name)).upper()] =\
+            '/cattle/{0}'.format(name)
+
         if link.data.fields.ports is None:
             return
 
@@ -180,7 +210,7 @@ def _add_link_env(name, link, result, in_ip=None):
             }
 
             for k, v in data.items():
-                result['{0}_{1}'.format(name, k).upper()] = v
+                result['{0}_{1}'.format(to_env_name(name), k).upper()] = v
     except AttributeError:
         pass
 
