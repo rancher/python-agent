@@ -22,6 +22,8 @@ from cattle.plugins.volmgr import volmgr
 
 log = logging.getLogger('docker')
 
+RANCHER_AGENT_IMAGE = 'rancher/agent'
+
 CREATE_CONFIG_FIELDS = [
     ('labels', 'labels'),
     ('environment', 'environment'),
@@ -141,7 +143,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         nonrunning_containers = {}
         for c in client.containers(all=True):
             # Blank status only wait to distinguish created from stopped
-            if c['Status'] != '':
+            if c['Status'] != '' and c['Status'] != 'Created':
                 nonrunning_containers[c['Id']] = c
 
         running_containers = {}
@@ -152,6 +154,13 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         return running_containers, nonrunning_containers
 
     def _get_sys_container(self, container):
+        try:
+            image_name = container['Image'].split(':')
+            if image_name[0] == RANCHER_AGENT_IMAGE:
+                return 'rancher-agent'
+        except (TypeError, KeyError):
+            pass
+
         try:
             return container['Labels']['io.rancher.container.system']
         except (TypeError, KeyError):

@@ -9,6 +9,15 @@ from .docker_common import *  # NOQA
 from docker.errors import APIError
 
 
+@pytest.fixture(scope='module')
+def pull_images():
+    client = docker_client()
+    images = [('rancher/agent', 'v0.7.11'),
+              ('rancher/agent-instance', 'v0.3.1')]
+    for i in images:
+        client.pull(i[0], i[1])
+
+
 @if_docker
 def test_volume_activate(agent, responses):
     event_test(agent, 'docker/volume_activate')
@@ -1029,14 +1038,22 @@ def assert_ping_stat_resources(resp):
 def ping_post_process(req, resp):
     resources = resp['data']['resources']
 
-    uuids = ['uuid-running', 'uuid-stopped', 'uuid-created']
+    uuids = ['uuid-running', 'uuid-stopped', 'uuid-created', 'uuid-system',
+             'uuid-agent-instance']
     instances = []
     for r in resources:
         if r['type'] == 'instance' and r['uuid'] in uuids:
             if r['uuid'] == 'uuid-running':
                 assert r['state'] == 'running'
-            elif r['uuid'] == 'uuid-stopped':
+            elif r['uuid'] in ['uuid-stopped', 'uuid-agent-instance']:
                 assert r['state'] == 'stopped'
+            elif r['uuid'] == 'uuid-system':
+                assert r['state'] == 'stopped'
+                # Account for docker 1.7/1.8 difference
+                try:
+                    del r['labels']['io.rancher.container.system']
+                except KeyError:
+                    pass
 
             assert r['dockerId'] is not None
             del r['dockerId']
@@ -1044,7 +1061,7 @@ def ping_post_process(req, resp):
             del r['created']
             instances.append(r)
 
-    assert len(instances) == 2
+    assert len(instances) == 4
 
     resources = filter(lambda x: x.get('kind') == 'docker', resources)
     resources += instances
@@ -1061,7 +1078,7 @@ def ping_post_process_state_exception(req, resp):
 
 
 @if_docker
-def test_ping(agent, responses, mocker):
+def test_ping(agent, responses, mocker, pull_images):
     mocker.patch.object(HostInfo, 'collect_data',
                         return_value=json_data('docker/host_info_resp'))
 
@@ -1070,6 +1087,8 @@ def test_ping(agent, responses, mocker):
     delete_container('/named-running')
     delete_container('/named-stopped')
     delete_container('/named-created')
+    delete_container('/named-system')
+    delete_container('/named-agent-instance')
 
     client.create_container('ibuildthecloud/helloworld',
                             name='named-created', labels={
@@ -1085,6 +1104,24 @@ def test_ping(agent, responses, mocker):
                                           'uuid-stopped'})
     client.start(stopped)
     client.kill(stopped)
+
+    system_con = client.create_container('rancher/agent:v0.7.11',
+                                         name='named-system', labels={
+                                             'io.rancher.container.uuid':
+                                             'uuid-system'})
+    client.start(system_con)
+    client.kill(system_con)
+
+    agent_inst_con = client.create_container('rancher/agent-instance:v0.3.1',
+                                             name='named-agent-instance',
+                                             labels={
+                                                 'io.rancher.container.uuid':
+                                                     'uuid-agent-instance',
+                                                 'io.rancher.container.system':
+                                                     'networkAgent'},
+                                             command='true')
+    client.start(agent_inst_con)
+    client.kill(agent_inst_con)
 
     CONFIG_OVERRIDE['DOCKER_UUID'] = 'testuuid'
     CONFIG_OVERRIDE['PHYSICAL_HOST_UUID'] = 'hostuuid'
