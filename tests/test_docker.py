@@ -1038,8 +1038,8 @@ def assert_ping_stat_resources(resp):
 def ping_post_process(req, resp):
     resources = resp['data']['resources']
 
-    uuids = ['uuid-running', 'uuid-stopped', 'uuid-created', 'uuid-system',
-             'uuid-agent-instance']
+    uuids = {'uuid-running': 0, 'uuid-stopped': 1, 'uuid-created': 2,
+             'uuid-system': 3, 'uuid-agent-instance': 4}
     instances = []
     for r in resources:
         if r['type'] == 'instance' and r['uuid'] in uuids:
@@ -1060,6 +1060,11 @@ def ping_post_process(req, resp):
             assert r['created'] is not None
             del r['created']
             instances.append(r)
+
+    def ping_sort(item):
+        return uuids[item['uuid']]
+
+    instances.sort(key=ping_sort)
 
     assert len(instances) == 4
 
