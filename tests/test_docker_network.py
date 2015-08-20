@@ -63,3 +63,23 @@ def test_network_mode_container(agent, responses):
 
     event_test(agent, 'docker/instance_activate', pre_func=pre,
                post_func=post, diff=False)
+
+
+@if_docker
+def test_network_mode_bridge(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['nics'][0]['network']['kind'] = 'dockerBridge'
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        docker_inspect = instance_data['dockerInspect']
+        docker_data = instance_data['dockerContainer']
+        assert not docker_inspect['Config']['NetworkDisabled']
+        assert len(docker_data['Ports']) == 1
+        assert docker_data['Ports'][0]["PublicPort"] == 100
+
+    event_test(agent, 'docker/instance_activate_bridge', pre_func=pre,
+               post_func=post, diff=False)

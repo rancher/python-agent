@@ -93,6 +93,9 @@ def setup_ports(instance, create_config, start_config):
     if 'ports' in create_config:
         del create_config['ports']
 
+    if 'port_bindings' in start_config:
+        del start_config['port_bindings']
+
     start_config['publish_all_ports'] = False
 
 
