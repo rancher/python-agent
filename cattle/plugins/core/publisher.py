@@ -21,7 +21,7 @@ class Publisher:
         start = time.time()
         try:
             r = self._session.post(self._url, data=line, auth=self._auth,
-                                   timeout=5)
+                                   timeout=60)
             if r.status_code != 201:
                 log.error("Error [%s], Request [%s]", r.text, line)
         finally:
