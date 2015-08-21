@@ -20,6 +20,7 @@ from cattle.plugins.docker.network import setup_ipsec, setup_links, \
 from cattle.plugins.docker.agent import setup_cattle_config_url
 from cattle.plugins.volmgr import volmgr
 
+
 log = logging.getLogger('docker')
 
 SYSTEM_LABEL = 'io.rancher.container.system'
@@ -403,16 +404,23 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         start_config['links'] = links
 
     @staticmethod
-    def _setup_ports(create_config, instance):
+    def _setup_ports(create_config, instance, start_config):
         ports = []
+        bindings = {}
         try:
             for port in instance.ports:
                 ports.append((port.privatePort, port.protocol))
+                if port.publicPort is not None:
+                    bind = '{0}/{1}'.format(port.privatePort, port.protocol)
+                    bindings[bind] = ('', port.publicPort)
         except (AttributeError, KeyError):
             pass
 
         if len(ports) > 0:
             create_config['ports'] = ports
+
+        if len(bindings) > 0:
+            start_config['port_bindings'] = bindings
 
     def _record_state(self, client, instance, docker_id=None):
         if docker_id is None:
@@ -517,7 +525,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         self._setup_command(create_config, instance)
 
-        self._setup_ports(create_config, instance)
+        self._setup_ports(create_config, instance, start_config)
 
         self._setup_volumes(create_config, instance, start_config, client)
 
