@@ -425,10 +425,11 @@ def test_instance_activate_log_config(agent, responses):
 
     def pre(req):
         instance = req['data']['instanceHostMap']['instance']
-        instance['data']['fields']['logConfig'] = {'driver': 'json-file',
-                                                   'config': {
-                                                       'tag': 'foo',
-                                                   }}
+        instance['data']['fields']['logConfig'] = \
+            JsonObject({'driver': 'json-file',
+                        'config': {
+                            'tag': 'foo',
+                        }})
 
     def post(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
@@ -451,8 +452,8 @@ def test_instance_activate_log_config_null(agent, responses):
 
     def pre(req):
         instance = req['data']['instanceHostMap']['instance']
-        instance['data']['fields']['logConfig'] = {'driver': None,
-                                                   'config': None}
+        instance['data']['fields']['logConfig'] = JsonObject({'driver': None,
+                                                              'config': None})
 
     def pre2(req):
         instance = req['data']['instanceHostMap']['instance']
