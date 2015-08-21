@@ -22,7 +22,7 @@ from cattle.plugins.volmgr import volmgr
 
 log = logging.getLogger('docker')
 
-RANCHER_AGENT_IMAGE = 'rancher/agent'
+SYSTEM_LABEL = 'io.rancher.container.system'
 
 CREATE_CONFIG_FIELDS = [
     ('labels', 'labels'),
@@ -80,6 +80,19 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         KindBasedMixin.__init__(self, kind='docker')
         BaseComputeDriver.__init__(self)
         self.host_info = HostInfo(docker_client())
+        self.system_images = self.get_agent_images(docker_client())
+
+    def get_agent_images(self, client):
+        images = client.images(filters={'label': SYSTEM_LABEL})
+        system_images = {}
+        for i in images:
+            try:
+                label_val = i['Labels'][SYSTEM_LABEL]
+                for l in i['RepoTags']:
+                    system_images[l] = label_val
+            except KeyError:
+                pass
+        return system_images
 
     @staticmethod
     def get_container_by(client, func):
@@ -155,9 +168,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _get_sys_container(self, container):
         try:
-            image_name = container['Image'].split(':')
-            if image_name[0] == RANCHER_AGENT_IMAGE:
-                return 'rancher-agent'
+            image = container['Image']
+            if image in self.system_images:
+                return self.system_images[image]
         except (TypeError, KeyError):
             pass
 

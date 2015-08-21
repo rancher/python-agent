@@ -12,7 +12,8 @@ from docker.errors import APIError
 @pytest.fixture(scope='module')
 def pull_images():
     client = docker_client()
-    images = [('rancher/agent', 'v0.7.11'),
+    images = [('ibuildthecloud/helloworld', 'latest'),
+              ('rancher/agent', 'v0.7.11'),
               ('rancher/agent-instance', 'v0.3.1')]
     for i in images:
         client.pull(i[0], i[1])
