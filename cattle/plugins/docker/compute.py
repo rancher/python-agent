@@ -8,6 +8,7 @@ from cattle.compute import BaseComputeDriver
 from cattle.agent.handler import KindBasedMixin
 from cattle.type_manager import get_type, MARSHALLER
 from cattle import utils
+from cattle.utils import JsonObject
 from docker.errors import APIError
 from docker import tls
 from docker.utils import create_host_config
@@ -596,7 +597,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _setup_simple_config_fields(self, config, instance, fields):
         for src, dest in fields:
             try:
-                config[dest] = instance.data.fields[src]
+                src_obj = instance.data.fields[src]
+                config[dest] = JsonObject.unwrap(src_obj)
             except (KeyError, AttributeError):
                 pass
 
@@ -651,8 +653,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         for i in ['type', 'config']:
             bad = True
             try:
-                if start_config['log_config'][i] is not None:
+                obj = start_config['log_config'][i]
+                if obj is not None:
                     bad = False
+                    start_config['log_config'][i] = JsonObject.unwrap(obj)
             except (KeyError, AttributeError):
                 pass
             if bad and 'log_config' in start_config:
