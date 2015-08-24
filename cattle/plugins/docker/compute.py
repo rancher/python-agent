@@ -90,6 +90,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 label_val = i['Labels'][SYSTEM_LABEL]
                 for l in i['RepoTags']:
                     system_images[l] = label_val
+                    if l.endswith(':latest'):
+                        alias = l[:-7]
+                        system_images[alias] = label_val
             except KeyError:
                 pass
         return system_images
