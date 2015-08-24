@@ -13,8 +13,8 @@ from docker.errors import APIError
 def pull_images():
     client = docker_client()
     images = [('ibuildthecloud/helloworld', 'latest'),
-              ('rancher/agent', 'v0.7.11'),
-              ('rancher/agent-instance', 'v0.3.1')]
+              ('rancher/agent', 'v0.7.9'),
+              ('rancher/agent', 'latest')]
     for i in images:
         client.pull(i[0], i[1])
 
@@ -1041,7 +1041,7 @@ def ping_post_process(req, resp):
     resources = resp['data']['resources']
 
     uuids = {'uuid-running': 0, 'uuid-stopped': 1, 'uuid-created': 2,
-             'uuid-system': 3, 'uuid-agent-instance': 4}
+             'uuid-system': 3, 'uuid-sys-nover': 4, 'uuid-agent-instance': 5}
     instances = []
     for r in resources:
         if r['type'] == 'instance' and r['uuid'] in uuids:
@@ -1049,13 +1049,18 @@ def ping_post_process(req, resp):
                 assert r['state'] == 'running'
             elif r['uuid'] in ['uuid-stopped', 'uuid-agent-instance']:
                 assert r['state'] == 'stopped'
-            elif r['uuid'] == 'uuid-system':
+            elif r['uuid'] == 'uuid-system' or r['uuid'] == 'uuid-sys-nover':
                 assert r['state'] == 'stopped'
                 # Account for docker 1.7/1.8 difference
                 try:
                     del r['labels']['io.rancher.container.system']
                 except KeyError:
                     pass
+
+            # Account for docker 1.6 where ':latest' is appended
+            if r['uuid'] == 'uuid-sys-nover' and r[
+                    'image'] == 'rancher/agent:latest':
+                r['image'] = 'rancher/agent'
 
             assert r['dockerId'] is not None
             del r['dockerId']
@@ -1068,7 +1073,7 @@ def ping_post_process(req, resp):
 
     instances.sort(key=ping_sort)
 
-    assert len(instances) == 4
+    assert len(instances) == 5
 
     resources = filter(lambda x: x.get('kind') == 'docker', resources)
     resources += instances
@@ -1085,7 +1090,7 @@ def ping_post_process_state_exception(req, resp):
 
 
 @if_docker
-def test_ping(agent, responses, mocker, pull_images):
+def test_ping(pull_images, agent, responses, mocker):
     mocker.patch.object(HostInfo, 'collect_data',
                         return_value=json_data('docker/host_info_resp'))
 
@@ -1095,6 +1100,7 @@ def test_ping(agent, responses, mocker, pull_images):
     delete_container('/named-stopped')
     delete_container('/named-created')
     delete_container('/named-system')
+    delete_container('/named-sys-nover')
     delete_container('/named-agent-instance')
 
     client.create_container('ibuildthecloud/helloworld',
@@ -1112,21 +1118,29 @@ def test_ping(agent, responses, mocker, pull_images):
     client.start(stopped)
     client.kill(stopped)
 
-    system_con = client.create_container('rancher/agent:v0.7.11',
+    system_con = client.create_container('rancher/agent:v0.7.9',
                                          name='named-system', labels={
                                              'io.rancher.container.uuid':
                                              'uuid-system'})
     client.start(system_con)
     client.kill(system_con)
 
-    agent_inst_con = client.create_container('rancher/agent-instance:v0.3.1',
-                                             name='named-agent-instance',
-                                             labels={
-                                                 'io.rancher.container.uuid':
-                                                     'uuid-agent-instance',
-                                                 'io.rancher.container.system':
-                                                     'networkAgent'},
-                                             command='true')
+    sys_nover = client.create_container('rancher/agent',
+                                        name='named-sys-nover', labels={
+                                            'io.rancher.container.uuid':
+                                            'uuid-sys-nover'})
+    client.start(sys_nover)
+    client.kill(sys_nover)
+
+    agent_inst_con = client.create_container(
+        'ibuildthecloud/helloworld:latest',
+        name='named-agent-instance',
+        labels={
+            'io.rancher.container.uuid':
+                'uuid-agent-instance',
+            'io.rancher.container.system':
+                'networkAgent'},
+        command='true')
     client.start(agent_inst_con)
     client.kill(agent_inst_con)
 

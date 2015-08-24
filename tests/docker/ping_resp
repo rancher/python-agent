@@ -86,15 +86,23 @@
                 "type" : "instance",
                 "uuid" : "uuid-system",
                 "state" : "stopped",
-                "image": "rancher/agent:v0.7.11",
+                "image": "rancher/agent:v0.7.9",
                 "systemContainer": "rancher-agent",
                 "labels": {"io.rancher.container.uuid": "uuid-system"}
             },
             {
                 "type" : "instance",
+                "uuid" : "uuid-sys-nover",
+                "state" : "stopped",
+                "image": "rancher/agent",
+                "systemContainer": "rancher-agent",
+                "labels": {"io.rancher.container.uuid": "uuid-sys-nover"}
+            },
+            {
+                "type" : "instance",
                 "uuid" : "uuid-agent-instance",
                 "state" : "stopped",
-                "image": "rancher/agent-instance:v0.3.1",
+                "image": "ibuildthecloud/helloworld:latest",
                 "systemContainer": "networkAgent",
                 "labels": {"io.rancher.container.uuid": "uuid-agent-instance",
                            "io.rancher.container.system": "networkAgent"}
