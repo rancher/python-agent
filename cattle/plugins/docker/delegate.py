@@ -15,6 +15,7 @@ from . import docker_client
 import requests
 import subprocess
 import os
+import time
 
 log = logging.getLogger('docker')
 
@@ -57,13 +58,24 @@ def ns_exec(pid, event):
 
     env['PATH'] = os.environ['PATH']
 
-    p = popen(cmd,
-              env=env,
-              stdin=subprocess.PIPE,
-              stdout=subprocess.PIPE,
-              stderr=subprocess.STDOUT)
-    output, error = p.communicate(input=input)
-    retcode = p.poll()
+    for i in range(3):
+        p = popen(cmd,
+                  env=env,
+                  stdin=subprocess.PIPE,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.STDOUT)
+        output, error = p.communicate(input=input)
+        retcode = p.poll()
+
+        if retcode == 0:
+            break
+
+        exists_cmd = cmd[:-1] + ['/usr/bin/test', '-e', script]
+        if popen(exists_cmd, env=env).wait() == 0:
+            break
+
+        # Sleep and try again if missing
+        time.sleep(1)
 
     if retcode:
         return retcode, output, None
