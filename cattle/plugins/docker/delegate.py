@@ -57,6 +57,7 @@ def ns_exec(pid, event):
                 env[kv[0]] = kv[1]
 
     env['PATH'] = os.environ['PATH']
+    env['CATTLE_CONFIG_URL'] = Config.config_url()
 
     for i in range(3):
         p = popen(cmd,
