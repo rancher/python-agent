@@ -289,7 +289,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except (TypeError, KeyError, AttributeError):
             pass
 
-    def get_container(self, client, instance):
+    def get_container(self, client, instance, by_agent=False):
         if instance is None:
             return None
 
@@ -306,7 +306,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if container:
             return container
 
-        if hasattr(instance, 'agentId') and instance.agentId:
+        if by_agent and hasattr(instance, 'agentId') and instance.agentId:
             f = lambda x: self._agent_id_filter(str(instance.agentId), x)
             container = self.get_container_by(client, f)
 

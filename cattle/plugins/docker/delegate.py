@@ -88,7 +88,8 @@ class DockerDelegate(BaseHandler):
            instanceData.get('token') is None:
             return
 
-        container = self.compute.get_container(docker_client(), instanceData)
+        container = self.compute.get_container(docker_client(), instanceData,
+                                               by_agent=True)
         if container is None:
             log.info('Can not call [%s], container does not exists',
                      instanceData.uuid)
