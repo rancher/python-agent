@@ -7,6 +7,12 @@ def setup_cattle_config_url(instance, create_config):
     if instance.get('agentId') is None:
         return
 
+    if 'labels' not in create_config:
+        create_config['labels'] = {}
+
+    create_config['labels']['io.rancher.container.agent_id'] = \
+        str(instance.get('agentId'))
+
     url = Config.config_url()
 
     if url is not None:
