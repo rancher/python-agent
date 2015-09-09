@@ -1,4 +1,5 @@
 import logging
+import socket
 from os import path, remove, makedirs, rename, environ
 
 from . import docker_client, pull_image
@@ -246,10 +247,12 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'uuid': compute['uuid'] + '-pool'
         }
 
+        resolved_ip = socket.gethostbyname(DockerConfig.docker_host_ip())
+
         ip = {
             'type': 'ipAddress',
-            'uuid': DockerConfig.docker_host_ip(),
-            'address': DockerConfig.docker_host_ip(),
+            'uuid': resolved_ip,
+            'address': resolved_ip,
             'hostUuid': compute['uuid'],
         }
 
@@ -279,6 +282,13 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         container_id = container.get('Id')
         return id == container_id
 
+    @staticmethod
+    def _agent_id_filter(id, container):
+        try:
+            return container['Labels']['io.rancher.container.agent_id'] == id
+        except (TypeError, KeyError, AttributeError):
+            pass
+
     def get_container(self, client, instance):
         if instance is None:
             return None
@@ -290,8 +300,17 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return container
 
         if hasattr(instance, 'externalId') and instance.externalId:
-            return self.get_container_by(client, lambda x: self._id_filter(
-                instance.externalId, x))
+            f = lambda x: self._id_filter(instance.externalId, x)
+            container = self.get_container_by(client, f)
+
+        if container:
+            return container
+
+        if hasattr(instance, 'agentId') and instance.agentId:
+            f = lambda x: self._agent_id_filter(str(instance.agentId), x)
+            container = self.get_container_by(client, f)
+
+        return container
 
     def _is_instance_active(self, instance, host):
         if is_no_op(instance):
