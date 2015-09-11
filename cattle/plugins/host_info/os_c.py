@@ -36,9 +36,10 @@ class OSCollector(object):
     def _get_os(self):
         data = {}
         if platform.system() == 'Linux':
-            info = platform.linux_distribution()
-            keys = ["distribution", "version", "versionDescription"]
-            data = self._zip_fields_values(keys, info)
+            if self.docker_client:
+                data["operatingSystem"] = \
+                    self.docker_client.info().get("OperatingSystem",
+                                                  "Unknown")
 
             data['kernelVersion'] = \
                 platform.release() if len(platform.release()) > 0 else None

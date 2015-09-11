@@ -123,10 +123,8 @@ def test_collect_data_meminfo(host_data):
 
 
 def test_collect_data_osinfo(host_data):
-    expected_osinfo_keys = ['distribution',
+    expected_osinfo_keys = ['operatingSystem',
                             'dockerVersion',
-                            'version',
-                            'versionDescription',
                             'kernelVersion']
 
     assert sorted(host_data['osInfo'].keys()) == \
