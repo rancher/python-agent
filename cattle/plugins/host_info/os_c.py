@@ -39,7 +39,7 @@ class OSCollector(object):
             if self.docker_client:
                 data["operatingSystem"] = \
                     self.docker_client.info().get("OperatingSystem",
-                                                  "Unknown")
+                                                  None)
 
             data['kernelVersion'] = \
                 platform.release() if len(platform.release()) > 0 else None
