@@ -72,6 +72,19 @@ class BaseComputeDriver(BaseHandler):
         result = {req.get("resourceType"): inspect}
         return self._reply(req, result)
 
+    def instance_pull(self, req=None, instancePull=None):
+        progress = Progress(req)
+        result = self._do_instance_pull(instancePull, progress)
+        if result is None:
+            result = {}
+        else:
+            result = {
+                'fields': {
+                    'dockerImage': result,
+                },
+            }
+        return self._reply(req, result)
+
     def get_instance_host_from_map(self, instanceHostMap):
         instance = instanceHostMap.instance
         host = instanceHostMap.host

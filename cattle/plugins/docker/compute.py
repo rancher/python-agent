@@ -4,6 +4,7 @@ from os import path, remove, makedirs, rename, environ
 
 from . import docker_client, pull_image
 from . import DockerConfig
+from . import DockerPool
 from cattle import Config
 from cattle.compute import BaseComputeDriver
 from cattle.agent.handler import KindBasedMixin
@@ -583,6 +584,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             log.info('Creating docker container [%s] from config %s', name,
                      create_config)
 
+            labels = create_config['labels']
+            if labels.get('io.rancher.container.pull_image', None) == 'always':
+                pull_image(instance.image, progress)
+
             try:
                 container = client.create_container(image_tag, **create_config)
             except APIError as e:
@@ -802,6 +807,29 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return
 
         remove_container(client, container)
+
+    def _do_instance_pull(self, pull_info, progress):
+        client = docker_client()
+
+        image = pull_info.image.data.dockerImage
+        try:
+            existing = client.inspect_image(image.fullName)
+        except APIError:
+            existing = None
+
+        if pull_info.mode == 'cached' and existing is None:
+            return existing
+
+        if pull_info.complete:
+            if existing is not None:
+                client.remove_image(image.fullName + pull_info.tag)
+            return
+
+        DockerPool.image_pull(pull_info.image, progress)
+        image_info = DockerPool.parse_repo_tag(image.fullName)
+        client.tag(image.fullName, image_info['repo'],
+                   image_info['tag'] + pull_info.tag, force=True)
+        return client.inspect_image(image.fullName)
 
     def _do_instance_inspect(self, instanceInspectRequest):
         client = docker_client()
