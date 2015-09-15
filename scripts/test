@@ -15,7 +15,7 @@ TMP=$(mktemp -d --tmpdir=/scratch)
 
 trap "rm -rf $TMP" exit
 
-rsync -a ./ $TMP
+rsync -a --exclude .tox ./ $TMP
 pushd $TMP
 
 sudo env DOCKER_TEST=true tox -e flake8

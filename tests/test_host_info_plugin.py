@@ -11,6 +11,9 @@ from cattle.plugins.docker import docker_client
 from cattle.utils import CadvisorAPIClient
 from docker.client import Client
 
+from .common_fixtures import *  # NOQA
+from .docker_common import *  # NOQA
+
 TEST_DIR = os.path.join(os.path.dirname(tests.__file__))
 
 
@@ -122,11 +125,10 @@ def test_collect_data_meminfo(host_data):
     assert host_data['memoryInfo']['memTotal'] == 3037.414
 
 
+@if_docker
 def test_collect_data_osinfo(host_data):
-    expected_osinfo_keys = ['distribution',
+    expected_osinfo_keys = ['operatingSystem',
                             'dockerVersion',
-                            'version',
-                            'versionDescription',
                             'kernelVersion']
 
     assert sorted(host_data['osInfo'].keys()) == \
@@ -135,18 +137,17 @@ def test_collect_data_osinfo(host_data):
     assert host_data['osInfo']['dockerVersion'] == \
         'Docker version 1.6.0, build 4749651'
 
+    operating_system = docker_client().info().get("OperatingSystem")
+    assert host_data['osInfo']['operatingSystem'] == operating_system
+
 
 def test_collect_data_diskinf(host_data):
-    expected_diskinfo_keys = ['mountPoints']
+    expected_diskinfo_keys = ['fileSystems', 'mountPoints']
 
     assert sorted(host_data['diskInfo']) == sorted(expected_diskinfo_keys)
     assert host_data['diskInfo']['mountPoints'].keys() == ['/dev/sda1']
-    mount_point = host_data['diskInfo']['mountPoints']
 
-    assert mount_point['/dev/sda1']['percentUsed'] == 24.15
-    assert mount_point['/dev/sda1']['total'] == 28447.621
-    assert mount_point['/dev/sda1']['used'] == 6869.797
-    assert mount_point['/dev/sda1']['free'] == 21577.824
+    assert host_data['diskInfo']['fileSystems'].keys() > 0
 
 
 def test_collect_data_bad_cadvisor_stat(no_cadvisor_host_data):
@@ -156,7 +157,10 @@ def test_collect_data_bad_cadvisor_stat(no_cadvisor_host_data):
                              'loadAvg',
                              'cpuCoresPercentages'
                              ]
-    expected_disk_info = {'mountPoints': {}}
+    expected_disk_info = {
+        'mountPoints': {},
+        'fileSystems': {}
+    }
 
     assert sorted(no_cadvisor_host_data['cpuInfo']) == \
         sorted(expected_cpuinfo_keys)
@@ -173,19 +177,10 @@ def test_collect_data_cpuinfo(host_data):
                              'cpuCoresPercentages'
                              ]
 
-    expected_core_usages = [80.135, 100.0, 35.338, 28.129]
-
     assert sorted(host_data['cpuInfo']) == sorted(expected_cpuinfo_keys)
-    assert host_data['cpuInfo']['loadAvg'] == \
-        [1.60693359375, 1.73193359375, 1.79248046875]
 
     assert host_data['cpuInfo']['modelName'] == \
         "Intel(R) Core(TM) i7-4650U CPU @ 1.70GHz"
-
-    assert host_data['cpuInfo']['mhz'] == 2334.915
-    assert host_data['cpuInfo']['count'] == 4
-
-    assert host_data['cpuInfo']['cpuCoresPercentages'] == expected_core_usages
 
 
 def test_non_linux_host(host_data_non_linux):

@@ -98,6 +98,12 @@ class CadvisorAPIClient(object):
             return containers['stats']
         return []
 
+    def get_machine_stats(self):
+        machine_data = self._get(self.url + '/machine')
+        if machine_data:
+            return machine_data
+        return {}
+
     def timestamp_diff(self, time_current, time_prev):
         time_current_conv = self._timestamp_convert(time_current)
         time_prev_conv = self._timestamp_convert(time_prev)

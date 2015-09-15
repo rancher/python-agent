@@ -32,14 +32,30 @@ class DiskCollector(object):
 
         return data
 
+    def _get_machine_filesystems_cadvisor(self):
+        data = {}
+        machine_info = self.cadvisor.get_machine_stats()
+
+        if 'filesystems' in machine_info.keys():
+            for filesystem in machine_info['filesystems']:
+                data[filesystem['device']] = {
+                    'capacity': self._convert_units(filesystem['capacity'])
+                }
+
+        return data
+
     def key_name(self):
         return 'diskInfo'
 
     def get_data(self):
-        data = {}
-        data['mountPoints'] = {}
+        data = {
+            'fileSystems': {},
+            'mountPoints': {}
+        }
 
         if platform.system() == 'Linux':
+            data['fileSystems'].update(
+                self._get_machine_filesystems_cadvisor())
             data['mountPoints'].update(self._get_mountpoints_cadvisor())
 
         return data
