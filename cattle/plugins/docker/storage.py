@@ -91,6 +91,10 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
         return False
 
+    @staticmethod
+    def image_pull(image, progress):
+        return DockerPool()._do_image_activate(image, None, progress)
+
     def _do_image_activate(self, image, storage_pool, progress):
         if is_no_op(image):
             return
@@ -138,6 +142,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                 raise ImageValidationError('Image [%s] failed to pull' %
                                            data.fullName)
         else:
+            last_message = ''
             for status in client.pull(repository=temp,
                                       tag=data.tag,
                                       auth_config=auth_config,
@@ -151,7 +156,9 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                     raise ImageValidationError('Image [%s] failed to pull '
                                                ': %s' % (data.fullName,
                                                          message))
-                progress.update(message)
+                if last_message != message:
+                    progress.update(message)
+                    last_message = message
 
     def _get_image_storage_pool_map_data(self, obj):
         return {}
