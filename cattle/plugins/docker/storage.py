@@ -148,7 +148,11 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                       auth_config=auth_config,
                                       stream=True,
                                       insecure_registry=True):
-                status = marshaller.from_string(status)
+                try:
+                    status = marshaller.from_string(status)
+                except:
+                    # Ignore errors reading the status from Docker
+                    continue
                 try:
                     message = status['status']
                 except KeyError:
