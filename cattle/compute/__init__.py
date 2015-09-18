@@ -1,7 +1,10 @@
 import logging
+import hashlib
 
 from cattle.agent.handler import BaseHandler
 from cattle.progress import Progress
+from cattle.lock import lock
+
 
 log = logging.getLogger("BaseComputeDriver")
 
@@ -72,9 +75,14 @@ class BaseComputeDriver(BaseHandler):
         result = {req.get("resourceType"): inspect}
         return self._reply(req, result)
 
+    def _image_pull_lock(self, instancePull):
+        return hashlib.md5(instancePull.image.data.dockerImage.fullName)\
+            .hexdigest()
+
     def instance_pull(self, req=None, instancePull=None):
         progress = Progress(req)
-        result = self._do_instance_pull(instancePull, progress)
+        with lock(self._image_pull_lock(instancePull)):
+            result = self._do_instance_pull(instancePull, progress)
         if result is None:
             result = {}
         else:
