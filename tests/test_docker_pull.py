@@ -51,3 +51,22 @@ def test_pull_mode_update(agent, responses):
 
     event_test(agent, 'docker/instance_pull', pre_func=pre,  post_func=post,
                diff=False)
+
+
+@if_docker
+def test_pull_on_create(agent, responses):
+    client = docker_client()
+
+    event_test(agent, 'docker/instance_activate', diff=False)
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    client.pull('tianon/true')
+    client.tag('tianon/true', 'ibuildthecloud/helloworld', 'latest',
+               force=True)
+    old_image = client.inspect_image('ibuildthecloud/helloworld')
+
+    event_test(agent, 'docker/instance_activate_pull', diff=False)
+    image = client.inspect_image('ibuildthecloud/helloworld')
+
+    assert image['Id'] != old_image['Id']
+    assert image['Id'] != client.inspect_image('tianon/true')['Id']
