@@ -27,3 +27,4 @@ def setup_cattle_config_url(instance, create_config):
                        CATTLE_CONFIG_URL_PORT=port)
         else:
             add_to_env(create_config, CATTLE_CONFIG_URL=url)
+            add_to_env(create_config, CATTLE_URL=url)
