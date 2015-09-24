@@ -13,8 +13,8 @@ class HostInfo(object):
         self.docker_client = docker_client
 
         self.collectors = [MemoryCollector(),
-                           OSCollector(docker_client),
-                           DiskCollector(),
+                           OSCollector(self.docker_client),
+                           DiskCollector(self.docker_client),
                            CpuCollector()]
 
     def collect_data(self):
