@@ -203,8 +203,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _determine_state(self, container):
         status = container['Status']
-        if status == '' or (
-                status is not None and status.lower() == 'created'):
+        if status == '' or (status is not None and
+                            status.lower() == 'created'):
             return 'created'
         elif 'Up ' in status:
             return 'running'
@@ -688,6 +688,13 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         except KeyError:
             pass
 
+        try:
+            for v in instance['volumesFromDataVolumeMounts']:
+                if not DockerPool.is_volume_active(v):
+                    DockerPool.do_volume_activate(v)
+        except KeyError:
+            pass
+
     def _get_image_tag(self, instance):
         try:
             return instance.image.data.dockerImage.fullName
@@ -880,16 +887,18 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         container = None
         try:
             container_id = instanceInspectRequest.id
-            container = self.get_container_by(client, lambda x:
-                                              self._id_filter(container_id, x))
+            container = self.get_container_by(client,
+                                              lambda x: self._id_filter(
+                                                  container_id, x))
         except (KeyError, AttributeError):
             pass
 
         if not container:
             try:
                 name = '/{0}'.format(instanceInspectRequest.name)
-                container = self.get_container_by(client, lambda x:
-                                                  self._name_filter(name, x))
+                container = self.get_container_by(client,
+                                                  lambda x: self._name_filter(
+                                                      name, x))
             except (KeyError, AttributeError):
                 pass
 

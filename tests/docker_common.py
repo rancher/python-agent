@@ -194,6 +194,10 @@ def container_field_test_boiler_plate(resp):
         instance_data['dockerInspect']['Id']
     del resp['data']['instanceHostMap']['instance']['externalId']
     del instance_data['dockerInspect']
+    try:
+        del instance_data['dockerMounts']
+    except KeyError:
+        pass
     fields = instance_data['+fields']
     del docker_container['Created']
     del docker_container['Id']

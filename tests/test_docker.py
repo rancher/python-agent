@@ -3,6 +3,7 @@ from cattle.plugins.docker.network import setup_mac_and_ip
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.docker.util import remove_container
 from cattle.plugins.docker.compute import DockerCompute
+from cattle.plugins.docker import DockerConfig
 
 from .common_fixtures import *  # NOQA
 from .docker_common import *  # NOQA
@@ -22,6 +23,63 @@ def pull_images():
 @if_docker
 def test_volume_activate(agent, responses):
     event_test(agent, 'docker/volume_activate')
+
+
+@if_docker
+def test_volume_activate_driver1(agent, responses):
+    def pre(req):
+        vol = req['data']['volumeStoragePoolMap']['volume']
+        vol['data'] = {'fields': {'driver': 'local',
+                                  'driverOpts': None}}
+        vol['name'] = 'test_vol'
+
+    def post(req, resp):
+        v = DockerConfig.storage_api_version()
+        vol = docker_client(version=v).inspect_volume('test_vol')
+        assert vol['Driver'] == 'local'
+        assert vol['Name'] == 'test_vol'
+        docker_client(version=v).remove_volume('test_vol')
+
+    event_test(agent, 'docker/volume_activate', pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_volume_activate_driver2(agent, responses):
+    def pre(req):
+        vol = req['data']['volumeStoragePoolMap']['volume']
+        vol['data'] = {'fields': {'driver': 'local',
+                                  'driverOpts': {'size': '10G'}}}
+        vol['name'] = 'test_vol'
+
+    def post(req, resp):
+        v = DockerConfig.storage_api_version()
+        vol = docker_client(version=v).inspect_volume('test_vol')
+        assert vol['Driver'] == 'local'
+        assert vol['Name'] == 'test_vol'
+        docker_client(version=v).remove_volume('test_vol')
+
+    event_test(agent, 'docker/volume_activate', pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_volume_deactivate_driver(agent, responses):
+    def pre(req):
+        v = DockerConfig.storage_api_version()
+        docker_client(version=v).create_volume('test_vol',
+                                               'local')
+        vol = req['data']['volumeStoragePoolMap']['volume']
+        vol['data'] = {'fields': {'driver': 'local',
+                                  'driverOpts': {'size': '10G'}}}
+        vol['name'] = 'test_vol'
+
+    def post(req, resp):
+        v = DockerConfig.storage_api_version()
+        vol = docker_client(version=v).inspect_volume('test_vol')
+        assert vol['Driver'] == 'local'
+        assert vol['Name'] == 'test_vol'
+        docker_client(version=v).remove_volume('test_vol')
+
+    event_test(agent, 'docker/volume_deactivate', pre_func=pre, post_func=post)
 
 
 @if_docker
@@ -48,6 +106,27 @@ def test_instance_activate_volume_driver(agent, responses):
         instance_activate_common_validation(resp)
 
     event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_volume_remove_driver(agent, responses):
+    def pre(req):
+        v = DockerConfig.storage_api_version()
+        docker_client(version=v).create_volume('test_vol',
+                                               'local')
+        vol = req['data']['volumeStoragePoolMap']['volume']
+        vol['data'] = {'fields': {'driver': 'local',
+                                  'driverOpts': {'size': '10G'}}}
+        vol['name'] = 'test_vol'
+        vol['uri'] = 'local:///test_vol'
+
+    def post(req, resp):
+        v = DockerConfig.storage_api_version()
+        with pytest.raises(APIError) as e:
+            docker_client(version=v).inspect_volume('test_vol')
+        assert e.value.explanation == 'no such volume'
+
+    event_test(agent, 'docker/volume_remove', pre_func=pre, post_func=post)
 
 
 @if_docker
@@ -113,6 +192,7 @@ def test_instance_activate_ports(agent, responses):
     def post(req, resp):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         del instance_data['dockerInspect']
+        del instance_data['dockerMounts']
         docker_container = instance_data['dockerContainer']
         fields = instance_data['+fields']
         del docker_container['Created']
@@ -1411,3 +1491,69 @@ def test_instance_links_net_host(agent, responses):
 
     event_test(agent, 'docker/instance_activate_links_no_service',
                       pre_func=pre, post_func=post, diff=False)
+
+
+@if_docker
+def test_volumes_from_data_volume_mounts(agent, responses, request):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/convoy')
+    client = docker_client(version='1.21')
+    dr = 'convoy%s' % random_str()
+    _launch_convoy_container(client, dr)
+
+    vol_name = 'test-vol1'
+
+    # Doing redundant cleanup as a finalizer because things can get weird if
+    # volume drivers just disappear while volumes for it are still around
+    def remove_vol():
+        delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        client.remove_volume(vol_name)
+        delete_container('/convoy')
+    request.addfinalizer(remove_vol)
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['dataVolumes'] = ['%s:/con/path' % vol_name]
+        mounts = [JsonObject(
+            {
+                'name': vol_name,
+                'data': {
+                    'fields': {
+                        'driver': dr,
+                        'driverOpts': None,
+                    },
+                },
+            })]
+        instance['volumesFromDataVolumeMounts'] = mounts
+
+    def post(req, resp):
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        mounts = instance_data['dockerMounts']
+        assert len(mounts) == 1
+        assert mounts[0]['Name'] == vol_name
+        assert mounts[0]['Driver'] == dr
+
+    event_test(agent, 'docker/instance_activate', pre_func=pre, post_func=post,
+               diff=False)
+
+
+def _launch_convoy_container(client, dr):
+    client.pull('cjellick/convoy-local', 'v0.1.0')
+    container = client. \
+        create_container('cjellick/convoy-local:v0.1.0',
+                         name='/convoy',
+                         environment={
+                             'CONVOY_SOCKET': '/var/run/%s.sock' % dr,
+                             'CONVOY_DATA_DIR': '/tmp/%s' % dr,
+                             'CONVOY_DRIVER_NAME': '%s' % dr},
+                         volumes=['/var/run/',
+                                  '/etc/docker/plugins',
+                                  '/tmp/%s' % dr],
+                         host_config=client.
+                         create_host_config(privileged=True, binds=[
+                             '/var/run:/var/run',
+                             '/etc/docker/plugins/:/etc/docker/plugins',
+                             '/tmp/%s:/tmp/%s' % (dr, dr)])
+                         )
+    client.start(container)
+    return container
