@@ -702,9 +702,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _setup_networking(self, instance, host, create_config, start_config):
         client = self._get_docker_client(host)
 
-        setup_network_mode(instance, self, client, create_config, start_config)
-        setup_mac_and_ip(instance, create_config)
-        setup_ports(instance, create_config, start_config)
+        managed = setup_network_mode(instance, self, client, create_config,
+                                     start_config)
+        setup_mac_and_ip(instance, create_config, set_mac=managed)
+        setup_ports(instance, create_config, start_config, managed)
         setup_links(instance, create_config, start_config)
         setup_ipsec(instance, host, create_config, start_config)
 

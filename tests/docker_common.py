@@ -165,7 +165,9 @@ def instance_activate_assert_host_config(resp):
     docker_container = resp['data']['instanceHostMap']['instance']
     docker_container = docker_container['+data']['dockerContainer']
     client = docker_client()
-    if compare_version('1.8', client.version()['Version']) >= 0:
+    ver = client.version()['Version']
+    ver = ver.replace('-dev', '')
+    if compare_version('1.8', ver) >= 0:
         if 'HostConfig' in docker_container:
             assert docker_container['HostConfig'] == {
                 'NetworkMode': 'default'
