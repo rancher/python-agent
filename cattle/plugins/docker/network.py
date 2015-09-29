@@ -14,15 +14,19 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     Docker.  We only really look for none, host, or container.  For all
     all other configurations we assume bridge mode
     """
+    managed = True
     try:
         kind = instance.nics[0].network.kind
         if kind == 'dockerHost':
+            managed = False
             start_config['network_mode'] = 'host'
             del start_config['links']
         elif kind == 'dockerNone':
+            managed = False
             create_config['network_disabled'] = True
             del start_config['links']
         elif kind == 'dockerContainer':
+            managed = False
             id = instance.networkContainer.uuid
             other = compute.get_container(client, instance.networkContainer)
             if other is not None:
@@ -32,8 +36,10 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     except (KeyError, AttributeError, IndexError):
         pass
 
+    return managed
 
-def setup_mac_and_ip(instance, create_config):
+
+def setup_mac_and_ip(instance, create_config, set_mac=True):
     """
     Configures the mac address and primary ip address for the the supplied
     container. The mac_address is configured directly as part of the native
@@ -55,7 +61,9 @@ def setup_mac_and_ip(instance, create_config):
         elif device_number > nic.deviceNumber:
             mac_address = nic.macAddress
             device_number = nic.deviceNumber
-    create_config["mac_address"] = mac_address
+
+    if set_mac:
+        create_config["mac_address"] = mac_address
 
     try:
         if instance.nics and instance.nics[0].ipAddresses:
@@ -75,7 +83,7 @@ def setup_mac_and_ip(instance, create_config):
         pass
 
 
-def setup_ports(instance, create_config, start_config):
+def setup_ports(instance, create_config, start_config, managed=True):
     """
     Sets up a container's config for rancher-managed ports by removing the
     native docker port configuration. We do this because rancher emulates ports
@@ -86,6 +94,17 @@ def setup_ports(instance, create_config, start_config):
     because on a container restart, we would not be able to properly rebuild
     the port config because it depends on manipulating the create_config.
     """
+    if not managed:
+        start_config['publish_all_ports'] = False
+        try:
+            del create_config['ports']
+        except:
+            pass
+        try:
+            del start_config['port_bindings']
+        except:
+            pass
+
     if not _has_service(instance, 'portService') or is_nonrancher_container(
             instance):
         return
