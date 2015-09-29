@@ -10,6 +10,7 @@ from os import path
 import pytest
 from cattle import CONFIG_OVERRIDE, Config
 from .common_fixtures import TEST_DIR
+from docker.utils import compare_version
 
 CONFIG_OVERRIDE['DOCKER_REQUIRED'] = 'false'  # NOQA
 CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'  # NOQA
@@ -157,6 +158,19 @@ def instance_activate_common_validation(resp):
     fields['dockerPorts']['8080/tcp'] = '1234'
     fields['dockerPorts']['12201/udp'] = '5678'
     assert state_file_exists(docker_id)
+    instance_activate_assert_host_config(resp)
+
+
+def instance_activate_assert_host_config(resp):
+    docker_container = resp['data']['instanceHostMap']['instance']
+    docker_container = docker_container['+data']['dockerContainer']
+    client = docker_client()
+    if compare_version('1.8', client.version()['Version']) >= 0:
+        if 'HostConfig' in docker_container:
+            assert docker_container['HostConfig'] == {
+                'NetworkMode': 'default'
+            } or docker_container['HostConfig'] == {}
+            del docker_container['HostConfig']
 
 
 def container_field_test_boiler_plate(resp):
@@ -172,6 +186,11 @@ def container_field_test_boiler_plate(resp):
     del docker_container['Status']
     del fields['dockerIp']
     _sort_ports(docker_container)
+
+    if 'Labels' in docker_container and docker_container['Labels'] is None:
+        docker_container['Labels'] = {}
+
+    instance_activate_assert_host_config(resp)
 
 
 def _sort_ports(docker_container):
