@@ -104,6 +104,8 @@ def test_instance_activate_ports(agent, responses):
         assert docker_container['Ports'][0]['PrivatePort'] == 8080
         assert docker_container['Ports'][0]['Type'] == 'tcp'
 
+        instance_activate_assert_host_config(resp)
+
     event_test(agent, 'docker/instance_activate_ports', post_func=post)
 
 
@@ -303,6 +305,7 @@ def test_instance_activate_cpu_set(agent, responses):
         instance['data']['fields']['cpuSet'] = ''
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == '0,1'
@@ -310,6 +313,7 @@ def test_instance_activate_cpu_set(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def postNull(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == ''
@@ -317,6 +321,7 @@ def test_instance_activate_cpu_set(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def postEmpty(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Cpuset'] == ''
@@ -339,6 +344,7 @@ def test_instance_activate_read_only(agent, responses):
         instance['data']['fields']['readOnly'] = True
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['ReadonlyRootfs']
@@ -369,6 +375,7 @@ def test_instance_activate_memory_swap(agent, responses):
         instance['data']['fields']['memorySwap'] = 16000000
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['MemorySwap'] == 16000000
@@ -391,6 +398,7 @@ def test_instance_activate_extra_hosts(agent, responses):
                                                     'b:2.2.2.2']
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['ExtraHosts'] == ['host:1.1.1.1',
@@ -410,6 +418,7 @@ def test_instance_activate_pid_mode(agent, responses):
         instance['data']['fields']['pidMode'] = 'host'
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['PidMode'] == 'host'
@@ -428,16 +437,17 @@ def test_instance_activate_log_config(agent, responses):
         instance['data']['fields']['logConfig'] = \
             JsonObject({'driver': 'json-file',
                         'config': {
-                            'tag': 'foo',
+                            'max-size': '10',
                         }})
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['LogConfig'] == {
             'Type': 'json-file',
             'Config': {
-                'tag': 'foo',
+                'max-size': '10',
             }
         }
         container_field_test_boiler_plate(resp)
@@ -460,6 +470,7 @@ def test_instance_activate_log_config_null(agent, responses):
         instance['data']['fields']['logConfig'] = None
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['LogConfig']['Type'] == 'json-file'
@@ -485,6 +496,7 @@ def test_instance_activate_security_opt(agent, responses):
         instance['data']['fields']['securityOpt'] = ["label:foo", "label:bar"]
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['HostConfig']['SecurityOpt'] == ["label:foo",
@@ -504,6 +516,7 @@ def test_instance_activate_working_dir(agent, responses):
         instance['data']['fields']['workingDir'] = "/tmp"
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['WorkingDir'] == "/tmp"
@@ -522,6 +535,7 @@ def test_instance_activate_entrypoint(agent, responses):
         instance['data']['fields']['entryPoint'] = ["./sleep.sh"]
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Entrypoint'] == ["./sleep.sh"]
@@ -542,6 +556,7 @@ def test_instance_activate_memory(agent, responses):
         instance['data']['fields']['memory'] = 8000000
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Memory'] == 8000000
@@ -566,12 +581,14 @@ def test_instance_activate_tty(agent, responses):
         instance['data']['fields']['tty'] = True
 
     def postFalse(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert not docker_inspect['Config']['Tty']
         container_field_test_boiler_plate(resp)
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Tty']
@@ -604,6 +621,7 @@ def test_instance_activate_stdinOpen(agent, responses):
         instance['data']['fields']['detach'] = False
 
     def postTrueDetach(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert not docker_inspect['Config']['StdinOnce']
@@ -612,6 +630,7 @@ def test_instance_activate_stdinOpen(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def postFalse(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert not docker_inspect['Config']['StdinOnce']
@@ -620,6 +639,7 @@ def test_instance_activate_stdinOpen(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['StdinOnce']
@@ -665,6 +685,7 @@ def test_instance_activate_domainname(agent, responses):
         instance['data']['fields']['domainName'] = "rancher.io"
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['Domainname'] == "rancher.io"
@@ -696,6 +717,7 @@ def test_instance_activate_devices(agent, responses):
         instance['data']['fields']['devices'] = input_devices
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         actual_devices = docker_inspect['HostConfig']['Devices']
@@ -724,6 +746,7 @@ def test_instance_activate_dns(agent, responses):
         instance['data']['fields']['dnsSearch'] = ["5.6.7.8", "7.7.7.7"]
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         actual_dns = docker_inspect['HostConfig']['Dns']
@@ -746,6 +769,7 @@ def test_instance_activate_caps(agent, responses):
         instance['data']['fields']['capDrop'] = ["MKNOD", "SYS_ADMIN"]
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         set_actual_cap_add = set(docker_inspect['HostConfig']['CapAdd'])
@@ -773,6 +797,7 @@ def test_instance_activate_privileged(agent, responses):
         instance['data']['fields']['privileged'] = False
 
     def postTrue(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
         docker_inspect = instance_data['dockerInspect']
@@ -780,6 +805,7 @@ def test_instance_activate_privileged(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def postFalse(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert not docker_inspect['HostConfig']['Privileged']
@@ -815,6 +841,7 @@ def test_instance_restart_policy(agent, responses):
         instance['data']['fields']['restartPolicy'] = expected_restart_pol_3
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
@@ -824,6 +851,7 @@ def test_instance_restart_policy(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def post_failure_policy(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
@@ -833,6 +861,7 @@ def test_instance_restart_policy(agent, responses):
         container_field_test_boiler_plate(resp)
 
     def post_name_policy(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         act_restart_pol = docker_inspect['HostConfig']['RestartPolicy']
@@ -856,6 +885,7 @@ def test_instance_activate_cpu_shares(agent, responses):
         instance['data']['fields']['cpuShares'] = 400
 
     def post(req, resp):
+        instance_activate_assert_host_config(resp)
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['CpuShares'] == 400
