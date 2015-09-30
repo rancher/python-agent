@@ -6,7 +6,6 @@ from contextlib import closing
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.agent.handler import KindBasedMixin
-from cattle.plugins.volmgr import volmgr
 from cattle.plugins.docker.util import is_no_op, remove_container
 from cattle.lock import lock
 from cattle.progress import Progress
@@ -187,9 +186,6 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             return container is None
         else:
             path = self._path_to_volume(volume)
-            # Check for volmgr managed volume, must be done before "isHostPath"
-            if volmgr.volume_exists(path):
-                return False
             if volume.data.fields['isHostPath']:
                 # If this is a host path volume, we'll never really remove it
                 # from disk, so just report is as removed for the purpose of
@@ -207,11 +203,6 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             remove_container(docker_client(), container)
         else:
             path = self._path_to_volume(volume)
-            # Check for volmgr managed volume, must be done before "isHostPath"
-            if volmgr.volume_exists(path):
-                log.info("Deleting volmgr managed volume: %s" % path)
-                volmgr.remove_volume(path)
-                return
             if not volume.data.fields['isHostPath']:
                 if os.path.exists(path):
                     log.info("Deleting volume: %s" % volume.uri)
