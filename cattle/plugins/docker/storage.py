@@ -138,10 +138,11 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                  tag=data.tag, auth_config=auth_config,
                                  insecure_registry=True)
             if 'error' in result:
-                raise ImageValidationError('Image [%s] failed to pull' %
-                                           data.fullName)
+                raise ImageValidationError('Image [%s] failed to pull: %s' %
+                                           (data.fullName, result['error']))
         else:
             last_message = ''
+            message = ''
             for status in client.pull(repository=temp,
                                       tag=data.tag,
                                       auth_config=auth_config,
@@ -149,16 +150,17 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                       insecure_registry=True):
                 try:
                     status = marshaller.from_string(status)
+                    if 'error' in status:
+                        message = status['error']
+                        raise ImageValidationError('Image [%s] failed to pull:'
+                                                   ' %s' % (data.fullName,
+                                                            message))
+                    if 'status' in status:
+                        message = status['status']
                 except:
                     # Ignore errors reading the status from Docker
                     continue
-                try:
-                    message = status['status']
-                except KeyError:
-                    message = status['error']
-                    raise ImageValidationError('Image [%s] failed to pull '
-                                               ': %s' % (data.fullName,
-                                                         message))
+
                 if last_message != message:
                     progress.update(message)
                     last_message = message
