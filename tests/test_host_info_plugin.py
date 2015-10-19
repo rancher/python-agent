@@ -22,6 +22,16 @@ def cpuinfo_data():
         return mf.readlines()
 
 
+def non_intel_cpuinfo_data():
+    d = cpuinfo_data()
+
+    for line in d:
+        if line.startswith("model name"):
+            d[d.index(line)] = "model name : AMD Opteron 250\n"
+
+    return d
+
+
 def meminfo_data():
     with open(os.path.join(TEST_DIR, 'host_info/meminfo')) as mf:
         return mf.readlines()
@@ -114,6 +124,29 @@ def no_cadvisor_host_data(mocker):
     mocker.patch.object(CpuCollector,
                         '_get_cpuinfo_data',
                         return_value=cpuinfo_data())
+
+    mocker.patch.object(MemoryCollector,
+                        '_get_meminfo_data',
+                        return_value=meminfo_data())
+
+    mocker.patch.object(CadvisorAPIClient, '_get',
+                        return_value=None)
+
+    host = HostInfo()
+    data = host.collect_data()
+
+    return data
+
+
+@pytest.fixture()
+def no_cadvisor_non_intel_cpuinfo_mock(mocker):
+    mocker.patch.object(platform, 'system', return_value='Linux')
+    mocker.patch('os.getloadavg',
+                 return_value=(1.60693359375, 1.73193359375, 1.79248046875))
+
+    mocker.patch.object(CpuCollector,
+                        '_get_cpuinfo_data',
+                        return_value=non_intel_cpuinfo_data())
 
     mocker.patch.object(MemoryCollector,
                         '_get_meminfo_data',
@@ -222,6 +255,12 @@ def test_collect_data_cpuinfo(host_data):
 
     assert host_data['cpuInfo']['modelName'] == \
         "Intel(R) Core(TM) i7-4650U CPU @ 1.70GHz"
+
+    assert host_data['cpuInfo']['mhz'] == 1700
+
+
+def test_collect_data_cpu_freq_fallback(no_cadvisor_non_intel_cpuinfo_mock):
+    assert no_cadvisor_non_intel_cpuinfo_mock['cpuInfo']['mhz'] == 2334.915
 
 
 def test_non_linux_host(host_data_non_linux):
