@@ -105,6 +105,7 @@ def test_instance_activate_ports(agent, responses):
         assert docker_container['Ports'][0]['Type'] == 'tcp'
 
         instance_activate_assert_host_config(resp)
+        instance_activate_assert_image_id(resp)
 
     event_test(agent, 'docker/instance_activate_ports', post_func=post)
 
