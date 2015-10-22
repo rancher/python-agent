@@ -1,6 +1,7 @@
 import platform
 import os
 import math
+import re
 
 from cattle.utils import CadvisorAPIClient
 from cattle import Config
@@ -26,9 +27,13 @@ class CpuCollector(object):
             split_line = line.split(':')
             if split_line[0].strip() == "model name":
                 procs.append(split_line[1].strip())
+                freq = re.search(r'([0-9\.]+)\s?GHz', split_line[1])
+                if freq:
+                    data['mhz'] = float(freq.group(1)) * 1000
 
-            if split_line[0].strip() == "cpu MHz":
-                data['mhz'] = float(split_line[1].strip())
+            if 'mhz' not in data:
+                if split_line[0].strip() == "cpu MHz":
+                    data['mhz'] = float(split_line[1].strip())
 
         data['modelName'] = procs[0]
         data['count'] = len(procs)
