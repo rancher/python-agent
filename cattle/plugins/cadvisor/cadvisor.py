@@ -12,6 +12,10 @@ class Cadvisor(object):
                '-listen_ip', Config.cadvisor_ip(),
                '-port', str(Config.cadvisor_port())]
 
+        docker_root = Config.cadvisor_docker_root()
+        if docker_root:
+            cmd += ["-docker_root", docker_root]
+
         wrapper = Config.cadvisor_wrapper()
 
         if len(wrapper):
