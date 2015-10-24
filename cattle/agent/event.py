@@ -215,6 +215,7 @@ class EventClient:
             def on_open(ws):
                 log.info('Websocket connection opened')
 
+            websocket.setdefaulttimeout(Config.event_read_timeout())
             ws = websocket.WebSocketApp(subscribe_url,
                                         header=headers,
                                         on_message=on_message,
