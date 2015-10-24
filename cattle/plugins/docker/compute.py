@@ -13,7 +13,6 @@ from cattle import utils
 from cattle.utils import JsonObject
 from docker.errors import APIError
 from docker import tls
-from docker.utils import create_host_config
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.docker.util import add_label, is_no_op, remove_container
 from cattle.progress import Progress
@@ -562,7 +561,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
         setup_cattle_config_url(instance, create_config)
 
-        create_config['host_config'] = create_host_config(**start_config)
+        create_config['host_config'] = \
+            client.create_host_config(**start_config)
 
         container = self._create_container(client, create_config,
                                            image_tag, instance, name,

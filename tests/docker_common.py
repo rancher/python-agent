@@ -159,15 +159,27 @@ def instance_activate_common_validation(resp):
     fields['dockerPorts']['12201/udp'] = '5678'
     assert state_file_exists(docker_id)
     instance_activate_assert_host_config(resp)
+    instance_activate_assert_image_id(resp)
+
+
+def newer_than(version):
+    client = docker_client()
+    ver = client.version()['ApiVersion']
+    return compare_version(version, ver) >= 0
+
+
+def instance_activate_assert_image_id(resp):
+    docker_container = resp['data']['instanceHostMap']['instance']
+    docker_container = docker_container['+data']['dockerContainer']
+    if newer_than('1.20'):
+        if 'ImageID' in docker_container:
+            del docker_container['ImageID']
 
 
 def instance_activate_assert_host_config(resp):
     docker_container = resp['data']['instanceHostMap']['instance']
     docker_container = docker_container['+data']['dockerContainer']
-    client = docker_client()
-    ver = client.version()['Version']
-    ver = ver.replace('-dev', '')
-    if compare_version('1.8', ver) >= 0:
+    if newer_than('1.20'):
         if 'HostConfig' in docker_container:
             assert docker_container['HostConfig'] == {
                 'NetworkMode': 'default'
@@ -193,6 +205,7 @@ def container_field_test_boiler_plate(resp):
         docker_container['Labels'] = {}
 
     instance_activate_assert_host_config(resp)
+    instance_activate_assert_image_id(resp)
 
 
 def _sort_ports(docker_container):

@@ -64,6 +64,8 @@ def setup_mac_and_ip(instance, create_config, set_mac=True):
 
     if set_mac:
         create_config["mac_address"] = mac_address
+    else:
+        del create_config['hostname']
 
     try:
         if instance.nics and instance.nics[0].ipAddresses:
