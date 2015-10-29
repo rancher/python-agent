@@ -39,7 +39,6 @@ CREATE_CONFIG_FIELDS = [
     ('tty', 'tty'),
     ('stdinOpen', 'stdin_open'),
     ('detach', 'detach'),
-    ('volumeDriver', 'volume_driver'),
     ('workingDir', 'working_dir'),
     ('entryPoint', 'entrypoint')]
 
@@ -592,12 +591,27 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                     'complete': False,
                 }), progress)
             try:
-                container = client.create_container(image_tag, **create_config)
+                del create_config['name']
+                command = ''
+                try:
+                    command = create_config['command']
+                    del create_config['command']
+                except KeyError:
+                    pass
+                config = client.create_container_config(image_tag,
+                                                        command,
+                                                        **create_config)
+                try:
+                    id = instance.data
+                    config['VolumeDriver'] = id.fields['volumeDriver']
+                except (KeyError, AttributeError):
+                    pass
+                container = client.create_container_from_config(config, name)
             except APIError as e:
                 if e.message.response.status_code == 404:
                     pull_image(instance.image, progress)
-                    container = client.create_container(image_tag,
-                                                        **create_config)
+                    container = client.create_container_from_config(config,
+                                                                    name)
                 else:
                     raise
         return container
