@@ -1071,10 +1071,16 @@ def assert_ping_stat_resources(resp):
 def ping_post_process(req, resp):
     resources = resp['data']['resources']
 
+    labels = {'io.rancher.host.docker_version': '1.6',
+              'io.rancher.host.linux_kernel_version': '4.1'}
+
     uuids = {'uuid-running': 0, 'uuid-stopped': 1, 'uuid-created': 2,
              'uuid-system': 3, 'uuid-sys-nover': 4, 'uuid-agent-instance': 5}
     instances = []
     for r in resources:
+        if r['type'] == 'host':
+            assert len(r['labels']) == 2
+            r['labels'] = labels
         if r['type'] == 'instance' and r['uuid'] in uuids:
             if r['uuid'] == 'uuid-running':
                 assert r['state'] == 'running'
@@ -1113,10 +1119,18 @@ def ping_post_process(req, resp):
 
 
 def ping_post_process_state_exception(req, resp):
+    labels = {'io.rancher.host.docker_version': '1.6',
+              'io.rancher.host.linux_kernel_version': '4.1'}
+
     # This filters down the returned resources to just the stat-based ones.
     # In other words, it gets rid of all containers from the response.
     resp['data']['resources'] = filter(lambda x: x.get('kind') == 'docker',
                                        resp['data']['resources'])
+    for r in resp['data']['resources']:
+        if r['type'] == 'host':
+            assert len(r['labels']) == 2
+            r['labels'] = labels
+
     assert_ping_stat_resources(resp)
 
 
