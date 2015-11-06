@@ -28,3 +28,16 @@ class HostInfo(object):
                 data[collector.key_name()] = {}
 
         return data
+
+    def host_labels(self, label_pfx="io.rancher.host"):
+        labels = {}
+        for collector in self.collectors:
+            try:
+                get_labels = getattr(collector, "get_labels", None)
+                if callable(get_labels):
+                    labels.update(get_labels(label_pfx))
+            except:
+                log.exception(
+                    "Error getting {0} labels".format(collector.key_name()))
+
+        return labels if len(labels) > 0 else None

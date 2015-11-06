@@ -214,6 +214,17 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             # Unknown. Assume running and state should sync up eventually.
             return 'running'
 
+    def _get_host_labels(self):
+        try:
+            labels = self.host_info.host_labels()
+        except:
+            log.exception("Error getting host labels")
+
+        if Config.labels():
+            labels.update(Config.labels())
+
+        return labels
+
     def _add_resources(self, ping, pong):
         if not utils.ping_include_resources(ping):
             return
@@ -231,7 +242,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'type': 'host',
             'kind': 'docker',
             'name': Config.hostname(),
-            'labels': Config.labels(),
+            'labels': self._get_host_labels(),
             'physicalHostUuid': physical_host['uuid'],
             'uuid': DockerConfig.docker_uuid(),
             'info': stats

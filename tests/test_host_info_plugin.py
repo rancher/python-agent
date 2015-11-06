@@ -75,9 +75,11 @@ def docker_client_version_data():
                       '"4749651", "Os": "linux", "GoVersion": "go1.4.2"}')
 
 
-@pytest.fixture()
-def host_data(mocker):
+@pytest.fixture
+def full_mock_hostinfo_obj(mocker):
     mocker.patch.object(platform, 'system', return_value='Linux')
+    mocker.patch.object(platform, 'release', return_value='3.19.0-28-generic')
+
     mocker.patch('os.getloadavg',
                  return_value=(1.60693359375, 1.73193359375, 1.79248046875))
 
@@ -101,8 +103,12 @@ def host_data(mocker):
     mocker.patch.object(Client, 'info',
                         return_value=docker_devicemapper_override())
 
-    host = HostInfo(docker_client())
-    data = host.collect_data()
+    return HostInfo(docker_client())
+
+
+@pytest.fixture()
+def host_data(full_mock_hostinfo_obj):
+    data = full_mock_hostinfo_obj.collect_data()
 
     assert isinstance(data, dict)
     os.getloadavg.assert_called_once_with()
@@ -113,6 +119,11 @@ def host_data(mocker):
     Client.version.assert_called_once_with()
 
     return data
+
+
+@pytest.fixture()
+def host_labels(full_mock_hostinfo_obj):
+    return full_mock_hostinfo_obj.host_labels()
 
 
 @pytest.fixture()
@@ -165,6 +176,15 @@ def no_cadvisor_non_intel_cpuinfo_mock(mocker):
 def host_data_non_linux(mocker):
     mocker.patch.object(platform, 'system', return_value='notLinux')
     return HostInfo().collect_data()
+
+
+def test_hostlabels(host_labels):
+    expected = {
+        'io.rancher.host.docker_version': '1.6',
+        'io.rancher.host.linux_kernel_version': '3.19'
+    }
+
+    assert host_labels == expected
 
 
 def test_collect_data(host_data):
