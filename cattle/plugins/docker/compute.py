@@ -330,7 +330,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         return _is_running(client, container)
 
     @staticmethod
-    def _get_docker_client(host):
+    def _get_docker_client(host, version_override=None):
         cluster_connection = None
         tls_config = None
         try:
@@ -384,6 +384,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
         return docker_client(
+            version=version_override,
             base_url_override=cluster_connection,
             tls_config=tls_config)
 
@@ -741,12 +742,14 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
     def _get_instance_host_map_data(self, obj):
         client = self._get_docker_client(obj.host)
         inspect = None
+        docker_mounts = None
         existing = self.get_container(client, obj.instance)
         docker_ports = {}
         docker_ip = None
 
         if existing is not None:
             inspect = client.inspect_container(existing['Id'])
+            docker_mounts = self._get_mount_data(obj.host, existing['Id'])
             docker_ip = inspect['NetworkSettings']['IPAddress']
             if existing.get('Ports') is not None:
                 for port in existing['Ports']:
@@ -780,7 +783,18 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if existing is not None:
             update['instance']['externalId'] = existing['Id']
 
+        if docker_mounts is not None:
+            update['instance']['+data']['dockerMounts'] = docker_mounts
+
         return update
+
+    def _get_mount_data(self, host, container_id):
+        try:
+            client = self._get_docker_client(host, '1.21')
+            inspect = client.inspect_container(container_id)
+            return inspect['Mounts']
+        except (KeyError, APIError):
+            pass
 
     def _is_instance_inactive(self, instance, host):
         if is_no_op(instance):
