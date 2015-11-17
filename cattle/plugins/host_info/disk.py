@@ -34,7 +34,13 @@ class DiskCollector(object):
         include = True
 
         if self.docker_storage_driver == "devicemapper":
-            if device.startswith("/dev/mapper/docker-"):
+            pool = self._get_dockerstorage_info()
+
+            pool_name = pool.get("Pool Name", "/dev/mapper/docker-")
+            if pool_name.endswith("-pool"):
+                pool_name = pool_name[:-5]
+
+            if pool_name in device:
                 include = False
 
         return include

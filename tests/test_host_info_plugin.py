@@ -237,7 +237,7 @@ def test_collect_data_diskinf(host_data):
     assert host_data['diskInfo']['mountPoints'].keys() == ['/dev/sda1']
 
     assert host_data['diskInfo']['fileSystems'].keys() > 0
-    assert not ("/dev/mapper/docker-8:1-523310-c3ae1852921c3fec9c9a74dce987f"
+    assert not ("/dev/mapper/docker-8:1-130861-c3ae1852921c3fec9c9a74dce987f"
                 "47f7e1ae8e7e3bcd9ad98e671f5d80a28d8") in \
         host_data['diskInfo']['fileSystems']
 
