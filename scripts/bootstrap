@@ -4,7 +4,7 @@ set -e
 cd $(dirname $0)/..
 
 apt-get update
-apt-get install -y arptables python-pip python-dev rsync libssl-dev libffi-dev
+apt-get install -y arptables python-pip python-dev rsync libssl-dev libffi-dev uuid-runtime
 
 pip install --upgrade pip tox virtualenv
 
