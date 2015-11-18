@@ -1,4 +1,5 @@
 import os
+import random
 import sys
 import tests
 import shutil
@@ -29,3 +30,11 @@ os.makedirs(SCRATCH_DIR)
 def scratch_dir(request):
     request.addfinalizer(
         lambda: shutil.rmtree(SCRATCH_DIR, ignore_errors=True))
+
+
+def random_str():
+    return 'test-{0}'.format(random_num())
+
+
+def random_num():
+    return random.randint(0, 1000000)
