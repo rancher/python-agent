@@ -198,7 +198,10 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
             return
         driver = volume.data['fields']['driver']
         try:
-            driver_opts = volume.data['fields']['driverOpts']
+            if volume.data['fields']['driverOpts']:
+                driver_opts = volume.data['fields']['driverOpts']
+            else:
+                driver_opts = None
         except KeyError:
             driver_opts = None
         v = DockerConfig.storage_api_version()

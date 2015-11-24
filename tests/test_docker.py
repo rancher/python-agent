@@ -1494,7 +1494,18 @@ def test_instance_links_net_host(agent, responses):
 
 
 @if_docker
-def test_volumes_from_data_volume_mounts(agent, responses, request):
+def test_volume_from_data_volume_mounts(agent, responses, request):
+    volumes_from_data_volume_mounts_test(agent, responses, request)
+
+
+@if_docker
+def test_volume_from_data_volume_mounts_empty_opts(agent, responses, request):
+    volumes_from_data_volume_mounts_test(agent, responses, request,
+                                         driver_opts={})
+
+
+def volumes_from_data_volume_mounts_test(agent, responses, request,
+                                         driver_opts=None):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     delete_container('/convoy')
     client = docker_client(version='1.21')
@@ -1520,7 +1531,7 @@ def test_volumes_from_data_volume_mounts(agent, responses, request):
                 'data': {
                     'fields': {
                         'driver': dr,
-                        'driverOpts': None,
+                        'driverOpts': driver_opts,
                     },
                 },
             })]
