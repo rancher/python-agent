@@ -96,7 +96,12 @@ def test_image_pull_variants(agent, responses):
         'docker.io/cirros',
         'index.docker.io/tianon/true',
         'index.docker.io/library/cirros',
-        'index.docker.io/cirros'
+        'index.docker.io/cirros',
+        'rocket.chat',
+        'rocket.chat:latest',
+        'docker.io/rocket.chat',
+        'index.docker.io/rocket.chat',
+        'index.docker.io/rocket.chat:latest'
     ]
 
     for i in image_names:
