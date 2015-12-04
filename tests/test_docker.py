@@ -1180,6 +1180,9 @@ def ping_post_process(req, resp):
     instances = []
     for r in resources:
         if r['type'] == 'host':
+            if 'io.rancher.host.kvm' in r['labels']:
+                assert r['labels']['io.rancher.host.kvm'] == 'true'
+                del r['labels']['io.rancher.host.kvm']
             assert len(r['labels']) == 2
             r['labels'] = labels
         if r['type'] == 'instance' and r['uuid'] in uuids:
@@ -1229,6 +1232,9 @@ def ping_post_process_state_exception(req, resp):
                                        resp['data']['resources'])
     for r in resp['data']['resources']:
         if r['type'] == 'host':
+            if 'io.rancher.host.kvm' in r['labels']:
+                assert r['labels']['io.rancher.host.kvm'] == 'true'
+                del r['labels']['io.rancher.host.kvm']
             assert len(r['labels']) == 2
             r['labels'] = labels
 
