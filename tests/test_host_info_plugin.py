@@ -184,6 +184,8 @@ def test_hostlabels(host_labels):
         'io.rancher.host.linux_kernel_version': '3.19'
     }
 
+    if 'io.rancher.container.kvm' in host_labels:
+        del host_labels['io.rancher.host.kvm']
     assert host_labels == expected
 
 
