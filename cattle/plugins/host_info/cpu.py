@@ -83,3 +83,9 @@ class CpuCollector(object):
             data.update(self._get_cpu_percentages())
 
         return data
+
+    def get_labels(self, pfx="rancher"):
+        if os.path.exists('/dev/kvm'):
+            return {".".join([pfx, "kvm"]): "true"}
+        else:
+            return {}
