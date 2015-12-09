@@ -53,7 +53,7 @@ def test_image_activate_no_reg_cred_pull_image(agent, responses):
 def _pull_image_by_name(agent, responses, image_name):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     try:
-        docker_client().remove_image(image_name)
+        docker_client().remove_image(image_name, noprune=True)
     except APIError:
         pass
 
