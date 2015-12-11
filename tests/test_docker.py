@@ -204,9 +204,14 @@ def test_instance_activate_ports(agent, responses):
         del fields['dockerIp']
         del resp['data']['instanceHostMap']['instance']['externalId']
 
-        assert len(docker_container['Ports']) == 1
-        assert docker_container['Ports'][0]['PrivatePort'] == 8080
-        assert docker_container['Ports'][0]['Type'] == 'tcp'
+        assert len(docker_container['Ports']) == 2
+        for port in docker_container['Ports']:
+            if port['Type'] == 'tcp':
+                assert port['PrivatePort'] == 8080
+            else:
+                assert port['PrivatePort'] == 12201
+
+        docker_container['Ports'] = [{'Type': 'tcp', 'PrivatePort': 8080}]
 
         instance_activate_assert_host_config(resp)
         instance_activate_assert_image_id(resp)
