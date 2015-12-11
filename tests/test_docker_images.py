@@ -1,3 +1,4 @@
+from cattle.plugins.docker.storage import ImageValidationError
 from docker.errors import APIError
 from .common_fixtures import *  # NOQA
 from .docker_common import *  # NOQA
@@ -159,6 +160,60 @@ def _test_image_pull_credential(agent, responses):
 
     event_test(agent, 'docker/image_activate', pre_func=pre, post_func=post,
                diff=False)
+
+
+@if_docker
+def test_image_pull_invalid_credential(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    image_name = 'tianon/true'
+
+    try:
+        docker_client().remove_image(image_name)
+    except APIError:
+        pass
+
+    def pre(req):
+        image = req['data']['imageStoragePoolMap']['image']
+        remap_dockerImage(image, image_name)
+        image['registryCredential'] = {
+            'publicValue': random_str(),
+            'secretValue': random_str(),
+            'data': {
+                'fields': {
+                    'email': 'test@rancher.com',
+                }
+            },
+            'registry': {
+                'data': {
+                    'fields': {
+                        'serverAddress': 'index.docker.io'
+                    }
+                }
+            }
+        }
+    req = json_data('docker/image_activate')
+    pre(req)
+    with pytest.raises(ImageValidationError) as e:
+        agent.execute(req)
+    assert e.value.message == 'Image [tianon/true] failed to pull:' \
+                              ' Authentication is required.'
+
+
+@if_docker
+def test_image_pull_invalid_image(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    image_name = random_str() + random_str()
+
+    def pre(req):
+        image = req['data']['imageStoragePoolMap']['image']
+        remap_dockerImage(image, image_name)
+    req = json_data('docker/image_activate')
+    pre(req)
+    with pytest.raises(ImageValidationError) as e:
+        agent.execute(req)
+    assert e.value.message == 'Image [{}] failed to pull: Error: image ' \
+                              'library/{}:latest not found'\
+        .format(image_name, image_name)
 
 
 @if_docker
