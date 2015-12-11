@@ -157,6 +157,8 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                                                             message))
                     if 'status' in status:
                         message = status['status']
+                except ImageValidationError, e:
+                    raise e
                 except:
                     # Ignore errors reading the status from Docker
                     continue
