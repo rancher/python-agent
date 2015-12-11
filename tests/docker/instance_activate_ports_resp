@@ -6,7 +6,8 @@
                     "+fields": {
                         "dockerHostIp": "1.2.3.4",
                         "dockerPorts": {
-                            "8080/tcp": null
+                            "8080/tcp": null,
+                            "12201/udp": null
                         }
                     },
                     "dockerContainer": {

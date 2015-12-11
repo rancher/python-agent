@@ -14,19 +14,19 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     Docker.  We only really look for none, host, or container.  For all
     all other configurations we assume bridge mode
     """
-    managed = True
+    ports_supported = True
     try:
         kind = instance.nics[0].network.kind
         if kind == 'dockerHost':
-            managed = False
+            ports_supported = False
             start_config['network_mode'] = 'host'
             del start_config['links']
         elif kind == 'dockerNone':
-            managed = False
+            ports_supported = False
             create_config['network_disabled'] = True
             del start_config['links']
         elif kind == 'dockerContainer':
-            managed = False
+            ports_supported = False
             id = instance.networkContainer.uuid
             other = compute.get_container(client, instance.networkContainer)
             if other is not None:
@@ -36,7 +36,7 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     except (KeyError, AttributeError, IndexError):
         pass
 
-    return managed
+    return ports_supported
 
 
 def setup_mac_and_ip(instance, create_config, set_mac=True):
@@ -85,18 +85,12 @@ def setup_mac_and_ip(instance, create_config, set_mac=True):
         pass
 
 
-def setup_ports(instance, create_config, start_config, managed=True):
+def setup_ports(instance, create_config, start_config, ports_supported=True):
     """
-    Sets up a container's config for rancher-managed ports by removing the
-    native docker port configuration. We do this because rancher emulates ports
-    outside of Docker's direct purview to allow for multi-host networking.
-
-    Note that a non-rancher container (one created and started outside the
-    rancher API) will not have its port configuration manipulated. This is
-    because on a container restart, we would not be able to properly rebuild
-    the port config because it depends on manipulating the create_config.
+    Docker 1.9+ does not allow you to pass port info for networks that don't
+    support ports (net, none, container:x)
     """
-    if not managed:
+    if not ports_supported:
         start_config['publish_all_ports'] = False
         try:
             del create_config['ports']
@@ -106,18 +100,6 @@ def setup_ports(instance, create_config, start_config, managed=True):
             del start_config['port_bindings']
         except:
             pass
-
-    if not _has_service(instance, 'portService') or is_nonrancher_container(
-            instance):
-        return
-
-    if 'ports' in create_config:
-        del create_config['ports']
-
-    if 'port_bindings' in start_config:
-        del start_config['port_bindings']
-
-    start_config['publish_all_ports'] = False
 
 
 def setup_links(instance, create_config, start_config):
