@@ -54,6 +54,7 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
                 if key in opts:
                     del opts[key]
             opts['stream'] = True
+            opts['rm'] = True
             marshaller = get_type(MARSHALLER)
             for status in client.build(**opts):
                 try:
