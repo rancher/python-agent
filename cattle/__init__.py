@@ -251,9 +251,17 @@ class Config:
         return default_value('CADVISOR_IP', '127.0.0.1')
 
     @staticmethod
+    def cadvisor_interval():
+        return default_value('CADVISOR_INTERVAL', '5s')
+
+    @staticmethod
     def cadvisor_docker_root():
         from cattle.plugins.docker import docker_client
         return docker_client().info().get("DockerRootDir", None)
+
+    @staticmethod
+    def cadvisor_opts():
+        return default_value('CADVISOR_OPTS', None)
 
     @staticmethod
     def host_api_ip():
