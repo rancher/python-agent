@@ -14,7 +14,8 @@
                 "labels" : {
                     "io.rancher.host.docker_version": "1.6",
                     "io.rancher.host.linux_kernel_version": "4.1"
-                }
+                },
+                "createLabels" : {}
             },
             {
                 "type" : "storagePool",
