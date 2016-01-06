@@ -225,14 +225,16 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _get_host_labels(self):
         try:
-            labels = self.host_info.host_labels()
+            return self.host_info.host_labels()
         except:
             log.exception("Error getting host labels")
+            return {}
 
-        if Config.labels():
-            labels.update(Config.labels())
-
-        return labels
+    def _get_host_create_labels(self):
+        labels = Config.labels()
+        if labels:
+            return labels
+        return {}
 
     def _add_resources(self, ping, pong):
         if not utils.ping_include_resources(ping):
@@ -251,6 +253,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             'type': 'host',
             'kind': 'docker',
             'name': Config.hostname(),
+            'createLabels': self._get_host_create_labels(),
             'labels': self._get_host_labels(),
             'physicalHostUuid': physical_host['uuid'],
             'uuid': DockerConfig.docker_uuid(),
