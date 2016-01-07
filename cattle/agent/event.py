@@ -3,7 +3,6 @@ import os
 import re
 import sys
 import time
-import uuid
 import websocket
 import base64
 
@@ -69,6 +68,8 @@ def _should_run(pid):
 def _worker(worker_name, queue, ppid):
     try:
         _worker_main(worker_name, queue, ppid)
+    except:
+        log.exception('%s : Exiting Exception', worker_name)
     finally:
         log.error('%s : Exiting', worker_name)
 
@@ -107,19 +108,18 @@ def _worker_main(worker_name, queue, ppid):
             if not _should_run(ppid):
                 break
         except Exception as e:
-            error_id = str(uuid.uuid4())
-            log.exception("%s : Unknown error", error_id)
+            if id is not None:
+                log.exception('Error in request : %s', id)
+            else:
+                log.exception("Unknown error")
             if not _should_run(ppid):
                 break
 
-            if req is not None:
-                msg = "{0} : {1}".format(error_id, e)
-
-                resp = utils.reply(req)
-                if resp is not None:
-                    resp["transitioning"] = "error"
-                    resp["transitioningInternalMessage"] = msg
-                    publisher.publish(resp)
+            resp = utils.reply(req)
+            if resp is not None:
+                resp["transitioning"] = "error"
+                resp["transitioningInternalMessage"] = "{0}".format(e)
+                publisher.publish(resp)
 
 
 class EventClient:
