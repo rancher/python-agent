@@ -127,7 +127,8 @@ def test_volume_remove_driver(agent, responses):
         v = DockerConfig.storage_api_version()
         with pytest.raises(APIError) as e:
             docker_client(version=v).inspect_volume('test_vol')
-        assert e.value.explanation == 'no such volume'
+        assert e.value.explanation == 'no such volume' or \
+            e.value.explanation == 'get test_vol: no such volume'
 
     event_test(agent, 'docker/volume_remove', pre_func=pre, post_func=post)
 
@@ -201,6 +202,7 @@ def test_instance_activate_ports(agent, responses):
         del docker_container['Created']
         del docker_container['Id']
         del docker_container['Status']
+        docker_container.pop('NetworkSettings', None)
         del fields['dockerIp']
         del resp['data']['instanceHostMap']['instance']['externalId']
 
@@ -388,8 +390,8 @@ def test_instance_activate_links_no_service(agent, responses):
         instance_activate_common_validation(resp)
 
         assert set(
-            ['/target_mysql:/c861f990-4472-4fa1-960f-65171b544c28/mysql',
-             '/target_redis:/c861f990-4472-4fa1-960f-65171b544c28/'
+            ['/target_mysql:/r-test/mysql',
+             '/target_redis:/r-test/'
              'redis']) == set(inspect['HostConfig']['Links'])
 
     event_test(agent, 'docker/instance_activate_links_no_service',
@@ -1075,8 +1077,10 @@ def test_instance_activate_volumes(agent, responses):
     delete_container('/target_volumes_from_by_id')
 
     client = docker_client()
+    labels = {'io.rancher.container.uuid': 'target_volumes_from_by_uuid'}
     c = client.create_container('ibuildthecloud/helloworld',
                                 volumes=['/volumes_from_path_by_uuid'],
+                                labels=labels,
                                 name='target_volumes_from_by_uuid')
     client.start(c)
 
@@ -1401,17 +1405,17 @@ def test_instance_force_stop(agent, responses):
 @if_docker
 def test_instance_remove(agent, responses):
     instance_only_activate(agent, responses)
-    container = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    container = get_container('/r-test')
     assert container is not None
 
     def post(req, resp):
-        c = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        c = get_container('/r-test')
         assert c is None
     event_test(agent, 'docker/instance_remove', post_func=post)
 
     # Test finding and removing by externalId instead of uuid
     instance_only_activate(agent, responses)
-    container = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    container = get_container('/r-test')
     assert container is not None
 
     def pre(req):
@@ -1420,7 +1424,7 @@ def test_instance_remove(agent, responses):
         req['data']['instanceHostMap']['instance']['uuid'] = 'wont be found'
 
     def post(req, resp):
-        c = get_container('/c861f990-4472-4fa1-960f-65171b544c28')
+        c = get_container('/r-test')
         assert c is None
     event_test(agent, 'docker/instance_remove', pre_func=pre, post_func=post)
 

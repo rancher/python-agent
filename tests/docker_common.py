@@ -122,18 +122,27 @@ def remove_state_file(container):
 def delete_container(name):
     client = docker_client()
     for c in client.containers(all=True):
+        found = False
+        labels = c.get('Labels', {})
+        if labels.get('io.rancher.container.uuid', None) == name[1:]:
+            found = True
+
         for container_name in c['Names']:
             if name == container_name:
-                try:
-                    client.kill(c)
-                except:
-                    pass
-                for i in range(10):
-                    if client.inspect_container(c['Id'])['State']['Pid'] == 0:
-                        break
-                    time.sleep(0.5)
-                client.remove_container(c)
-                remove_state_file(c)
+                found = True
+                break
+
+        if found:
+            try:
+                client.kill(c)
+            except:
+                pass
+            for i in range(10):
+                if client.inspect_container(c['Id'])['State']['Pid'] == 0:
+                    break
+                time.sleep(0.5)
+            client.remove_container(c)
+            remove_state_file(c)
 
 
 def get_container(name):
@@ -202,6 +211,7 @@ def container_field_test_boiler_plate(resp):
     del docker_container['Created']
     del docker_container['Id']
     del docker_container['Status']
+    docker_container.pop('NetworkSettings', None)
     del fields['dockerIp']
     _sort_ports(docker_container)
 
