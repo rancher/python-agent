@@ -1,5 +1,6 @@
 import logging
 import socket
+import re
 from os import path, remove, makedirs, rename, environ
 
 from . import docker_client, pull_image
@@ -11,8 +12,7 @@ from cattle.agent.handler import KindBasedMixin
 from cattle.type_manager import get_type, MARSHALLER
 from cattle import utils
 from cattle.utils import JsonObject
-from docker.errors import APIError
-from docker import tls
+from docker.errors import APIError, NotFound
 from cattle.plugins.host_info.main import HostInfo
 from cattle.plugins.docker.util import add_label, is_no_op, remove_container
 from cattle.progress import Progress
@@ -25,6 +25,7 @@ from cattle.plugins.docker.agent import setup_cattle_config_url
 log = logging.getLogger('docker')
 
 SYSTEM_LABEL = 'io.rancher.container.system'
+UUID_LABEL = 'io.rancher.container.uuid'
 
 CREATE_CONFIG_FIELDS = [
     ('labels', 'labels'),
@@ -194,7 +195,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _get_uuid(self, container):
         try:
-            uuid = container['Labels']['io.rancher.container.uuid']
+            uuid = container['Labels'][UUID_LABEL]
             if uuid:
                 return uuid
         except (TypeError, KeyError):
@@ -245,7 +246,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             try:
                 stats = self.host_info.collect_data()
             except:
-                log.exception("Error geting host info stats")
+                log.exception("Error getting host info stats")
 
         physical_host = Config.physical_host()
 
@@ -314,10 +315,17 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if instance is None:
             return None
 
-        name = '/{0}'.format(instance.uuid)
+        # First look for UUID label directly
+        labeled_containers = client.containers(all=True, trunc=False, filters={
+            'label': '{}={}'.format(UUID_LABEL, instance.uuid)})
+        if len(labeled_containers) > 0:
+            return labeled_containers[0]
+
+        # Next look by UUID using fallback method
         container_list = client.containers(all=True, trunc=False)
         container = self.find_first(container_list,
-                                    lambda x: self._name_filter(name, x))
+                                    lambda x: self._get_uuid(x) ==
+                                    instance.uuid)
         if container:
             return container
 
@@ -338,68 +346,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if is_no_op(instance):
             return True
 
-        client = self._get_docker_client(host)
+        client = docker_client()
         container = self.get_container(client, instance)
         return _is_running(client, container)
-
-    @staticmethod
-    def _get_docker_client(host, version_override=None):
-        cluster_connection = None
-        tls_config = None
-        try:
-            cluster_connection = host['clusterConnection']
-            if cluster_connection.startswith('https'):
-                try:
-                    account_id = host['accountId']
-                    ca_crt = host['caCrt']
-                    client_crt = host['clientCrt']
-                    client_key = host['clientKey']
-
-                    client_certs_dir = Config.client_certs_dir()
-                    acct_client_cert_dir = \
-                        path.join(client_certs_dir, str(account_id))
-                    if not path.exists(acct_client_cert_dir):
-                        log.debug('Creating client cert directory: %s',
-                                  acct_client_cert_dir)
-                        makedirs(acct_client_cert_dir)
-                    if ca_crt:
-                        log.debug('Writing cert auth')
-                        with open(path.join(acct_client_cert_dir, 'ca.crt'),
-                                  'w') as f:
-                            f.write(ca_crt)
-                    if client_crt:
-                        log.debug('Writing client cert')
-                        with open(path.join(acct_client_cert_dir,
-                                            'client.crt'),
-                                  'w') as f:
-                            f.write(client_crt)
-                    if client_key:
-                        log.debug('Writing client key')
-                        with open(path.join(acct_client_cert_dir,
-                                            'client.key'),
-                                  'w') as f:
-                            f.write(client_key)
-                    if ca_crt and client_crt and client_key:
-                        tls_config = tls.TLSConfig(
-                            client_cert=(
-                                path.join(acct_client_cert_dir, 'client.crt'),
-                                path.join(acct_client_cert_dir, 'client.key')
-                            ),
-                            verify=path.join(acct_client_cert_dir, 'ca.crt'),
-                            assert_hostname=False
-                        )
-                except (KeyError, AttributeError) as e:
-                    raise Exception(
-                        'Unable to process cert/keys for cluster',
-                        cluster_connection,
-                        e)
-        except (KeyError, AttributeError):
-            pass
-
-        return docker_client(
-            version=version_override,
-            base_url_override=cluster_connection,
-            tls_config=tls_config)
 
     @staticmethod
     def _setup_legacy_command(create_config, instance, command):
@@ -517,7 +466,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             BaseComputeDriver.get_instance_host_from_map(self, instanceHostMap)
 
         progress = Progress(req)
-        client = self._get_docker_client(host)
+        client = docker_client()
         if instance is not None:
             instance.processData = processData
 
@@ -537,11 +486,16 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if is_no_op(instance):
             return
 
-        client = self._get_docker_client(host)
+        client = docker_client()
 
         image_tag = self._get_image_tag(instance)
 
         name = instance.uuid
+        if re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]+$', instance.name):
+            try:
+                client.inspect_container(instance.name)
+            except NotFound:
+                name = 'r-{}'.format(instance.name)
 
         create_config = {
             'name': name,
@@ -563,7 +517,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         self._setup_simple_config_fields(start_config, instance,
                                          START_CONFIG_FIELDS)
 
-        add_label(create_config, {'io.rancher.container.uuid': instance.uuid})
+        add_label(create_config, {UUID_LABEL: instance.uuid})
+        add_label(create_config, {'io.rancher.container.name': instance.name})
 
         self._setup_logging(start_config, instance)
 
@@ -744,7 +699,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             pass
 
     def _setup_networking(self, instance, host, create_config, start_config):
-        client = self._get_docker_client(host)
+        client = docker_client()
 
         ports_supported = setup_network_mode(instance, self, client,
                                              create_config, start_config)
@@ -760,7 +715,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return False
 
     def _get_instance_host_map_data(self, obj):
-        client = self._get_docker_client(obj.host)
+        client = docker_client()
         inspect = None
         docker_mounts = None
         existing = self.get_container(client, obj.instance)
@@ -810,7 +765,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
 
     def _get_mount_data(self, host, container_id):
         try:
-            client = self._get_docker_client(host, '1.21')
+            client = docker_client(version='1.21')
             inspect = client.inspect_container(container_id)
             return inspect['Mounts']
         except (KeyError, APIError):
@@ -820,7 +775,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if is_no_op(instance):
             return True
 
-        c = self._get_docker_client(host)
+        c = docker_client()
         container = self.get_container(c, instance)
 
         return _is_stopped(c, container)
@@ -829,7 +784,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if is_no_op(instance):
             return
 
-        c = self._get_docker_client(host)
+        c = docker_client()
         timeout = 10
 
         try:
@@ -858,12 +813,12 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 raise e
 
     def _is_instance_removed(self, instance, host):
-        client = self._get_docker_client(host)
+        client = docker_client()
         container = self.get_container(client, instance)
         return container is None
 
     def _do_instance_remove(self, instance, host, progress):
-        client = self._get_docker_client(host)
+        client = docker_client()
         container = self.get_container(client, instance)
         if container is None:
             return

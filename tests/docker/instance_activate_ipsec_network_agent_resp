@@ -17,7 +17,7 @@
                         "Labels": {},
                         "Image": "ibuildthecloud/helloworld:latest",
                         "Names": [
-                            "/c861f990-4472-4fa1-960f-65171b544c28"
+                            "/r-test"
                         ],
                         "Ports": [
                             {
@@ -47,6 +47,7 @@
                             "io.rancher.container.agent_id": "42",
                             "io.rancher.container.system": "NetworkAgent",
                             "io.rancher.container.uuid": "c861f990-4472-4fa1-960f-65171b544c28",
+                            "io.rancher.container.name": "test",
                             "io.rancher.container.ip": "10.10.10.10/24"
                         }
                     }
