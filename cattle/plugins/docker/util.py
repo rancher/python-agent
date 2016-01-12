@@ -64,7 +64,7 @@ def is_no_op(resource):
 
 def remove_container(client, container):
     try:
-        client.remove_container(container, force=True, v=True)
+        client.remove_container(container, force=True)
     except APIError as e:
         try:
             if e.response.status_code != 404:
