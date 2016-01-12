@@ -134,6 +134,48 @@ def test_volume_remove_driver(agent, responses):
 
 
 @if_docker
+def test_instance_activate_no_name(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['name'] = None
+
+    def post(req, resp, valid_resp):
+        data = valid_resp['data']['instanceHostMap']['instance']['+data']
+        docker_con = data['dockerContainer']
+        del docker_con['Labels']['io.rancher.container.name']
+        docker_con['Names'] = ['/c861f990-4472-4fa1-960f-65171b544c28']
+        instance_activate_common_validation(resp)
+
+    schema = 'docker/instance_activate'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_duplicate_name(agent, responses):
+    dupe_name_uuid = 'dupename-c861f990-4472-4fa1-960f-65171b544c28'
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    delete_container('/' + dupe_name_uuid)
+
+    schema = 'docker/instance_activate'
+    event_test(agent, schema, diff=False)
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['uuid'] = dupe_name_uuid
+
+    def post(req, resp, valid_resp):
+        data = valid_resp['data']['instanceHostMap']['instance']['+data']
+        docker_con = data['dockerContainer']
+        docker_con['Labels']['io.rancher.container.uuid'] = dupe_name_uuid
+        docker_con['Names'] = ['/' + dupe_name_uuid]
+        instance_activate_common_validation(resp)
+
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_instance_activate_no_mac_address(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
 

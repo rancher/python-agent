@@ -5,6 +5,7 @@ from cattle.plugins.docker import docker_client
 import cattle.plugins.docker  # NOQA
 
 import os
+import inspect
 import time
 from os import path
 import pytest
@@ -59,21 +60,26 @@ def diff_dict(left, right):
 
 def event_test(agent, name, pre_func=None, post_func=None, diff=True):
     req = json_data(name)
-    resp_valid = json_data(name + '_resp')
+    valid_resp_file = json_data(name + '_resp')
+    valid_resp = JsonObject.unwrap(valid_resp_file)
 
     if pre_func is not None:
         pre_func(req)
 
     resp = agent.execute(req)
     if post_func is not None:
-        post_func(req, resp)
+        insp = inspect.getargspec(post_func)
+        if len(insp.args) == 3:
+            post_func(req, resp, valid_resp)
+        else:
+            post_func(req, resp)
 
     if diff:
         del resp["id"]
         del resp["time"]
 
-        diff_dict(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
-        assert_equals(JsonObject.unwrap(resp_valid), JsonObject.unwrap(resp))
+        diff_dict(valid_resp, JsonObject.unwrap(resp))
+        assert_equals(valid_resp, JsonObject.unwrap(resp))
 
     return req, resp
 
