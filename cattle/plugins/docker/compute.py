@@ -330,15 +330,17 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             return container
 
         if hasattr(instance, 'externalId') and instance.externalId:
-            f = lambda x: self._id_filter(instance.externalId, x)
-            container = self.find_first(container_list, f)
+            container = self.find_first(container_list,
+                                        lambda x: self._id_filter(
+                                            instance.externalId, x))
 
         if container:
             return container
 
         if by_agent and hasattr(instance, 'agentId') and instance.agentId:
-            f = lambda x: self._agent_id_filter(str(instance.agentId), x)
-            container = self.find_first(container_list, f)
+            container = self.find_first(container_list,
+                                        lambda x: self._agent_id_filter(
+                                            str(instance.agentId), x))
 
         return container
 
@@ -491,9 +493,10 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         image_tag = self._get_image_tag(instance)
 
         name = instance.uuid
-        if re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]+$', instance.name):
+        if instance.name and re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]+$',
+                                      instance.name):
             try:
-                client.inspect_container(instance.name)
+                client.inspect_container('r-{}'.format(instance.name))
             except NotFound:
                 name = 'r-{}'.format(instance.name)
 
@@ -518,7 +521,9 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                                          START_CONFIG_FIELDS)
 
         add_label(create_config, {UUID_LABEL: instance.uuid})
-        add_label(create_config, {'io.rancher.container.name': instance.name})
+        if instance.name:
+            add_label(create_config,
+                      {'io.rancher.container.name': instance.name})
 
         self._setup_logging(start_config, instance)
 
