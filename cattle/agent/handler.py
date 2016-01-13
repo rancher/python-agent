@@ -105,6 +105,8 @@ class BaseHandler(object):
 class KindBasedMixin(object):
     CHECK_PATHS = [
         ["imageStoragePoolMap", "storagePool", "kind"],
+        ["volumeStoragePoolMap", "storagePool", "kind"],
+        ["snapshotStoragePoolMap", "storagePool", "kind"],
         ["instanceHostMap", "host", "kind"],
         ["instanceForceStop", "kind"],
         ["instanceInspect", "kind"],
