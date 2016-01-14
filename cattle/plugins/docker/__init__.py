@@ -64,7 +64,8 @@ class DockerConfig:
         return default_value('AGENT_PIDNS', 'container') == 'host'
 
 
-def docker_client(version=None, base_url_override=None, tls_config=None):
+def docker_client(version=None, base_url_override=None, tls_config=None,
+                  timeout=None):
     if DockerConfig.use_boot2docker_connection_env_vars():
         kwargs = kwargs_from_env(assert_hostname=False)
     else:
@@ -79,6 +80,8 @@ def docker_client(version=None, base_url_override=None, tls_config=None):
     if version is None:
         version = DockerConfig.api_version()
 
+    if timeout:
+        kwargs['timeout'] = timeout
     kwargs['version'] = version
     log.debug('docker_client=%s', kwargs)
     return Client(**kwargs)

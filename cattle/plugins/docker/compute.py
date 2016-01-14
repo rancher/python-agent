@@ -165,7 +165,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         containers.append(container_data)
 
     def _get_all_containers_by_state(self):
-        client = docker_client()
+        client = docker_client(timeout=2)
 
         nonrunning_containers = {}
         for c in client.containers(all=True):
