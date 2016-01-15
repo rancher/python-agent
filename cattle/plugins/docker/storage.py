@@ -5,7 +5,6 @@ import requests
 from contextlib import closing
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
-from cattle.agent.handler import KindBasedMixin
 from cattle.plugins.docker.util import is_no_op, remove_container
 from cattle.lock import lock
 from cattle.progress import Progress
@@ -16,9 +15,8 @@ from cattle.utils import is_str_set, JsonObject
 log = logging.getLogger('docker')
 
 
-class DockerPool(KindBasedMixin, BaseStoragePool):
+class DockerPool(BaseStoragePool):
     def __init__(self):
-        KindBasedMixin.__init__(self, kind='docker')
         BaseStoragePool.__init__(self)
 
     @staticmethod
@@ -293,6 +291,9 @@ class DockerPool(KindBasedMixin, BaseStoragePool):
 
             data = self._get_response_data(req, volumeStoragePoolMap)
             return self._reply(req, data)
+
+    def _check_supports(self, req):
+        return True
 
 
 class ImageValidationError(Exception):
