@@ -29,6 +29,10 @@ cd $(dirname $0)
 
 stage()
 {
+    if [[ -n "${CURL_CA_BUNDLE}" && -d ./dist/websocket ]]; then
+        cp /etc/ssl/certs/ca-certificates.crt ./dist/websocket/cacert.pem
+    fi
+
     cp -rf apply.sh cattle dist main.py $TEMP
 
     find $TEMP -name "*.sh" -exec chmod +x {} \;
@@ -47,7 +51,8 @@ conf()
 {
     CONF=(${CATTLE_HOME}/pyagent/agent.conf
           /etc/cattle/agent/agent.conf
-          ${CATTLE_HOME}/etc/cattle/agent/agent.conf)
+          ${CATTLE_HOME}/etc/cattle/agent/agent.conf
+          /var/lib/rancher/etc/agent.conf)
 
     for conf_file in "${CONF[@]}"; do
         if [ -e $conf_file ]
