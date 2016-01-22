@@ -84,6 +84,8 @@ def main():
     Config.set_secret_key(args.secret_key)
     Config.set_api_url(args.url)
 
+    Config.physical_host_uuid(force_write=True)
+
     process_manager.init()
 
     plugins.load()

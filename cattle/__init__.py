@@ -69,9 +69,10 @@ class Config:
         return default_value('PHYSICAL_HOST_UUID_FILE', def_value)
 
     @staticmethod
-    def physical_host_uuid():
+    def physical_host_uuid(force_write=False):
         return Config.get_uuid_from_file('PHYSICAL_HOST_UUID',
-                                         Config.physical_host_uuid_file())
+                                         Config.physical_host_uuid_file(),
+                                         force_write=force_write)
 
     @staticmethod
     def setup_logger():
@@ -82,9 +83,14 @@ class Config:
         return default_value('PING_ENABLED', 'true') == 'true'
 
     @staticmethod
-    def get_uuid_from_file(env_name, uuid_file):
+    def get_uuid_from_file(env_name, uuid_file, force_write=False):
         uuid = default_value(env_name, None)
         if uuid is not None:
+            if force_write:
+                if path.exists(uuid_file):
+                    os.remove(uuid_file)
+                with open(uuid_file, 'w') as f:
+                    f.write(uuid)
             return uuid
 
         return Config._get_uuid_from_file(uuid_file)
