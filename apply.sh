@@ -29,8 +29,11 @@ cd $(dirname $0)
 
 stage()
 {
-    if [[ -n "${CURL_CA_BUNDLE}" && -d ./dist/websocket ]]; then
-        cp /etc/ssl/certs/ca-certificates.crt ./dist/websocket/cacert.pem
+    if [[ -n "${CURL_CA_BUNDLE}" && -e ./dist/websocket/cacert.pem ]]; then
+        if [ ! -e ./dist/websocket/cacert.orig ]; then
+            cp ./dist/websocket/cacert.pem ./dist/websocket/cacert.orig
+        fi
+        cat ./dist/websocket/cacert.orig ${CURL_CA_BUNDLE} > ./dist/websocket/cacert.pem
     fi
 
     cp -rf apply.sh cattle dist main.py $TEMP
