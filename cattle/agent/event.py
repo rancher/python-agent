@@ -207,7 +207,7 @@ class EventClient:
                     ws.close()
 
             def on_error(ws, error):
-                raise Exception('Received websocket error: [%s]', error)
+                raise Exception('Received websocket error: [%s]' % error)
 
             def on_close(ws):
                 log.info('Websocket connection closed.')
