@@ -1223,9 +1223,9 @@ def test_instance_deactivate(agent, responses):
 def assert_ping_stat_resources(resp):
     hostname = Config.hostname()
     pool_name = hostname + ' Storage Pool'
-    assert resp['data']['resources'][0]['name'] == hostname
+    assert resp['data']['resources'][0]['hostname'] == hostname
     assert resp['data']['resources'][1]['name'] == pool_name
-    resp['data']['resources'][0]['name'] = 'localhost'
+    resp['data']['resources'][0]['hostname'] = 'localhost'
     resp['data']['resources'][1]['name'] = 'localhost Storage Pool'
 
 

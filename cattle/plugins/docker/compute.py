@@ -253,7 +253,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         compute = {
             'type': 'host',
             'kind': 'docker',
-            'name': Config.hostname(),
+            'hostname': Config.hostname(),
             'createLabels': self._get_host_create_labels(),
             'labels': self._get_host_labels(),
             'physicalHostUuid': physical_host['uuid'],
@@ -264,7 +264,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         pool = {
             'type': 'storagePool',
             'kind': 'docker',
-            'name': compute['name'] + ' Storage Pool',
+            'name': compute['hostname'] + ' Storage Pool',
             'hostUuid': compute['uuid'],
             'uuid': compute['uuid'] + '-pool'
         }
