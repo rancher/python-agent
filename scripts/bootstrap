@@ -7,8 +7,8 @@ apt-get update
 apt-get install -y arptables python-pip python-dev rsync libssl-dev libffi-dev uuid-runtime
 
 # Fix bug on overlay w/ Docker
-pip uninstall -y py pip >/dev/null >/dev/null 2>&1 || true
-pip install --upgrade pip tox virtualenv
+pip uninstall -y py pip virtualenv >/dev/null >/dev/null 2>&1 || true
+pip install --upgrade pip tox
 
 # Switch to pip installed pip...
 /usr/local/bin/pip install psutil
