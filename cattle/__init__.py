@@ -258,7 +258,7 @@ class Config:
 
     @staticmethod
     def cadvisor_interval():
-        return default_value('CADVISOR_INTERVAL', '5s')
+        return default_value('CADVISOR_INTERVAL', '1s')
 
     @staticmethod
     def cadvisor_docker_root():
