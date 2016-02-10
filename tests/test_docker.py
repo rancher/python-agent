@@ -1584,7 +1584,7 @@ def volumes_from_data_volume_mounts_test(agent, responses, request,
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     delete_container('/convoy')
     client = docker_client(version='1.21')
-    dr = 'convoy%s' % random_str()
+    dr = 'convoytest'
     _launch_convoy_container(client, dr)
 
     vol_name = 'test-vol1'
@@ -1624,9 +1624,9 @@ def volumes_from_data_volume_mounts_test(agent, responses, request,
 
 
 def _launch_convoy_container(client, dr):
-    client.pull('cjellick/convoy-local', 'v0.1.0')
+    client.pull('cjellick/convoy-local', 'v0.4.3-longhorn-2')
     container = client. \
-        create_container('cjellick/convoy-local:v0.1.0',
+        create_container('cjellick/convoy-local:v0.4.3-longhorn-2',
                          name='/convoy',
                          environment={
                              'CONVOY_SOCKET': '/var/run/%s.sock' % dr,
