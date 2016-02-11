@@ -242,6 +242,9 @@ class DockerPool(BaseStoragePool):
         return True
 
     def _do_volume_remove(self, volume, storage_pool, progress):
+        if self._is_volume_removed(volume, storage_pool):
+            return
+
         if volume.deviceNumber == 0:
             container = get_compute().get_container(docker_client(),
                                                     volume.instance)
@@ -250,7 +253,14 @@ class DockerPool(BaseStoragePool):
             remove_container(docker_client(), container)
         elif self._is_managed_volume(volume):
             v = DockerConfig.storage_api_version()
-            docker_client(version=v).remove_volume(volume.name)
+            try:
+                docker_client(version=v).remove_volume(volume.name)
+            except APIError as e:
+                if e.message.response.status_code == 409:
+                    log.warn('Encountered conflict (%s) while deleting '
+                             'volume. Orphaning volume.', e)
+                else:
+                    raise e
         else:
             path = self._path_to_volume(volume)
             if not volume.data.fields['isHostPath']:

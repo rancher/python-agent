@@ -12,6 +12,7 @@ import pytest
 from cattle import CONFIG_OVERRIDE, Config
 from .common_fixtures import TEST_DIR
 from docker.utils import compare_version
+from cattle.plugins.docker import DockerConfig
 
 CONFIG_OVERRIDE['DOCKER_REQUIRED'] = 'false'  # NOQA
 CONFIG_OVERRIDE['DOCKER_HOST_IP'] = '1.2.3.4'  # NOQA
@@ -123,6 +124,14 @@ def remove_state_file(container):
                 os.remove(file_path)
         except:
             pass
+
+
+def delete_volume(name):
+    client = docker_client(version=DockerConfig.storage_api_version())
+    try:
+        client.remove_volume(name)
+    except:
+        pass
 
 
 def delete_container(name):
