@@ -1560,6 +1560,39 @@ def test_instance_links_net_host(agent, responses):
 
 
 @if_docker
+def test_volume_delete_orphaning(agent, responses, request):
+    # This test emulates the situatoin we've seen in docker 1.10 where we need
+    # to delete a volume but docker's ref count is off and it won't let us
+    # delete it. In this scenario, we'll now just orphan the volume and return
+    # success
+    delete_container('/orphan_test')
+    vol_name = 'orphan_test_vol'
+    delete_volume(vol_name)
+
+    v = DockerConfig.storage_api_version()
+    docker_client(version=v).create_volume(vol_name, 'local')
+
+    client = docker_client()
+    c = client.create_container('ibuildthecloud/helloworld',
+                                name='orphan_test',
+                                host_config=client.create_host_config(
+                                    binds=['%s:/tmp/1' % vol_name]))
+    client.start(c)
+
+    def pre(req):
+        vol = req['data']['volumeStoragePoolMap']['volume']
+        vol['name'] = vol_name
+        vol['data'] = {'fields': {'driver': 'local'}}
+        vol['uri'] = 'local:///%s' % vol_name
+
+    def post(req, resp):
+        found_vol = docker_client(version=v).inspect_volume(vol_name)
+        assert found_vol is not None
+
+    event_test(agent, 'docker/volume_remove', pre_func=pre, post_func=post)
+
+
+@if_docker
 def test_volume_from_data_volume_mounts_with_opt(agent, responses, request):
     driver_opts = JsonObject(
         {'foo': 'bar'}

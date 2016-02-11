@@ -63,7 +63,6 @@ class BaseStoragePool(BaseHandler):
 
         return self._do(
             req=req,
-            check=lambda: self._is_volume_removed(volume, storage_pool),
             result=lambda: self._get_response_data(req, volumeStoragePoolMap),
             lock_obj=volume,
             action=lambda: self._do_volume_remove(volume, storage_pool,
