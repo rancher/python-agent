@@ -15,10 +15,12 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     all other configurations we assume bridge mode
     """
     ports_supported = True
+    hostname_support = True
     try:
         kind = instance.nics[0].network.kind
         if kind == 'dockerHost':
             ports_supported = False
+            hostname_support = False
             start_config['network_mode'] = 'host'
             del start_config['links']
         elif kind == 'dockerNone':
@@ -27,6 +29,7 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
             del start_config['links']
         elif kind == 'dockerContainer':
             ports_supported = False
+            hostname_support = False
             id = instance.networkContainer.uuid
             other = compute.get_container(client, instance.networkContainer)
             if other is not None:
@@ -36,10 +39,10 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
     except (KeyError, AttributeError, IndexError):
         pass
 
-    return ports_supported
+    return ports_supported, hostname_support
 
 
-def setup_mac_and_ip(instance, create_config, set_mac=True):
+def setup_mac_and_ip(instance, create_config, set_mac=True, set_hostname=True):
     """
     Configures the mac address and primary ip address for the the supplied
     container. The mac_address is configured directly as part of the native
@@ -64,7 +67,8 @@ def setup_mac_and_ip(instance, create_config, set_mac=True):
 
     if set_mac:
         create_config["mac_address"] = mac_address
-    else:
+
+    if not set_hostname:
         del create_config['hostname']
 
     try:
