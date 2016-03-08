@@ -15,6 +15,7 @@ def test_network_mode_none(agent, responses):
         instance_data = resp['data']['instanceHostMap']['instance']['+data']
         docker_inspect = instance_data['dockerInspect']
         assert docker_inspect['Config']['NetworkDisabled']
+        assert docker_inspect['HostConfig']['NetworkMode'] == 'none'
         assert docker_inspect['Config']['Hostname'] == 'nameisset'
 
     event_test(agent, 'docker/instance_activate', pre_func=pre,

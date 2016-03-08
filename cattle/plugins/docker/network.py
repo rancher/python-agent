@@ -26,6 +26,7 @@ def setup_network_mode(instance, compute, client, create_config, start_config):
         elif kind == 'dockerNone':
             ports_supported = False
             create_config['network_disabled'] = True
+            start_config['network_mode'] = 'none'
             del start_config['links']
         elif kind == 'dockerContainer':
             ports_supported = False
