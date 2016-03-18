@@ -241,6 +241,7 @@ def test_instance_activate_ports(agent, responses):
         del instance_data['dockerMounts']
         docker_container = instance_data['dockerContainer']
         fields = instance_data['+fields']
+        fields['dockerPorts'].sort()
         del docker_container['Created']
         del docker_container['Id']
         del docker_container['Status']
@@ -248,15 +249,24 @@ def test_instance_activate_ports(agent, responses):
         del fields['dockerIp']
         del resp['data']['instanceHostMap']['instance']['externalId']
 
-        assert len(docker_container['Ports']) == 2
+        assert len(docker_container['Ports']) == 4
         for port in docker_container['Ports']:
-            if port['Type'] == 'tcp':
-                assert port['PrivatePort'] == 8080
+            if port['PrivatePort'] == 8080:
+                assert port['Type'] == 'tcp'
+                assert 'HostIp' not in port
+            elif port['PrivatePort'] == 12201:
+                assert port['Type'] == 'udp'
+                assert 'HostIp' not in port
+            elif port['PrivatePort'] == 6666 and port['PublicPort'] == 7777:
+                assert port['Type'] == 'tcp'
+                assert port['IP'] == '127.0.0.1'
+            elif port['PrivatePort'] == 6666 and port['PublicPort'] == 8888:
+                assert port['Type'] == 'tcp'
+                assert port['IP'] == '0.0.0.0'
             else:
-                assert port['PrivatePort'] == 12201
+                assert False, 'Found unknown port: %s' % port
 
-        docker_container['Ports'] = [{'Type': 'tcp', 'PrivatePort': 8080}]
-
+        del docker_container['Ports']
         instance_activate_assert_host_config(resp)
         instance_activate_assert_image_id(resp)
 

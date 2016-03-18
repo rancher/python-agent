@@ -409,7 +409,19 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 ports.append((port.privatePort, port.protocol))
                 if port.publicPort is not None:
                     bind = '{0}/{1}'.format(port.privatePort, port.protocol)
-                    bindings[bind] = ('', port.publicPort)
+                    bind_addr = ''
+                    try:
+                        if port.data.fields['bindAddr'] is not None:
+                            bind_addr = port.data.fields['bindAddr']
+                    except (AttributeError, KeyError):
+                        pass
+
+                    host_bind = (bind_addr, port.publicPort)
+                    if bind not in bindings:
+                        bindings[bind] = [host_bind]
+                    else:
+                        bindings[bind].append(host_bind)
+
         except (AttributeError, KeyError):
             pass
 
@@ -727,7 +739,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         inspect = None
         docker_mounts = None
         existing = self.get_container(client, obj.instance)
-        docker_ports = {}
+        docker_ports = []
         docker_ip = None
 
         if existing is not None:
@@ -736,19 +748,22 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             docker_ip = inspect['NetworkSettings']['IPAddress']
             if existing.get('Ports') is not None:
                 for port in existing['Ports']:
-                    if 'PublicPort' in port and 'PrivatePort' not in port:
-                        # Remove after docker 0.12/1.0 is released
-                        private_port = '{0}/{1}'.format(port['PublicPort'],
-                                                        port['Type'])
-                        docker_ports[private_port] = None
-                    elif 'PublicPort' in port:
-                        private_port = '{0}/{1}'.format(port['PrivatePort'],
-                                                        port['Type'])
-                        docker_ports[private_port] = str(port['PublicPort'])
-                    else:
-                        private_port = '{0}/{1}'.format(port['PrivatePort'],
-                                                        port['Type'])
-                        docker_ports[private_port] = None
+                    private_port = '{0}/{1}'.format(port['PrivatePort'],
+                                                    port['Type'])
+                    port_spec = private_port
+
+                    bind_addr = ''
+                    if 'IP' in port:
+                        bind_addr = '%s:' % port['IP']
+
+                    public_port = ''
+                    if 'PublicPort' in port:
+                        public_port = '%s:' % port['PublicPort']
+                    elif 'IP' in port:
+                        public_port = ':'
+
+                    port_spec = bind_addr + public_port + port_spec
+                    docker_ports.append(port_spec)
 
         update = {
             'instance': {
