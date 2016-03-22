@@ -411,8 +411,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                     bind = '{0}/{1}'.format(port.privatePort, port.protocol)
                     bind_addr = ''
                     try:
-                        if port.data.fields['bindAddr'] is not None:
-                            bind_addr = port.data.fields['bindAddr']
+                        if port.data.fields['bindAddress'] is not None:
+                            bind_addr = port.data.fields['bindAddress']
                     except (AttributeError, KeyError):
                         pass
 
