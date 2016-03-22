@@ -47,7 +47,7 @@
                         "publicPort": 7777,
                         "data": {
                           "fields": {
-                            "bindAddr": "127.0.0.1"
+                            "bindAddress": "127.0.0.1"
                             }
                         }
                     },
