@@ -18,7 +18,7 @@ from cattle.plugins.docker.util import add_label, is_no_op, remove_container
 from cattle.progress import Progress
 from cattle.lock import lock
 from cattle.plugins.docker.network import setup_ipsec, setup_links, \
-    setup_mac_and_ip, setup_ports, setup_network_mode
+    setup_mac_and_ip, setup_ports, setup_network_mode, setup_dns
 from cattle.plugins.docker.agent import setup_cattle_config_url
 
 
@@ -727,6 +727,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         setup_ports(instance, create_config, start_config, ports_supported)
         setup_links(instance, create_config, start_config)
         setup_ipsec(instance, host, create_config, start_config)
+        setup_dns(instance)
 
     def _is_true(self, instance, key):
         try:

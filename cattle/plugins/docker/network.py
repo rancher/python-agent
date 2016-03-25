@@ -3,7 +3,8 @@ import re
 
 from cattle.plugins.docker.util import add_to_env, add_label, \
     is_nonrancher_container
-from cattle.utils import get_or_create_map, get_or_create_list
+from cattle.utils import get_or_create_map, get_or_create_list, \
+    check_output
 
 log = logging.getLogger('docker')
 
@@ -105,6 +106,46 @@ def setup_ports(instance, create_config, start_config, ports_supported=True):
             del start_config['port_bindings']
         except:
             pass
+
+
+def _find_ip_and_mac(instance):
+    for nic in instance.nics:
+        for ip in nic.ipAddresses:
+            if ip.role != 'primary':
+                continue
+            subnet = '{}/{}'.format(ip.subnet.networkAddress,
+                                    ip.subnet.cidrSize)
+            return ip.address, nic.macAddress, subnet
+    return None, None, None
+
+
+def setup_dns(instance):
+    if not _has_service(instance, 'dnsService'):
+        return
+
+    ip_address, mac_address, subnet = _find_ip_and_mac(instance)
+
+    if ip_address is None or mac_address is None:
+        return
+
+    try:
+        parts = ip_address.split('.')
+        if len(parts) != 4:
+            return
+
+        mark = str(int(parts[2]) * 1000 + int(parts[3]))
+
+        check_output(['iptables', '-w', '-t', 'nat', '-A', 'CATTLE_PREROUTING',
+                      '!', '-s', subnet, '-d', '169.254.169.250', '-m', 'mac',
+                      '--mac-source', mac_address, '-j', 'MARK', '--set-mark',
+                      mark])
+        check_output(['iptables', '-w', '-t', 'nat', '-A',
+                      'CATTLE_POSTROUTING', '!', '-s', subnet, '-d',
+                      '169.254.169.250', '-m', 'mark', '--mark', mark, '-j',
+                      'SNAT', '--to', ip_address])
+    except:
+        # log exception but ignore error
+        log.exception('Failed to apply iptables')
 
 
 def setup_links(instance, create_config, start_config):
