@@ -144,8 +144,8 @@ def setup_dns(instance):
                       '169.254.169.250', '-m', 'mark', '--mark', mark, '-j',
                       'SNAT', '--to', ip_address])
     except:
-        # log exception but ignore error
-        log.exception('Failed to apply iptables')
+        # ignore error
+        pass
 
 
 def setup_links(instance, create_config, start_config):
