@@ -388,6 +388,42 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 create_config['command'] = command
 
     @staticmethod
+    def _setup_dns_search(config, instance):
+        try:
+            if instance.systemContainer:
+                return
+        except (KeyError, AttributeError):
+            pass
+        # if only rancher search is specified,
+        # prepend search with params read from the system
+        all_rancher = True
+        try:
+            dns_search = config['dns_search']
+            if len(dns_search) == 0:
+                return
+            for search in dns_search:
+                if search.endswith('rancher.internal'):
+                    continue
+                all_rancher = False
+                break
+        except KeyError:
+            return
+
+        if not all_rancher:
+            return
+        # read host's resolv.conf
+        with open('/etc/resolv.conf', 'r') as f:
+            for line in f:
+                # in case multiple search lines
+                # respect the last one
+                s = []
+                if line.startswith('search'):
+                    s = line.split()[1:]
+                for search in s[::-1]:
+                        if search not in dns_search:
+                            dns_search.insert(0, search)
+
+    @staticmethod
     def _setup_links(start_config, instance):
         links = {}
 
@@ -536,6 +572,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         if instance.name:
             add_label(create_config,
                       {'io.rancher.container.name': instance.name})
+        self._setup_dns_search(start_config, instance)
 
         self._setup_logging(start_config, instance)
 
