@@ -1,8 +1,6 @@
 import logging
 import os.path
 import shutil
-import requests
-from contextlib import closing
 from cattle.type_manager import get_type, MARSHALLER
 from cattle.storage import BaseStoragePool
 from cattle.plugins.docker.util import is_no_op, remove_container
@@ -11,6 +9,8 @@ from cattle.progress import Progress
 from . import docker_client, get_compute, DockerConfig
 from docker.errors import APIError
 from cattle.utils import is_str_set, JsonObject
+from cattle.download import download_file
+from cattle import Config
 
 log = logging.getLogger('docker')
 
@@ -62,15 +62,17 @@ class DockerPool(BaseStoragePool):
                     pass
 
         if is_str_set(opts, 'context'):
-            with closing(requests.get(opts['context'], stream=True)) as r:
-                if r.status_code != 200:
-                    raise Exception('Bad response {} from {}'
-                                    .format(r.status_code,
-                                            opts['context']))
-                del opts['context']
-                opts['fileobj'] = ResponseWrapper(r)
-                opts['custom_context'] = True
-                do_build()
+            downloaded = None
+            try:
+                downloaded = download_file(opts['context'], Config.builds())
+                with open(downloaded) as f:
+                    del opts['context']
+                    opts['fileobj'] = f
+                    opts['custom_context'] = True
+                    do_build()
+            finally:
+                if downloaded is not None:
+                    os.remove(downloaded)
         else:
             remote = opts['remote']
             if remote.startswith('git@github.com:'):
@@ -312,16 +314,3 @@ class ImageValidationError(Exception):
 
 class AuthConfigurationError(Exception):
     pass
-
-
-class ResponseWrapper(object):
-    """"
-    This wrapper is to prevent requests from incorrectly setting the
-    Content-Length on the request.  If you do not use this wrapper requests
-    finds r.raw.fileno and uses the size of that FD, which is 0
-    """
-    def __init__(self, response):
-        self.r = response
-
-    def __iter__(self):
-        return self.r.raw.__iter__()
