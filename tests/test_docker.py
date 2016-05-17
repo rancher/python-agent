@@ -1123,6 +1123,42 @@ def test_instance_activate_agent_instance(agent, responses):
 
 
 @if_docker
+def test_instance_activate_start_fails(agent, responses):
+    delete_container('/r-start-fails')
+    start_fails(agent)
+    container = get_container('/r-start-fails')
+    assert container is None
+
+
+@if_docker
+def test_instance_activate_start_fails_preexisting_container(agent, responses):
+    delete_container('/r-start-fails')
+    client = docker_client()
+
+    labels = {'io.rancher.container.uuid': 'start-fails'}
+    client.create_container('ibuildthecloud/helloworld',
+                            labels=labels,
+                            command='willfail',
+                            name='r-start-fails')
+
+    start_fails(agent)
+    container = get_container('/r-start-fails')
+    assert container is not None
+
+
+def start_fails(agent):
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['name'] = 'start-fails'
+        instance['uuid'] = 'start-fails'
+        instance['data']['fields']['command'] = ["willfail"]
+
+    with pytest.raises(APIError):
+        event_test(agent, 'docker/instance_activate',
+                   pre_func=pre, diff=False)
+
+
+@if_docker
 def test_instance_activate_volumes(agent, responses):
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     delete_container('/target_volumes_from_by_uuid')

@@ -597,57 +597,65 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         create_config['host_config'] = \
             client.create_host_config(**start_config)
 
-        container = self._create_container(client, create_config,
-                                           image_tag, instance, name,
-                                           progress)
+        container = self.get_container(client, instance)
+        created = False
+        if container is None:
+            container = self._create_container(client, create_config,
+                                               image_tag, instance, name,
+                                               progress)
+            created = True
+
         container_id = container['Id']
 
         log.info('Starting docker container [%s] docker id [%s] %s', name,
                  container_id, start_config)
 
-        client.start(container_id)
+        try:
+            client.start(container_id)
+        except Exception as e:
+            if created:
+                remove_container(client, container)
+            raise e
 
         self._record_state(client, instance, docker_id=container['Id'])
 
     def _create_container(self, client, create_config, image_tag, instance,
                           name, progress):
-        container = self.get_container(client, instance)
-        if container is None:
-            log.info('Creating docker container [%s] from config %s', name,
-                     create_config)
+        log.info('Creating docker container [%s] from config %s', name,
+                 create_config)
 
-            labels = create_config['labels']
-            if labels.get('io.rancher.container.pull_image', None) == 'always':
-                self._do_instance_pull(JsonObject({
-                    'image': instance.image,
-                    'tag': None,
-                    'mode': 'all',
-                    'complete': False,
-                }), progress)
+        labels = create_config['labels']
+        if labels.get('io.rancher.container.pull_image', None) == 'always':
+            self._do_instance_pull(JsonObject({
+                'image': instance.image,
+                'tag': None,
+                'mode': 'all',
+                'complete': False,
+            }), progress)
+        try:
+            del create_config['name']
+            command = ''
             try:
-                del create_config['name']
-                command = ''
-                try:
-                    command = create_config['command']
-                    del create_config['command']
-                except KeyError:
-                    pass
-                config = client.create_container_config(image_tag,
-                                                        command,
-                                                        **create_config)
-                try:
-                    id = instance.data
-                    config['VolumeDriver'] = id.fields['volumeDriver']
-                except (KeyError, AttributeError):
-                    pass
-                container = client.create_container_from_config(config, name)
-            except APIError as e:
-                if e.message.response.status_code == 404:
-                    pull_image(instance.image, progress)
-                    container = client.create_container_from_config(config,
-                                                                    name)
-                else:
-                    raise
+                command = create_config['command']
+                del create_config['command']
+            except KeyError:
+                pass
+            config = client.create_container_config(image_tag,
+                                                    command,
+                                                    **create_config)
+            try:
+                id = instance.data
+                config['VolumeDriver'] = id.fields['volumeDriver']
+            except (KeyError, AttributeError):
+                pass
+            container = client.create_container_from_config(config, name)
+        except APIError as e:
+            if e.message.response.status_code == 404:
+                pull_image(instance.image, progress)
+                container = client.create_container_from_config(config,
+                                                                name)
+            else:
+                raise
         return container
 
     def _flag_system_container(self, instance, create_config):
