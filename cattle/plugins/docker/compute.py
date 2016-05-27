@@ -399,7 +399,7 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         all_rancher = True
         try:
             dns_search = config['dns_search']
-            if len(dns_search) == 0:
+            if dns_search is None or len(dns_search) == 0:
                 return
             for search in dns_search:
                 if search.endswith('rancher.internal'):
