@@ -699,8 +699,11 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                     if len(parts) == 1:
                         volumes_map[parts[0]] = {}
                     else:
-                        read_only = len(parts) == 3 and parts[2] == 'ro'
-                        bind = {'bind': parts[1], 'ro': read_only}
+                        if len(parts) == 3:
+                            mode = parts[2]
+                        else:
+                            mode = 'rw'
+                        bind = {'bind': parts[1], 'mode': mode}
                         binds_map[parts[0]] = bind
                 create_config['volumes'] = volumes_map
                 start_config['binds'] = binds_map
