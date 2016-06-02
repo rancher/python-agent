@@ -1191,7 +1191,7 @@ def test_instance_activate_volumes(agent, responses):
         assert inspect['Volumes']['/volumes_from_path_by_uuid'] is not None
         assert inspect['Volumes']['/volumes_from_path_by_id'] is not None
 
-        assert len(inspect['Volumes']) == 5
+        assert len(inspect['Volumes']) == 6
 
         assert inspect['VolumesRW'] == {
             '/host/proc': True,
@@ -1199,10 +1199,12 @@ def test_instance_activate_volumes(agent, responses):
             '/random': True,
             '/volumes_from_path_by_uuid': True,
             '/volumes_from_path_by_id': True,
-
+            '/slave_test': True,
         }
 
-        assert set(['/sys:/host/sys:ro', '/proc:/host/proc:rw']) == set(
+        assert set(['/sys:/host/sys:ro',
+                    '/proc:/host/proc:rw',
+                    '/slave_test:/slave_test:Z']) == set(
             inspect['HostConfig']['Binds'])
 
         instance_activate_common_validation(resp)
