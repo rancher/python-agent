@@ -420,8 +420,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
                 if line.startswith('search'):
                     s = line.split()[1:]
                 for search in s[::-1]:
-                        if search not in dns_search:
-                            dns_search.insert(0, search)
+                    if search not in dns_search:
+                        dns_search.insert(0, search)
 
     @staticmethod
     def _setup_links(start_config, instance):
@@ -597,6 +597,8 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         create_config['host_config'] = \
             client.create_host_config(**start_config)
 
+        self._setup_device_options(create_config['host_config'], instance)
+
         container = self.get_container(client, instance)
         created = False
         if container is None:
@@ -762,6 +764,35 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
             create_config['hostname'] = instance.hostname
         except (KeyError, AttributeError):
             pass
+
+    def _setup_device_options(self, config, instance):
+        option_configs = \
+            [('readIops', [], 'BlkioDeviceReadIOps', 'Rate'),
+             ('writeIops', [], 'BlkioDeviceWriteIOps', 'Rate'),
+             ('readBps', [], 'BlkioDeviceReadBps', 'Rate'),
+             ('writeBps', [], 'BlkioDeviceWriteBps', 'Rate'),
+             ('weight', [], 'BlkioWeightDevice', 'Weight')]
+
+        try:
+            device_options = instance.data.fields['blkioDeviceOptions']
+        except (KeyError, AttributeError):
+            return
+
+        for dev, options in device_options.iteritems():
+            if dev == 'DEFAULT_DISK':
+                dev = self.host_info.get_default_disk()
+                if not dev:
+                    log.warn("Couldn't find default device. Not setting"
+                             "device options: %s", options)
+                    continue
+            for k, dev_list, _, field in option_configs:
+                if k in options and options[k] is not None:
+                    value = options[k]
+                    dev_list.append({'Path': dev, field: value})
+
+        for _, dev_list, docker_field, _ in option_configs:
+            if len(dev_list):
+                config[docker_field] = dev_list
 
     def _setup_networking(self, instance, host, create_config, start_config):
         client = docker_client()
