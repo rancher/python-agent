@@ -825,6 +825,10 @@ def test_instance_activate_stdinOpen(agent, responses):
 
 @if_docker
 def test_instance_activate_lxc_conf(agent, responses):
+    if newer_than('1.22'):
+        # lxc conf fields don't work in docker 1.10 and above
+        return
+
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     expectedLxcConf = {"lxc.network.type": "veth"}
 
