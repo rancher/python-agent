@@ -825,6 +825,10 @@ def test_instance_activate_stdinOpen(agent, responses):
 
 @if_docker
 def test_instance_activate_lxc_conf(agent, responses):
+    if newer_than('1.22'):
+        # lxc conf fields don't work in docker 1.10 and above
+        return
+
     delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
     expectedLxcConf = {"lxc.network.type": "veth"}
 
@@ -900,6 +904,92 @@ def test_instance_activate_devices(agent, responses):
             assert exp_dvc['PathInContainer'] == act_dvc['PathInContainer']
             assert exp_dvc['CgroupPermissions'] == act_dvc['CgroupPermissions']
 
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+
+@if_docker
+def test_instance_activate_device_options(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    # Note, can't test weight as it isn't supported in kernel by default
+    device_options = {'/dev/sda': {
+        'readIops': 1000,
+        'writeIops': 2000,
+        'readBps': 1024,
+        'writeBps': 2048
+        }
+    }
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['blkioDeviceOptions'] = device_options
+
+    def post(req, resp):
+        instance_activate_assert_host_config(resp)
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        host_config = instance_data['dockerInspect']['HostConfig']
+        assert host_config['BlkioDeviceReadIOps'] == [
+            {'Path': '/dev/sda', 'Rate': 1000}]
+        assert host_config['BlkioDeviceWriteIOps'] == [
+            {'Path': '/dev/sda', 'Rate': 2000}]
+        assert host_config['BlkioDeviceReadBps'] == [
+            {'Path': '/dev/sda', 'Rate': 1024}]
+        assert host_config['BlkioDeviceWriteBps'] == [
+            {'Path': '/dev/sda', 'Rate': 2048}]
+        container_field_test_boiler_plate(resp)
+
+    schema = 'docker/instance_activate_fields'
+    event_test(agent, schema, pre_func=pre, post_func=post)
+
+    # Test DEFAULT_DISK functionality
+    dc = DockerCompute()
+
+    device = '/dev/mock'
+
+    class MockHostInfo(object):
+        def get_default_disk(self):
+            return device
+
+    dc.host_info = MockHostInfo()
+    instance = JsonObject({'data': {}})
+    instance.data['fields'] = {
+        'blkioDeviceOptions': {
+            'DEFAULT_DISK': {'readIops': 10}
+        }
+    }
+    config = {}
+    dc._setup_device_options(config, instance)
+    assert config['BlkioDeviceReadIOps'] == [{'Path': '/dev/mock', 'Rate': 10}]
+
+    config = {}
+    device = None
+    dc._setup_device_options(config, instance)
+    assert not config  # config should be empty
+
+
+@if_docker
+def test_instance_activate_single_device_option(agent, responses):
+    delete_container('/c861f990-4472-4fa1-960f-65171b544c28')
+    device_options = {'/dev/sda': {
+        'writeIops': 2000,
+        }
+    }
+
+    def pre(req):
+        instance = req['data']['instanceHostMap']['instance']
+        instance['data']['fields']['blkioDeviceOptions'] = device_options
+
+    def post(req, resp):
+        instance_activate_assert_host_config(resp)
+        instance_data = resp['data']['instanceHostMap']['instance']['+data']
+        host_config = instance_data['dockerInspect']['HostConfig']
+        assert host_config['BlkioDeviceWriteIOps'] == [
+            {'Path': '/dev/sda', 'Rate': 2000}]
+        assert host_config['BlkioDeviceReadIOps'] is None
+        assert host_config['BlkioDeviceReadBps'] is None
+        assert host_config['BlkioDeviceWriteBps'] is None
         container_field_test_boiler_plate(resp)
 
     schema = 'docker/instance_activate_fields'
