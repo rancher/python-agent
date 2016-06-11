@@ -46,5 +46,5 @@ class IopsCollector(object):
         if not data:
             return None
 
-        # Return the first and only item in the dict
-        return data[data.keys()[0]]
+        # Return the first item in the dict
+        return data.keys()[0]
