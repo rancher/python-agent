@@ -822,28 +822,31 @@ class DockerCompute(KindBasedMixin, BaseComputeDriver):
         docker_ports = []
         docker_ip = None
 
-        if existing is not None:
-            inspect = client.inspect_container(existing['Id'])
-            docker_mounts = self._get_mount_data(obj.host, existing['Id'])
-            docker_ip = inspect['NetworkSettings']['IPAddress']
-            if existing.get('Ports') is not None:
-                for port in existing['Ports']:
-                    private_port = '{0}/{1}'.format(port['PrivatePort'],
-                                                    port['Type'])
-                    port_spec = private_port
+        try:
+            if existing is not None:
+                inspect = client.inspect_container(existing['Id'])
+                docker_mounts = self._get_mount_data(obj.host, existing['Id'])
+                docker_ip = inspect['NetworkSettings']['IPAddress']
+                if existing.get('Ports') is not None:
+                    for port in existing['Ports']:
+                        private_port = '{0}/{1}'.format(port['PrivatePort'],
+                                                        port['Type'])
+                        port_spec = private_port
 
-                    bind_addr = ''
-                    if 'IP' in port:
-                        bind_addr = '%s:' % port['IP']
+                        bind_addr = ''
+                        if 'IP' in port:
+                            bind_addr = '%s:' % port['IP']
 
-                    public_port = ''
-                    if 'PublicPort' in port:
-                        public_port = '%s:' % port['PublicPort']
-                    elif 'IP' in port:
-                        public_port = ':'
+                        public_port = ''
+                        if 'PublicPort' in port:
+                            public_port = '%s:' % port['PublicPort']
+                        elif 'IP' in port:
+                            public_port = ':'
 
-                    port_spec = bind_addr + public_port + port_spec
-                    docker_ports.append(port_spec)
+                        port_spec = bind_addr + public_port + port_spec
+                        docker_ports.append(port_spec)
+        except NotFound:
+            pass
 
         update = {
             'instance': {
