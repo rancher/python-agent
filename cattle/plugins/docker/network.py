@@ -120,7 +120,8 @@ def _find_ip_and_mac(instance):
 
 
 def setup_dns(instance):
-    if not _has_service(instance, 'dnsService'):
+    if not _has_service(instance, 'dnsService') or \
+            instance.kind == 'virtualMachine':
         return
 
     ip_address, mac_address, subnet = _find_ip_and_mac(instance)
