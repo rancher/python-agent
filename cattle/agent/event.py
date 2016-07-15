@@ -222,7 +222,7 @@ class EventClient:
                                         on_error=on_error,
                                         on_close=on_close,
                                         on_open=on_open)
-            ws.run_forever()
+            ws.run_forever(ping_interval=5, ping_timeout=4)
 
         finally:
             for child in self._children:
